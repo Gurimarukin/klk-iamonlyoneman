@@ -1,3 +1,5 @@
+import { Lens as MonocleLens } from 'monocle-ts'
+
 import { KlkSearchService } from './KlkSearchService'
 import { PartialLogger } from './Logger'
 import { Link } from '../models/Link'
@@ -7,12 +9,36 @@ import { KlkPostId } from '../models/klkPost/KlkPostId'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
 import { Future, pipe, Maybe, List, IO, Task } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
+import { LinksListing } from '../models/LinksListing'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
 type PollOptions = Readonly<{ all: boolean }>
 
 const pollRedditEvery = 24 * 60 * 60 * 1000
+
+type PollCounter = Readonly<{
+  searches: number
+  postsFound: number
+  postsAlreadyInDb: number
+  postsInserted: number
+}>
+
+namespace PollCounter {
+  export const empty: PollCounter = {
+    searches: 0,
+    postsFound: 0,
+    postsAlreadyInDb: 0,
+    postsInserted: 0,
+  }
+
+  export namespace Lens {
+    export const searches = MonocleLens.fromPath<PollCounter>()(['searches'])
+    export const postsFound = MonocleLens.fromPath<PollCounter>()(['postsFound'])
+    export const postsAlreadyInDb = MonocleLens.fromPath<PollCounter>()(['postsAlreadyInDb'])
+    export const postsInserted = MonocleLens.fromPath<PollCounter>()(['postsInserted'])
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function KlkPostService(
@@ -62,50 +88,73 @@ export function KlkPostService(
     return pipe(
       Future.fromIOEither(logger.info('Start polling')),
       Future.chain(_ => pollRec(options)),
-      Future.chain(n => Future.fromIOEither(logger.info(`End polling - ${n} searches`))),
+      Future.chain(c =>
+        Future.fromIOEither(
+          logger.info(
+            `End polling - searches: ${c.searches}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
+          ),
+        ),
+      ),
     )
   }
 
-  function pollRec(options: PollOptions, after?: string, searchCount = 1): Future<number> {
+  function pollRec(
+    options: PollOptions,
+    after?: string,
+    pollCounter: PollCounter = PollCounter.empty,
+  ): Future<PollCounter> {
     return pipe(
       klkSearchService.search(after),
-      Future.chain(
-        Maybe.fold(
-          () => Future.right(searchCount),
-          listing =>
+      Future.chain(found => {
+        const newPollCounter = PollCounter.Lens.searches.modify(_ => _ + 1)(pollCounter)
+        return pipe(
+          found,
+          Maybe.fold(
+            () => Future.right(newPollCounter),
+            _ => syncListing(_, options, newPollCounter),
+          ),
+        )
+      }),
+    )
+  }
+
+  function syncListing(
+    listing: LinksListing,
+    options: PollOptions,
+    pollCounter: PollCounter,
+  ): Future<PollCounter> {
+    return pipe(
+      klkPostPersistence.findByIds(listing.data.children.map(_ => _.data.id)),
+      Future.chain(inDb => {
+        const { left: notInDb, right: alreadyInDb } = pipe(
+          listing.data.children,
+          List.partition(link =>
             pipe(
-              klkPostPersistence.findByIds(listing.data.children.map(_ => _.data.id)),
-              Future.chain(inDb => {
-                const { left: notInDb, right: alreadyInDb } = pipe(
-                  listing.data.children,
-                  List.partition(link =>
-                    pipe(
-                      inDb,
-                      List.exists(_ => _ === link.data.id),
-                    ),
-                  ),
-                )
-                return pipe(
-                  logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
-                  IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
-                  Future.fromIOEither,
-                  Future.chain(_ =>
-                    options.all
-                      ? addToDbAndContinuePolling(notInDb, listing, options, searchCount)
-                      : List.isEmpty(notInDb)
-                      ? Future.right(searchCount)
-                      : List.isEmpty(alreadyInDb)
-                      ? addToDbAndContinuePolling(notInDb, listing, options, searchCount)
-                      : pipe(
-                          addToDb(notInDb),
-                          Future.map(_ => searchCount),
-                        ),
-                  ),
-                )
-              }),
+              inDb,
+              List.exists(_ => _ === link.data.id),
             ),
-        ),
-      ),
+          ),
+        )
+        const newPollCounter = pipe(
+          pollCounter,
+          PollCounter.Lens.postsFound.modify(_ => _ + listing.data.children.length),
+          PollCounter.Lens.postsAlreadyInDb.modify(_ => _ + alreadyInDb.length),
+        )
+        return pipe(
+          logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
+          IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
+          Future.fromIOEither,
+          Future.chain(_ =>
+            options.all
+              ? addToDbAndContinuePolling(notInDb, listing, options, newPollCounter)
+              : List.isEmpty(notInDb)
+              ? Future.right(newPollCounter)
+              : List.isEmpty(alreadyInDb)
+              ? addToDbAndContinuePolling(notInDb, listing, options, newPollCounter)
+              : addToDb(notInDb, newPollCounter),
+          ),
+        )
+      }),
     )
   }
 
@@ -113,24 +162,24 @@ export function KlkPostService(
     links: Link[],
     listing: Listing,
     options: PollOptions,
-    searchCount: number,
-  ): Future<number> {
+    pollCounter: PollCounter,
+  ): Future<PollCounter> {
     return pipe(
-      addToDb(links),
-      Future.chain(_ =>
+      addToDb(links, pollCounter),
+      Future.chain(newPollCounter =>
         pipe(
           listing.data.after,
           Maybe.fold(
-            () => Future.right(searchCount),
-            after => pollRec(options, after, searchCount + 1),
+            () => Future.right(newPollCounter),
+            after => pollRec(options, after, newPollCounter),
           ),
         ),
       ),
     )
   }
 
-  function addToDb(links: Link[]): Future<void> {
-    if (List.isEmpty(links)) return Future.unit
+  function addToDb(links: Link[], pollCounter: PollCounter): Future<PollCounter> {
+    if (List.isEmpty(links)) return Future.right(pollCounter)
 
     const posts = links.map(KlkPost.fromLink)
     return pipe(
@@ -151,12 +200,17 @@ export function KlkPostService(
       ),
       Future.fromIOEither,
       Future.chain(_ => klkPostPersistence.insertMany(posts)),
-      Future.chain(_ =>
-        _.insertedCount === posts.length
-          ? Future.unit
-          : Future.fromIOEither(
-              logger.error('insertMany: insertedCount was different than inserted length'),
-            ),
+      Future.chain(res =>
+        pipe(
+          res.insertedCount === posts.length
+            ? Future.unit
+            : Future.fromIOEither(
+                logger.error('insertMany: insertedCount was different than inserted length'),
+              ),
+          Future.map(_ =>
+            PollCounter.Lens.postsInserted.modify(_ => _ + res.insertedCount)(pollCounter),
+          ),
+        ),
       ),
     )
   }
