@@ -1,10 +1,10 @@
 import { Collection } from 'mongodb'
 
-import { FpCollection } from './FpCollection'
+import { FpCollection, decodeError } from './FpCollection'
 import { KlkPost } from '../models/klkPost/KlkPost'
 import { KlkPostId } from '../models/klkPost/KlkPostId'
 import { PartialLogger } from '../services/Logger'
-import { Future, pipe, Either, Task, List } from '../../shared/utils/fp'
+import { Future, pipe, Either, Task, List, flow } from '../../shared/utils/fp'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
@@ -28,8 +28,17 @@ export function KlkPostPersistence(
 
     findByIds: (ids: KlkPostId[]): Future<KlkPostId[]> =>
       pipe(
-        collection.find({ id: { $in: ids } }, { projection: { id: 1 } }),
-        Future.map(_ => () => _.map(Either.map(_ => _.id)).toArray()),
+        collection.collection(),
+        Future.map(_ => () =>
+          _.find({ id: { $in: ids } }, { projection: { id: 1 } })
+            .map(
+              flow(
+                KlkPost.onlyWithIdCodec.decode,
+                Either.bimap(decodeError, _ => _.id),
+              ),
+            )
+            .toArray(),
+        ),
         Future.chain(Task.map(List.array.sequence(Either.either))),
       ),
 

@@ -21,7 +21,7 @@ import {
 
 import { IndexSpecification } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'
-import { Future, pipe, Maybe, Either } from '../../shared/utils/fp'
+import { Future, pipe, Maybe, Either, flow } from '../../shared/utils/fp'
 
 export type FpCollection = ReturnType<typeof FpCollection>
 
@@ -32,6 +32,8 @@ export function FpCollection<A, O>(
   codec: C.Codec<unknown, OptionalId<O>, A>,
 ) {
   return {
+    collection,
+
     ensureIndexes: (
       indexSpecs: IndexSpecification<A>[],
       options?: { session?: ClientSession },
@@ -130,7 +132,7 @@ export function FpCollection<A, O>(
         Future.chain(
           Maybe.fold(
             () => Future.right(Maybe.none),
-            u => pipe(codec.decode(u), Either.bimap(decodeError, Maybe.some), Future.fromEither),
+            flow(codec.decode, Either.bimap(decodeError, Maybe.some), Future.fromEither),
           ),
         ),
       ),
@@ -139,7 +141,7 @@ export function FpCollection<A, O>(
       pipe(
         collection(),
         Future.map(_ =>
-          _.find(query, options).map(u => pipe(codec.decode(u), Either.mapLeft(decodeError))),
+          _.find(query, options).map(flow(codec.decode, Either.mapLeft(decodeError))),
         ),
       ),
 
@@ -157,6 +159,6 @@ export function FpCollection<A, O>(
   }
 }
 
-function decodeError(e: D.DecodeError): Error {
+export function decodeError(e: D.DecodeError): Error {
   return Error(`DecodeError:\n${D.draw(e)}`)
 }

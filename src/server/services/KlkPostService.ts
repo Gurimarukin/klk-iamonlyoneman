@@ -24,7 +24,7 @@ export function KlkPostService(
     initDbIfEmpty: (): Future<void> =>
       pipe(
         klkPostPersistence.count(),
-        Future.chain(_ => (_ === 0 ? pollReddit({ all: true }) : Future.unit)),
+        Future.chain(_ => (_ === 0 ? pollReddit({ all: true }) : pollReddit({ all: false }))),
       ),
   }
 
@@ -57,7 +57,7 @@ export function KlkPostService(
                 )
                 return pipe(
                   logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
-                  IO.chain(_ => logger.debug('notInDb:    ', printLinkIds(notInDb))),
+                  IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
                   Future.fromIOEither,
                   Future.chain(_ =>
                     options.all
@@ -105,9 +105,17 @@ export function KlkPostService(
     const posts = links.map(KlkPost.fromLink)
     return pipe(
       List.sequence(IO.ioEither)(
-        posts.map(_ =>
-          Maybe.isNone(_.metadata)
-            ? logger.warn('KlkPost with empty metadata:', _.id, _.permalink)
+        posts.map(p =>
+          Maybe.isNone(p.episode) || Maybe.isNone(p.size)
+            ? pipe(KlkPost.codec.encode(p), ({ id, title, episode, size }) =>
+                pipe(
+                  logger.warn(
+                    'KlkPost with empty metadata:',
+                    JSON.stringify({ id, episode, size }),
+                  ),
+                  IO.chain(_ => logger.warn('                      title:', JSON.stringify(title))),
+                ),
+              )
             : IO.unit,
         ),
       ),
@@ -129,5 +137,5 @@ function printLinkIds(links: Link[]): string {
     links.map(_ => KlkPostId.unwrap(_.data.id)),
     StringUtils.mkString(','),
   )
-  return `(${res.length}) ${res}`
+  return `(${links.length}) ${res}`
 }

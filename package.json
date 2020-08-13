@@ -10,6 +10,8 @@
     "server-run": "ts-node --project ./tsconfig-server.json src/server/index.ts",
     "~server-run": "nodemon -e js,ts,json -x \"npm run --silent server-run\"",
     "server-build": "rm -fr dist/server/* && tsc -p ./tsconfig-server.build.json",
+    "test": "jest",
+    "~test": "jest --watchAll",
     "lint": "eslint --cache --fix --max-warnings 0 --ext .ts src/"
   },
   "repository": {
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@type-config/strict": "^1.0.2",
     "@types/dateformat": "^3.0.1",
+    "@types/jest": "^26.0.9",
     "@types/mongodb": "^3.5.25",
     "@types/node": "^14.0.27",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
@@ -37,11 +40,13 @@
     "fp-ts": "^2.8.1",
     "fp-ts-contrib": "^0.1.17",
     "io-ts": "^2.2.9",
+    "jest": "^26.4.0",
     "mongodb": "^3.6.0",
     "monocle-ts": "^2.3.3",
     "newtype-ts": "^0.3.4",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
+    "ts-jest": "^26.2.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
   }

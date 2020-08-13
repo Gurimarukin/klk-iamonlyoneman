@@ -33,4 +33,7 @@ export namespace StringUtils {
 
   export const matcher2 = (regex: RegExp): ((str: string) => Maybe<[string, string]>) =>
     matcher(regex, ([, a, b]) => [a, b])
+
+  export const matcher3 = (regex: RegExp): ((str: string) => Maybe<[string, string, string]>) =>
+    matcher(regex, ([, a, b, c]) => [a, b, c])
 }
