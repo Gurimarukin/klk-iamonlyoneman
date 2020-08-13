@@ -52,7 +52,9 @@ export function KlkPostService(
     initDbIfEmpty: (): Future<void> =>
       pipe(
         klkPostPersistence.count(),
-        Future.chain(_ => (_ === 0 ? pollReddit({ all: true }) : pollReddit({ all: false }))),
+        Future.chain(_ =>
+          _ === 0 ? pollReddit({ all: true }) : Future.fromIOEither(logger.info('Nothing to poll')),
+        ),
       ),
 
     scheduleRedditPolling: (): Future<void> => {
