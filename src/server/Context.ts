@@ -24,7 +24,7 @@ export function Context(config: Config) {
 
   const klkSearchService = KlkSearchService(Logger)
 
-  const klkPostService = KlkPostService(Logger, klkPostPersistence)
+  const klkPostService = KlkPostService(Logger, klkPostPersistence, klkSearchService)
 
   return {
     Logger,
@@ -38,7 +38,7 @@ export function Context(config: Config) {
         ),
       ),
 
-    initDbIfEmpty: (): Future<void> => klkSearchService.requestWip(),
+    initDbIfEmpty: (): Future<void> => klkPostService.initDbIfEmpty(),
 
     scheduleRedditPolling: (): Future<void> => Future.apply(() => todo(klkPostService)),
   }

@@ -4,7 +4,7 @@ import { FpCollection } from './FpCollection'
 import { KlkPost } from '../models/klkPost/KlkPost'
 import { KlkPostId } from '../models/klkPost/KlkPostId'
 import { PartialLogger } from '../services/Logger'
-import { Future, pipe } from '../../shared/utils/fp'
+import { Future, pipe, Either, Task, List } from '../../shared/utils/fp'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
@@ -24,14 +24,18 @@ export function KlkPostPersistence(
         { key: { ['metadata.episode' as keyof KlkPost]: -1 } },
       ]),
 
+    count: (): Future<number> => collection.count({}),
+
+    findByIds: (ids: KlkPostId[]): Future<KlkPostId[]> =>
+      pipe(
+        collection.find({ id: { $in: ids } }, { projection: { id: 1 } }),
+        Future.map(_ => () => _.map(Either.map(_ => _.id)).toArray()),
+        Future.chain(Task.map(List.array.sequence(Either.either))),
+      ),
+
     // find: (id: GuildId): Future<Maybe<KlkPost>> => collection.findOne({ id }),
 
-    // findAll: (): Future<GuildId[]> =>
-    //   pipe(
-    //     collection.find({}),
-    //     Future.map(_ => () => _.map(Either.map(_ => _.id)).toArray()),
-    //     Future.chain(Task.map(List.array.sequence(Either.either))),
-    //   ),
+    insertMany: (posts: KlkPost[]) => collection.insertMany(posts),
 
     upsert: (id: KlkPostId, post: KlkPost): Future<boolean> =>
       pipe(

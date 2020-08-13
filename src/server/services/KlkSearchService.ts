@@ -7,7 +7,7 @@ import { AxiRes } from '../models/AxiRes'
 import { Link } from '../models/Link'
 import { LinksListing } from '../models/LinksListing'
 import { Listing } from '../models/Listing'
-import { Future, pipe, Either, List, IO, flow, Dict } from '../../shared/utils/fp'
+import { Future, pipe, Either, List, IO, flow, Dict, Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
 export type KlkSearchService = ReturnType<typeof KlkSearchService>
@@ -24,24 +24,40 @@ export function KlkSearchService(Logger: PartialLogger) {
   })
 
   return {
-    requestWip: (): Future<void> =>
+    search: (after?: string): Future<Maybe<LinksListing>> =>
       pipe(
-        request(),
-        Future.chain(
-          Either.fold(
-            () => Future.right(undefined),
-            _ => pipe(logger.debug('data:', _.data), Future.fromIOEither),
-          ),
+        request(after),
+        Future.chain<Error, AxiRes, Maybe<LinksListing>>(res =>
+          res.status === 200
+            ? pipe(
+                Listing.decoder.decode(res.data),
+                Either.fold(
+                  e =>
+                    pipe(
+                      logger.error(`Couldn't parse Listing:\n${D.draw(e)}`),
+                      IO.map(_ => Maybe.none),
+                    ),
+                  flow(linksListing, IO.map(Maybe.some)),
+                ),
+                Future.fromIOEither,
+              )
+            : pipe(
+                logger.warn('Non 200 status:'),
+                IO.chain(_ => logger.warn(printDetailedResponse(res))),
+                IO.map(_ => Maybe.none),
+                Future.fromIOEither,
+              ),
         ),
       ),
   }
 
-  function request(after?: string): Future<Either<AxiRes, AxiRes<LinksListing>>> {
+  function request(after?: string): Future<AxiRes> {
     const defaultParams = {
       q: 'author:iamonlyoneman',
       sort: 'new',
       t: 'all',
       show: 'all',
+      restrict_sr: 'on',
       limit: '100',
     }
     const params = after === undefined ? defaultParams : { ...defaultParams, after }
@@ -53,34 +69,10 @@ export function KlkSearchService(Logger: PartialLogger) {
           Future.map(_ => res),
         ),
       ),
-      Future.chain<Error, AxiRes, Either<AxiRes, AxiRes<LinksListing>>>(res =>
-        res.status === 200
-          ? pipe(
-              Listing.decoder.decode(res.data),
-              Either.fold(
-                e =>
-                  pipe(
-                    logger.error(`Couldn't parse Listing:\n${D.draw(e)}`),
-                    IO.map(_ => Either.left(res)),
-                  ),
-                flow(
-                  fromListing,
-                  IO.map(data => Either.right({ ...res, data })),
-                ),
-              ),
-              Future.fromIOEither,
-            )
-          : pipe(
-              logger.warn('Non 200 status:'),
-              IO.chain(_ => logger.warn(printDetailedResponse(res))),
-              IO.map(_ => Either.left(res)),
-              Future.fromIOEither,
-            ),
-      ),
     )
   }
 
-  function fromListing(listing: Listing): IO<LinksListing> {
+  function linksListing(listing: Listing): IO<LinksListing> {
     return pipe(
       listing.data.children,
       List.reduceWithIndex<unknown, IO<Link[]>>(IO.right([]), (i, ioAcc, child) =>

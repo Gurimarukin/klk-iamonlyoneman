@@ -3,11 +3,13 @@ import * as D from 'io-ts/lib/Decoder'
 import {
   ClientSession,
   Collection,
+  CollectionInsertManyOptions,
   CollectionInsertOneOptions,
   Cursor,
   FilterQuery,
   FindOneOptions,
   InsertOneWriteOpResult,
+  InsertWriteOpResult,
   MatchKeysAndValues,
   OptionalId,
   ReplaceOneOptions,
@@ -51,6 +53,23 @@ export function FpCollection<A, O>(
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug('inserted', encoded)),
+            Future.map(_ => res),
+          ),
+        ),
+      )
+    },
+
+    insertMany: (
+      docs: A[],
+      options?: CollectionInsertManyOptions,
+    ): Future<InsertWriteOpResult<WithId<O>>> => {
+      const encoded = docs.map(codec.encode)
+      return pipe(
+        collection(),
+        Future.chain(_ => Future.apply(() => _.insertMany(encoded, options))),
+        Future.chain(res =>
+          pipe(
+            Future.fromIOEither(logger.debug(`inserted ${res.insertedCount} documents`)),
             Future.map(_ => res),
           ),
         ),
