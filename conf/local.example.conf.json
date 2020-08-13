@@ -4,7 +4,7 @@
   "allowedOrigins": ["*"],
   "db": {
     "host": "localhost:27017",
-    "dbName": "klk-iamonlyoneman",
+    "dbName": "klkIamonlyoneman",
     "user": "user",
     "password": "password"
   }
