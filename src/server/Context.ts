@@ -2,8 +2,12 @@ import { MongoClient, Collection } from 'mongodb'
 
 import { pipe, Future, Task, Either, IO } from '../shared/utils/fp'
 
+import { startWebServer } from './Webserver'
 import { Config } from './config/Config'
+import { KlkPostController } from './controllers/KlkPostController'
+import { Route } from './models/Route'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
+import { Routes } from './routes/Routes'
 import { KlkPostService } from './services/KlkPostService'
 import { KlkSearchService } from './services/KlkSearchService'
 import { PartialLogger } from './services/Logger'
@@ -26,6 +30,10 @@ export function Context(config: Config) {
 
   const klkPostService = KlkPostService(Logger, klkPostPersistence, klkSearchService)
 
+  const klkPostController = KlkPostController(Logger)
+
+  const routes: Route[] = Routes(klkPostController)
+
   return {
     Logger,
 
@@ -41,6 +49,8 @@ export function Context(config: Config) {
     initDbIfEmpty: (): Future<void> => klkPostService.initDbIfEmpty(),
 
     scheduleRedditPolling: (): Future<void> => klkPostService.scheduleRedditPolling(),
+
+    startWebServer: () => startWebServer(Logger, config, routes),
   }
 
   function retryIfFailed(f: Future<void>, firstTime = true): Future<void> {
