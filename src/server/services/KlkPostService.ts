@@ -5,12 +5,14 @@ import { Listing } from '../models/Listing'
 import { KlkPost } from '../models/klkPost/KlkPost'
 import { KlkPostId } from '../models/klkPost/KlkPostId'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
-import { Future, pipe, Maybe, List, IO } from '../../shared/utils/fp'
+import { Future, pipe, Maybe, List, IO, Task } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
 type PollOptions = Readonly<{ all: boolean }>
+
+const pollRedditEvery = 24 * 60 * 60 * 1000
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function KlkPostService(
@@ -26,6 +28,34 @@ export function KlkPostService(
         klkPostPersistence.count(),
         Future.chain(_ => (_ === 0 ? pollReddit({ all: true }) : pollReddit({ all: false }))),
       ),
+
+    scheduleRedditPolling: (): Future<void> => {
+      const now = new Date()
+      const tomorrow8am = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8)
+      const untilTomorrow8am = new Date(tomorrow8am.getTime() - now.getTime())
+      return pipe(
+        logger.info(
+          `Scheduling activity refresh: 8am is in ${untilTomorrow8am.getHours()}h${untilTomorrow8am.getMinutes()}`,
+        ),
+        IO.chain(_ =>
+          pipe(
+            Future.fromIOEither(setRefreshActivityInterval()),
+            Task.delay(untilTomorrow8am.getTime()),
+            IO.runFuture,
+          ),
+        ),
+        Future.fromIOEither,
+      )
+    },
+  }
+
+  function setRefreshActivityInterval(): IO<void> {
+    return pipe(
+      IO.apply(() =>
+        setInterval(() => pipe(pollReddit({ all: false }), Future.runUnsafe), pollRedditEvery),
+      ),
+      IO.map(_ => {}),
+    )
   }
 
   function pollReddit(options: PollOptions): Future<void> {

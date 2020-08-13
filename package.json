@@ -12,7 +12,7 @@
     "server-build": "rm -fr dist/server/* && tsc -p ./tsconfig-server.build.json",
     "test": "jest",
     "~test": "jest --watchAll",
-    "lint": "eslint --cache --fix --max-warnings 0 --ext .ts src/"
+    "lint": "eslint --cache --fix --max-warnings 0 --ext .ts src/ test/"
   },
   "repository": {
     "type": "git",

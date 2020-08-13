@@ -1,6 +1,6 @@
 import { MongoClient, Collection } from 'mongodb'
 
-import { pipe, Future, todo, Task, Either, IO } from '../shared/utils/fp'
+import { pipe, Future, Task, Either, IO } from '../shared/utils/fp'
 
 import { Config } from './config/Config'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
@@ -40,7 +40,7 @@ export function Context(config: Config) {
 
     initDbIfEmpty: (): Future<void> => klkPostService.initDbIfEmpty(),
 
-    scheduleRedditPolling: (): Future<void> => Future.apply(() => todo(klkPostService)),
+    scheduleRedditPolling: (): Future<void> => klkPostService.scheduleRedditPolling(),
   }
 
   function retryIfFailed(f: Future<void>, firstTime = true): Future<void> {
