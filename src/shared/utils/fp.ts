@@ -184,18 +184,11 @@ export const Future = {
   sequence: <A>(futures: Future<A>[]): Future<A[]> =>
     List.array.sequence(Future.taskEitherSeq)(futures),
 
-  recover: <A>(
-    ...matchers: [(e: Error) => boolean, (e: Error) => A][]
-  ): ((future: Future<A>) => Future<A>) =>
-    Task.map(res =>
-      _pipe(
-        matchers,
-        _Array.reduce(res, (acc, [cond, a]) =>
-          _pipe(
-            acc,
-            _Either.orElse(e => (cond(e) ? _Either.right(a(e)) : _Either.left(e))),
-          ),
-        ),
+  recover: <A>(onError: (e: Error) => Future<A>): ((future: Future<A>) => Future<A>) =>
+    _Task.chain(
+      _Either.fold(
+        e => onError(e),
+        _ => _TaskEither.right(_),
       ),
     ),
 

@@ -1,6 +1,6 @@
 import { Context } from './Context'
 import { Config } from './config/Config'
-import { Future, pipe, IO } from '../shared/utils/fp'
+import { Future, pipe } from '../shared/utils/fp'
 
 pipe(
   Future.fromIOEither(Config.load()),
@@ -12,7 +12,7 @@ pipe(
       Future.chain(_ => ensureIndexes()),
       Future.chain(_ => initDbIfEmpty()),
       Future.chain(_ => scheduleRedditPolling()),
-      Future.recover([_ => true, e => IO.runUnsafe(logger.error(e))]),
+      Future.recover(e => Future.fromIOEither(logger.error(e))),
       Future.chain(_ => Future.fromIOEither(logger.info('Started'))),
     )
   }),
