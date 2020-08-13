@@ -104,7 +104,7 @@ export function KlkSearchService(Logger: PartialLogger) {
     } = res
     const params = querystring.stringify(res.config.params)
 
-    return `${method} ${url}?${params} ${status}`
+    return `${method.toUpperCase()} ${url}?${params} ${status}`
   }
 
   function printDetailedResponse<A>(res: AxiRes<A>): string {
