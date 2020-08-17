@@ -1,5 +1,6 @@
+import { Maybe } from '../../../shared/utils/fp'
+
 import { Link } from './Link'
-import { Maybe } from '../../shared/utils/fp'
 
 export type LinksListing = Readonly<{
   kind: 'Listing'

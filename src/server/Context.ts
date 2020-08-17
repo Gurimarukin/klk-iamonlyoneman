@@ -30,7 +30,7 @@ export function Context(config: Config) {
 
   const klkPostService = KlkPostService(Logger, klkPostPersistence, klkSearchService)
 
-  const klkPostController = KlkPostController(Logger)
+  const klkPostController = KlkPostController(Logger, klkPostService)
 
   const routes: Route[] = Routes(klkPostController)
 

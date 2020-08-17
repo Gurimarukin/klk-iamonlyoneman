@@ -1,15 +1,18 @@
 import { Lens as MonocleLens } from 'monocle-ts'
 
+import { Future, pipe, Maybe, List, IO, Task, Do } from '../../shared/utils/fp'
+
+import { KlkPost } from '../../shared/models/klkPost/KlkPost'
+import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { Size } from '../../shared/models/klkPost/Size'
+import { StringUtils } from '../../shared/utils/StringUtils'
+
 import { KlkSearchService } from './KlkSearchService'
 import { PartialLogger } from './Logger'
-import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
-import { KlkPost } from '../models/klkPost/KlkPost'
-import { KlkPostId } from '../models/klkPost/KlkPostId'
+import { Link } from '../models/link/Link'
+import { LinksListing } from '../models/link/LinksListing'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
-import { Future, pipe, Maybe, List, IO, Task } from '../../shared/utils/fp'
-import { StringUtils } from '../../shared/utils/StringUtils'
-import { LinksListing } from '../models/LinksListing'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
@@ -77,6 +80,8 @@ export function KlkPostService(
         Future.fromIOEither,
       )
     },
+
+    findAll: (): Future<KlkPost[]> => klkPostPersistence.findAll(),
   }
 
   function setRefreshActivityInterval(): IO<void> {
@@ -185,7 +190,7 @@ export function KlkPostService(
   function addToDb(links: Link[], pollCounter: PollCounter): Future<PollCounter> {
     if (List.isEmpty(links)) return Future.right(pollCounter)
 
-    const posts = links.map(KlkPost.fromLink)
+    const posts = links.map(klkPostFromLink)
     return pipe(
       List.sequence(IO.ioEither)(
         posts.map(p =>
@@ -218,6 +223,49 @@ export function KlkPostService(
       ),
     )
   }
+}
+
+function klkPostFromLink(l: Link): KlkPost {
+  const { episode, size } = metadataFromTitle(l.data.title)
+  return {
+    id: l.data.id,
+    title: l.data.title,
+    episode,
+    size,
+    createdAt: new Date(l.data.created_utc * 1000),
+    permalink: l.data.permalink,
+    url: l.data.url,
+  }
+}
+
+type Metadata = Readonly<{
+  episode: Maybe<number>
+  size: Maybe<Size>
+}>
+
+const Regex = {
+  episode: /eps?is?ode\s+([0-9]+)/i,
+  size: /([0-9]+)\s*x\s*([0-9]+)/i,
+}
+
+export function metadataFromTitle(title: string): Metadata {
+  const episode = pipe(title, StringUtils.matcher1(Regex.episode), Maybe.chain(toNumber))
+  const size = pipe(
+    title,
+    StringUtils.matcher2(Regex.size),
+    Maybe.chain(([width, height]) =>
+      Do(Maybe.option)
+        .bindL('width', () => toNumber(width))
+        .bindL('height', () => toNumber(height))
+        .done(),
+    ),
+  )
+  return { episode, size }
+}
+
+function toNumber(str: string): Maybe<number> {
+  const n = Number(str.trim())
+  return isNaN(n) ? Maybe.none : Maybe.some(n)
 }
 
 function printLinkIds(links: Link[]): string {

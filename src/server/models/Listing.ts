@@ -1,6 +1,7 @@
 import * as D from 'io-ts/lib/Decoder'
 
 import { Maybe } from '../../shared/utils/fp'
+
 import { Unknown } from '../../shared/models/Unknown'
 
 export namespace Listing {

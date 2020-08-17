@@ -1,9 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
 import './reset.css'
 
-// import { App } from './components/App'
+import { App } from './App'
 
-ReactDOM.render(<div>Haha !</div>, document.getElementById('root'))
+ReactDOM.render(<App />, document.getElementById('root'))

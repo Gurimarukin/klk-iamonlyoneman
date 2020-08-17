@@ -1,5 +1,5 @@
-import * as D from 'io-ts/lib/Decoder'
 import { sequenceT } from 'fp-ts/lib/Apply'
+import * as D from 'io-ts/lib/Decoder'
 
 import { IO, pipe, Either, NonEmptyArray, Maybe } from '../../shared/utils/fp'
 

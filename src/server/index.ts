@@ -1,6 +1,7 @@
+import { Future, pipe } from '../shared/utils/fp'
+
 import { Context } from './Context'
 import { Config } from './config/Config'
-import { Future, pipe } from '../shared/utils/fp'
 
 pipe(
   Future.fromIOEither(Config.load()),

@@ -31,7 +31,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/i,
+        test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
     ],
@@ -50,6 +50,7 @@ module.exports = {
         configFile,
       },
       eslint: {
+        enabled: true,
         files: './src/client/**/*.{tsx,ts}',
       },
     }),

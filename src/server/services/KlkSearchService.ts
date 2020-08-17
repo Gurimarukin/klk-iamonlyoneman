@@ -2,13 +2,15 @@ import Axios from 'axios'
 import * as D from 'io-ts/lib/Decoder'
 import querystring from 'querystring'
 
+import { Future, pipe, Either, List, IO, flow, Dict, Maybe } from '../../shared/utils/fp'
+
+import { StringUtils } from '../../shared/utils/StringUtils'
+
 import { PartialLogger } from './Logger'
 import { AxiRes } from '../models/AxiRes'
-import { Link } from '../models/Link'
-import { LinksListing } from '../models/LinksListing'
 import { Listing } from '../models/Listing'
-import { Future, pipe, Either, List, IO, flow, Dict, Maybe } from '../../shared/utils/fp'
-import { StringUtils } from '../../shared/utils/StringUtils'
+import { Link } from '../models/link/Link'
+import { LinksListing } from '../models/link/LinksListing'
 
 export type KlkSearchService = ReturnType<typeof KlkSearchService>
 

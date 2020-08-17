@@ -1,8 +1,9 @@
 import fmt from 'dateformat'
 import util from 'util'
 
-import { LogLevel, LogLevelOrOff } from '../models/LogLevel'
 import { IO, Future } from '../../shared/utils/fp'
+
+import { LogLevel, LogLevelOrOff } from '../models/LogLevel'
 
 export type Logger = Record<LogLevel, (arg: unknown, ...args: unknown[]) => IO<void>>
 

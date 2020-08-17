@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler } from 'express'
-import { Server } from 'http'
 import * as H from 'hyper-ts'
 import { toRequestHandler, ExpressConnection, toArray, Action } from 'hyper-ts/lib/express'
+import { Server } from 'http'
 
 import {
   Do,
@@ -14,6 +14,7 @@ import {
   Future,
   NonEmptyArray,
   Dict,
+  flow,
 } from '../shared/utils/fp'
 
 import { Config } from './config/Config'
@@ -72,7 +73,9 @@ export const startWebServer = (
       ),
     ),
     IO.chain(_ =>
-      IO.apply(() => _.use(pipe(EndedMiddleware.NotFound(), withLog, toRequestHandler))),
+      IO.apply(() =>
+        _.use(pipe(EndedMiddleware.text(H.Status.NotFound)(), withLog, toRequestHandler)),
+      ),
     ),
     IO.chain(_ => IO.apply(() => _.use(errorHandler(onError)))),
     IO.chain(_ =>
@@ -104,12 +107,12 @@ export const startWebServer = (
           pipe(
             _,
             Either.fold(
-              e =>
-                pipe(
-                  Task.fromIO(onError(e)),
-                  Task.chain(_ => EndedMiddleware.InternalServerError()(conn)),
-                ),
-              _ => Task.of(_),
+              flow(
+                onError,
+                Task.fromIO,
+                Task.chain(_ => EndedMiddleware.text(H.Status.InternalServerError)()(conn)),
+              ),
+              Task.of,
             ),
           ),
         ),

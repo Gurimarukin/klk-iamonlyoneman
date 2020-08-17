@@ -5,10 +5,17 @@ module.exports = {
     project: './tsconfig-client.json',
   },
   extends: [
+    'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
     'plugin:prettier/recommended',
+    'plugin:react-hooks/recommended',
   ],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -54,6 +61,20 @@ module.exports = {
     'no-undef': 'off',
     'prettier/prettier': 'off',
     quotes: ['warn', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
+    'react/display-name': 'off',
+    'react/jsx-no-bind': [
+      'warn',
+      {
+        ignoreDOMComponents: false,
+        ignoreRefs: false,
+        allowArrowFunctions: false,
+        allowFunctions: false,
+        allowBind: false,
+      },
+    ],
+    'react/no-unescaped-entities': 'off',
+    'react/prop-types': 'off',
+    'react/self-closing-comp': ['warn', { component: true, html: true }],
     'sort-imports': 'off',
     'space-in-parens': ['warn', 'never'],
     strict: 'warn',

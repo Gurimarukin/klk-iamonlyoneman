@@ -1,10 +1,10 @@
-import * as H from 'hyper-ts'
 import express, { Request } from 'express'
-import { ExpressConnection } from 'hyper-ts/lib/express'
-import { fromRequestHandler } from 'hyper-ts/lib/express'
+import * as H from 'hyper-ts'
+import { ExpressConnection, fromRequestHandler } from 'hyper-ts/lib/express'
+
+import { pipe, Either, Future } from '../../shared/utils/fp'
 
 import { EndedMiddleware } from '../models/EndedMiddleware'
-import { pipe, Either, Future } from '../../shared/utils/fp'
 
 export namespace ControllerUtils {
   export const withJsonBody = <A>(decoder: (u: unknown) => Either<unknown, A>) => (

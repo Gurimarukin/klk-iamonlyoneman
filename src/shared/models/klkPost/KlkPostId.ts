@@ -1,7 +1,7 @@
 import * as C from 'io-ts/lib/Codec'
 import { Newtype, iso } from 'newtype-ts'
 
-import { fromNewtype } from '../../../shared/utils/fromNewtype'
+import { fromNewtype } from '../../utils/fromNewtype'
 
 export type KlkPostId = Newtype<{ readonly KlkPostId: unique symbol }, string>
 

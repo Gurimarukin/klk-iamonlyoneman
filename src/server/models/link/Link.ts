@@ -1,6 +1,6 @@
 import * as D from 'io-ts/lib/Decoder'
 
-import { KlkPostId } from './klkPost/KlkPostId'
+import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 
 export namespace Link {
   export const decoder = D.type({
