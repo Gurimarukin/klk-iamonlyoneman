@@ -27,7 +27,7 @@ export function Config(
 export namespace Config {
   export function load(): IO<Config> {
     return pipe(
-      ConfReader.fromFiles('./conf/local.conf.json', './conf/application.conf.json'),
+      ConfReader.fromFiles('./conf/server/local.conf.json', './conf/server/application.conf.json'),
       IO.chain(reader =>
         pipe(
           readConfig(reader),

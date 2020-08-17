@@ -1,5 +1,6 @@
 /.eslintcache
 /.prettierrc.json
-/conf/local.conf.json
+/conf/client/.env
+/conf/server/local.conf.json
 /dist
 /node_modules
