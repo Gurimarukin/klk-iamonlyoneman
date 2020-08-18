@@ -33,6 +33,7 @@ export function KlkPostPersistence(
         collection.collection(),
         Future.map(_ => () =>
           _.find({})
+            .sort({ 'metadata.episode': 1, createdAt: 1 })
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),

@@ -10,6 +10,7 @@ devDependencies:
   '@types/node': 14.0.27
   '@types/react': 16.9.46
   '@types/react-dom': 16.9.8
+  '@types/react-lazy-load-image-component': 1.5.1
   '@typescript-eslint/eslint-plugin': 3.9.0_4eca5ec91cad0f67409464922f123f54
   '@typescript-eslint/parser': 3.9.0_eslint@7.7.0+typescript@3.9.7
   axios: 0.19.2
@@ -36,6 +37,7 @@ devDependencies:
   prettier: 2.0.5
   react: 16.13.1
   react-dom: 16.13.1_react@16.13.1
+  react-lazy-load-image-component: 1.5.0_react-dom@16.13.1+react@16.13.1
   style-loader: 1.2.1_webpack@4.44.1
   ts-jest: 26.2.0_jest@26.4.0+typescript@3.9.7
   ts-loader: 8.0.2_typescript@3.9.7
@@ -853,6 +855,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-ykkPQ+5nFknnlU6lDd947WbQ6TE3NNzbQAkInC2EKY1qeYdTKp7onFusmYZb+ityzx2YviqT6BXSu+LyWWJwcA==
+  /@types/react-lazy-load-image-component/1.5.1:
+    dependencies:
+      '@types/react': 16.9.46
+      csstype: 3.0.2
+    dev: true
+    resolution:
+      integrity: sha512-MvR5/20LXczHorci3Yuo3c8/iSHqpSw5MC5aYnEPwytCitm6rd/fz7GFjRCk9wjjGS9750IP6qSP87oU9G+lSA==
   /@types/react/16.9.46:
     dependencies:
       '@types/prop-types': 15.7.3
@@ -5309,6 +5318,10 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==
+  /lodash.debounce/4.0.8:
+    dev: true
+    resolution:
+      integrity: sha1-gteb/zCmfEAF/9XiUVMArZyk168=
   /lodash.memoize/4.1.2:
     dev: true
     resolution:
@@ -5317,6 +5330,10 @@ packages:
     dev: true
     resolution:
       integrity: sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=
+  /lodash.throttle/4.1.1:
+    dev: true
+    resolution:
+      integrity: sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
   /lodash/4.17.19:
     dev: true
     resolution:
@@ -6642,6 +6659,18 @@ packages:
     dev: true
     resolution:
       integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+  /react-lazy-load-image-component/1.5.0_react-dom@16.13.1+react@16.13.1:
+    dependencies:
+      lodash.debounce: 4.0.8
+      lodash.throttle: 4.1.1
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+    dev: true
+    peerDependencies:
+      react: ^15.x.x || ^16.x.x
+      react-dom: ^15.x.x || ^16.x.x
+    resolution:
+      integrity: sha512-dAvuueTq0FNjswHEII8tcd0FRRHZgPoIdVhE1fcAfCdqY7LZ37IHd0xWb2c6rCl+dsSm9Z4AloEffM8JYPxTlA==
   /react/16.13.1:
     dependencies:
       loose-envify: 1.4.0
@@ -8677,6 +8706,7 @@ specifiers:
   '@types/node': ^14.0.27
   '@types/react': ^16.9.46
   '@types/react-dom': ^16.9.8
+  '@types/react-lazy-load-image-component': ^1.5.1
   '@typescript-eslint/eslint-plugin': ^3.9.0
   '@typescript-eslint/parser': ^3.9.0
   axios: ^0.19.2
@@ -8703,6 +8733,7 @@ specifiers:
   prettier: ^2.0.5
   react: ^16.13.1
   react-dom: ^16.13.1
+  react-lazy-load-image-component: ^1.5.0
   style-loader: ^1.2.1
   ts-jest: ^26.2.0
   ts-loader: ^8.0.2
