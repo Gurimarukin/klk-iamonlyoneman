@@ -29,7 +29,7 @@ export type FpCollection = ReturnType<typeof FpCollection>
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function FpCollection<A, O>(
   logger: Logger,
-  collection: () => Future<Collection<O>>,
+  collection: <T>(f: (coll: Collection<O>) => Promise<T>) => Future<T>,
   codec: C.Codec<unknown, OptionalId<O>, A>,
 ) {
   return {
@@ -41,8 +41,7 @@ export function FpCollection<A, O>(
     ): Future<void> =>
       pipe(
         Future.fromIOEither(logger.debug('Ensuring indexes')),
-        Future.chain(_ => collection()),
-        Future.chain(_ => Future.apply(() => _.createIndexes(indexSpecs, options))),
+        Future.chain(_ => collection(c => c.createIndexes(indexSpecs, options))),
       ),
 
     insertOne: (
@@ -51,8 +50,7 @@ export function FpCollection<A, O>(
     ): Future<InsertOneWriteOpResult<WithId<O>>> => {
       const encoded = codec.encode(doc)
       return pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.insertOne(encoded, options))),
+        collection(c => c.insertOne(encoded, options)),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug('inserted', encoded)),
@@ -68,8 +66,7 @@ export function FpCollection<A, O>(
     ): Future<InsertWriteOpResult<WithId<O>>> => {
       const encoded = docs.map(codec.encode)
       return pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.insertMany(encoded, options))),
+        collection(c => c.insertMany(encoded, options)),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug(`inserted ${res.insertedCount} documents`)),
@@ -86,12 +83,7 @@ export function FpCollection<A, O>(
     ): Future<UpdateWriteOpResult> => {
       const encoded = codec.encode(doc)
       return pipe(
-        collection(),
-        Future.chain(_ =>
-          Future.apply(() =>
-            _.updateOne(filter, { $set: encoded as MatchKeysAndValues<O> }, options),
-          ),
-        ),
+        collection(c => c.updateOne(filter, { $set: encoded as MatchKeysAndValues<O> }, options)),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug('updated', encoded)),
@@ -108,8 +100,7 @@ export function FpCollection<A, O>(
     ): Future<ReplaceWriteOpResult> => {
       const encoded = codec.encode(doc)
       return pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.replaceOne(filter, encoded as O, options))),
+        collection(c => c.replaceOne(filter, encoded as O, options)),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug('upserted', encoded)),
@@ -119,16 +110,11 @@ export function FpCollection<A, O>(
       )
     },
 
-    count: (filter: FilterQuery<O>): Future<number> =>
-      pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.countDocuments(filter))),
-      ),
+    count: (filter: FilterQuery<O>): Future<number> => collection(c => c.countDocuments(filter)),
 
     findOne: (filter: FilterQuery<O>, options?: FindOneOptions): Future<Maybe<A>> =>
       pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.findOne(filter, options))),
+        collection(c => c.findOne(filter, options)),
         Future.map(Maybe.fromNullable),
         Future.chain(
           Maybe.fold(
@@ -139,17 +125,15 @@ export function FpCollection<A, O>(
       ),
 
     find: (query: FilterQuery<O>, options?: FindOneOptions): Future<Cursor<Either<Error, A>>> =>
-      pipe(
-        collection(),
-        Future.map(_ =>
-          _.find(query, options).map(flow(codec.decode, Either.mapLeft(decodeError))),
+      collection(c =>
+        Promise.resolve(
+          c.find(query, options).map(flow(codec.decode, Either.mapLeft(decodeError))),
         ),
       ),
 
     drop: (): Future<void> =>
       pipe(
-        collection(),
-        Future.chain(_ => Future.apply(() => _.drop())),
+        collection(c => c.drop()),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.info('droped collection')),

@@ -13,10 +13,10 @@ export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function KlkPostPersistence(
   Logger: PartialLogger,
-  mongoCollection: (dbName: string) => Future<Collection>,
+  mongoCollection: (coll: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
 ) {
   const logger = Logger('KlkPostPersistence')
-  const collection = FpCollection(logger, () => mongoCollection('klkPost'), KlkPost.codec)
+  const collection = FpCollection(logger, mongoCollection('klkPost'), KlkPost.codec)
 
   return {
     ensureIndexes: (): Future<void> =>
@@ -30,20 +30,19 @@ export function KlkPostPersistence(
 
     findAll: (): Future<KlkPost[]> =>
       pipe(
-        collection.collection(),
-        Future.map(_ => () =>
-          _.find({})
+        collection.collection(c =>
+          c
+            .find({})
             .sort({ 'metadata.episode': 1, createdAt: 1 })
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
-        Future.chain(Task.map(List.array.sequence(Either.either))),
+        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
       ),
 
     findByIds: (ids: KlkPostId[]): Future<KlkPostId[]> =>
       pipe(
-        collection.collection(),
-        Future.map(_ => () =>
+        collection.collection(_ =>
           _.find({ id: { $in: ids } }, { projection: { id: 1 } })
             .map(
               flow(
@@ -53,7 +52,7 @@ export function KlkPostPersistence(
             )
             .toArray(),
         ),
-        Future.chain(Task.map(List.array.sequence(Either.either))),
+        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
       ),
 
     // find: (id: GuildId): Future<Maybe<KlkPost>> => collection.findOne({ id }),
