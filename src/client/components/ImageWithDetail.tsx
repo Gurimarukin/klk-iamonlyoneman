@@ -10,15 +10,14 @@ import { Size } from '../../shared/models/klkPost/Size'
 import { theme } from '../utils/theme'
 
 type Props = Readonly<{
-  key?: string | number
   scrollPosition: ScrollPosition
   resizeImg: (size: Size) => Size
   post: KlkPost
 }>
 
-const IMAGE_WRAPPER = '__image_wrapper'
+const PLACEHOLDER = '__placeholder'
 
-export const ImageWithDetail = ({ key, scrollPosition, resizeImg, post }: Props): JSX.Element => {
+export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX.Element => {
   const size: Size = pipe(
     post.size,
     Maybe.fold(
@@ -29,13 +28,12 @@ export const ImageWithDetail = ({ key, scrollPosition, resizeImg, post }: Props)
   return (
     <StyledContainer>
       <StyledImage
-        key={key}
         alt={post.title}
         src={post.url}
         scrollPosition={scrollPosition}
         effect='blur'
         placeholder={<span />}
-        wrapperClassName={IMAGE_WRAPPER}
+        wrapperClassName={PLACEHOLDER}
         {...size}
       />
       <StyledTitle style={{ width: size.width }}>{post.title}</StyledTitle>
@@ -50,7 +48,7 @@ const StyledContainer = styled.div({
   display: 'flex',
   flexDirection: 'column',
 
-  [`& .${IMAGE_WRAPPER}`]: {
+  [`& .${PLACEHOLDER}`]: {
     display: 'flex',
     background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
   },
