@@ -19,8 +19,8 @@ export const App = (): JSX.Element => {
     state,
     AsyncState.fold({
       onLoading: () => <StyledPre>Loading...</StyledPre>,
-      onFailure: e => <StyledPre>{e.message}</StyledPre>,
-      onSuccess: _ => <Gallery klkPosts={_} />,
+      onFailure: _ => <StyledPre>Error</StyledPre>,
+      onSuccess: p => <Gallery klkPosts={p} />,
     }),
   )
 }

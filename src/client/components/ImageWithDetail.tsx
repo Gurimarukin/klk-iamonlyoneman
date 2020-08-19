@@ -14,17 +14,11 @@ type Props = Readonly<{
   scrollPosition: ScrollPosition
   resizeImg: (size: Size) => Size
   post: KlkPost
-  // WARNING: className isn't passed to container but to placeholder span
-  className?: string
 }>
 
-export const ImageWithDetail = ({
-  key,
-  scrollPosition,
-  resizeImg,
-  post,
-  className,
-}: Props): JSX.Element => {
+const IMAGE_WRAPPER = '__image_wrapper'
+
+export const ImageWithDetail = ({ key, scrollPosition, resizeImg, post }: Props): JSX.Element => {
   const size: Size = pipe(
     post.size,
     Maybe.fold(
@@ -39,9 +33,9 @@ export const ImageWithDetail = ({
         alt={post.title}
         src={post.url}
         scrollPosition={scrollPosition}
-        effect='opacity'
+        effect='blur'
         placeholder={<span />}
-        wrapperProps={{ className }}
+        wrapperClassName={IMAGE_WRAPPER}
         {...size}
       />
       <StyledTitle style={{ width: size.width }}>{post.title}</StyledTitle>
@@ -55,6 +49,11 @@ const StyledContainer = styled.div({
   margin: `${theme.Gallery.margin}px 0`,
   display: 'flex',
   flexDirection: 'column',
+
+  [`& .${IMAGE_WRAPPER}`]: {
+    display: 'flex',
+    background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
+  },
 })
 
 const StyledImage = styled(LazyLoadImage)({

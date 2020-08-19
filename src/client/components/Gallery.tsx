@@ -78,7 +78,7 @@ export const Gallery = trackWindowScroll(
     return (
       <StyledContainer ref={onMount}>
         {klkPosts.map(_ => (
-          <StyledImageWithDetail
+          <ImageWithDetail
             key={KlkPostId.unwrap(_.id)}
             scrollPosition={scrollPosition}
             resizeImg={resizeImg}
@@ -108,12 +108,6 @@ const StyledContainer = styled.div({
   background:
     'linear-gradient(0deg, rgba(1,1,1,1) 0%, rgba(63,97,212,1) 33%, rgba(155,57,87,1) 67%, rgba(1,1,1,1) 100%)',
   paddingBottom: `${theme.Gallery.margin}px`,
-})
-
-// styling of ImageWithDetail placeholder span
-const StyledImageWithDetail = styled(ImageWithDetail)({
-  display: 'flex',
-  background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
 })
 
 // Nonon
