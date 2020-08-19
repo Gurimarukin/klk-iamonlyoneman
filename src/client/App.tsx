@@ -20,7 +20,10 @@ type Props = Readonly<{
 
 export const App = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
-    const future = useMemo(() => Http.get(`${Config.apiHost}/klk-posts`, KlkPosts.codec.decode), [])
+    const future = useMemo(
+      () => Http.get(`${Config.apiHost}/api/klk-posts`, KlkPosts.codec.decode),
+      [],
+    )
     const [state] = useAsyncState(future)
 
     return (
