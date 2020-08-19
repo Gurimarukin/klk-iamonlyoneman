@@ -38,7 +38,9 @@ export const App = trackWindowScroll(
             </StyledA>{' '}
             and wanted a better viewer for it.
           </StyledH3>
-          <StyledH6>(Hover the title to see the date and the link to the original post.)</StyledH6>
+          {/* <StyledH6>
+            (Hover the title to see the date and the link to the original post.)
+          </StyledH6> */}
         </Header>
         {pipe(
           state,
@@ -81,10 +83,10 @@ const StyledH3 = styled.h3({
   marginTop: '2em',
 })
 
-const StyledH6 = styled.h6({
-  fontSize: '1em',
-  marginTop: '3em',
-})
+// const StyledH6 = styled.h6({
+//   fontSize: '1em',
+//   marginTop: '5em',
+// })
 
 const StyledA = styled(ABlank)({
   color: 'inherit',
