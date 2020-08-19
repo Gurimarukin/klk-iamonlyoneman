@@ -105,8 +105,7 @@ const StyledContainer = styled.div({
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
-  background:
-    'linear-gradient(0deg, rgba(1,1,1,1) 0%, rgba(63,97,212,1) 33%, rgba(155,57,87,1) 67%, rgba(1,1,1,1) 100%)',
+  background: `linear-gradient(0deg, ${theme.colors.black} 0%, ${theme.colors.darkblue} 33%, ${theme.colors.darkred} 67%, ${theme.colors.black} 100%)`,
   paddingBottom: `${theme.Gallery.margin}px`,
 })
 
