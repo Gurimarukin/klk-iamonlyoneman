@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React, { useCallback, useState, useEffect } from 'react'
-import { LazyLoadImage, ScrollPosition, trackWindowScroll } from 'react-lazy-load-image-component'
+import { ScrollPosition, trackWindowScroll } from 'react-lazy-load-image-component'
 
 import { Maybe, pipe } from '../../shared/utils/fp'
 
@@ -8,6 +8,7 @@ import { KlkPosts } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 
+import { ImageWithDetail } from './ImageWithDetail'
 import { useMaybeRef } from '../hooks/useMaybeRef'
 
 type Props = Readonly<{
@@ -78,34 +79,15 @@ export const Gallery = trackWindowScroll(
 
     return (
       <StyledContainer ref={onMount}>
-        {klkPosts.map(_ => {
-          const size: Partial<Size> = pipe(
-            _.size,
-            Maybe.fold(
-              () => ({
-                height: Dimensions.smallestSide,
-              }),
-              resizeImg,
-            ),
-          )
-          return (
-            <StyledImage
-              key={KlkPostId.unwrap(_.id)}
-              alt={_.title}
-              src={_.url}
-              scrollPosition={scrollPosition}
-              effect='opacity'
-              placeholder={<span />}
-              wrapperProps={{
-                style: {
-                  display: 'flex',
-                  background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
-                },
-              }}
-              {...size}
-            />
-          )
-        })}
+        {klkPosts.map(_ => (
+          <StyledImageWithDetail
+            key={KlkPostId.unwrap(_.id)}
+            smallestSide={Dimensions.smallestSide}
+            scrollPosition={scrollPosition}
+            resizeImg={resizeImg}
+            post={_}
+          />
+        ))}
       </StyledContainer>
     )
   },
@@ -131,8 +113,10 @@ const StyledContainer = styled.div({
   paddingBottom: `${Dimensions.margin}px`,
 })
 
-const StyledImage = styled(LazyLoadImage)({
-  boxShadow: '0 0 8px black',
+// styling of ImageWithDetail placeholder span
+const StyledImageWithDetail = styled(ImageWithDetail)({
+  display: 'flex',
+  background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
 })
 
 // Nonon
