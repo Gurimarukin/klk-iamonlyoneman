@@ -14,7 +14,7 @@ export namespace ControllerUtils {
       fromRequestHandler(express.json(), _ => undefined),
       H.ichain(_ => H.decodeBody(decoder)),
       H.ichain(f),
-      H.orElse(_ => EndedMiddleware.BadRequest()),
+      H.orElse(_ => EndedMiddleware.text(H.Status.BadRequest)()),
     )
 
   export const withRequest: H.Middleware<H.StatusOpen, H.StatusOpen, Error, Request> = (
