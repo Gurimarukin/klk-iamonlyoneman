@@ -10,17 +10,12 @@ import { Size } from '../../shared/models/klkPost/Size'
 
 import { ImageWithDetail } from './ImageWithDetail'
 import { useMaybeRef } from '../hooks/useMaybeRef'
+import { theme } from '../utils/theme'
 
 type Props = Readonly<{
   klkPosts: KlkPosts
   scrollPosition: ScrollPosition
 }>
-
-namespace Dimensions {
-  export const smallestSide = 500
-  export const margin = 6
-  export const maxHeight = 0.9 // * 100vh
-}
 
 export const Gallery = trackWindowScroll(
   ({ klkPosts, scrollPosition }: Props): JSX.Element => {
@@ -32,10 +27,13 @@ export const Gallery = trackWindowScroll(
           ref.current,
           Maybe.fold(
             () => [
-              window.innerWidth - 2 * Dimensions.margin,
-              window.innerHeight * Dimensions.maxHeight,
+              window.innerWidth - 2 * theme.Gallery.margin,
+              window.innerHeight * theme.Gallery.maxHeight,
             ],
-            _ => [_.clientWidth - 2 * Dimensions.margin, _.clientHeight * Dimensions.maxHeight],
+            _ => [
+              _.clientWidth - 2 * theme.Gallery.margin,
+              _.clientHeight * theme.Gallery.maxHeight,
+            ],
           ),
         ),
       [ref],
@@ -63,16 +61,16 @@ export const Gallery = trackWindowScroll(
       (size: Size): Size => {
         const { width, height } = size
         if (width > height) {
-          const w = widthFromHeight(size, Dimensions.smallestSide)
+          const w = widthFromHeight(size, theme.Gallery.smallestSide)
           return w > maxWidth
             ? { width: maxWidth, height: heightFromWidth(size, maxWidth) }
-            : { width: w, height: Dimensions.smallestSide }
+            : { width: w, height: theme.Gallery.smallestSide }
         }
 
-        const h = heightFromWidth(size, Dimensions.smallestSide)
+        const h = heightFromWidth(size, theme.Gallery.smallestSide)
         return h > maxHeight
           ? { width: widthFromHeight(size, maxHeight), height: maxHeight }
-          : { width: Dimensions.smallestSide, height: h }
+          : { width: theme.Gallery.smallestSide, height: h }
       },
       [maxWidth, maxHeight],
     )
@@ -82,7 +80,6 @@ export const Gallery = trackWindowScroll(
         {klkPosts.map(_ => (
           <StyledImageWithDetail
             key={KlkPostId.unwrap(_.id)}
-            smallestSide={Dimensions.smallestSide}
             scrollPosition={scrollPosition}
             resizeImg={resizeImg}
             post={_}
@@ -110,7 +107,7 @@ const StyledContainer = styled.div({
   flexWrap: 'wrap',
   background:
     'linear-gradient(0deg, rgba(1,1,1,1) 0%, rgba(63,97,212,1) 33%, rgba(155,57,87,1) 67%, rgba(1,1,1,1) 100%)',
-  paddingBottom: `${Dimensions.margin}px`,
+  paddingBottom: `${theme.Gallery.margin}px`,
 })
 
 // styling of ImageWithDetail placeholder span
