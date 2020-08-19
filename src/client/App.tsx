@@ -32,7 +32,7 @@ export const App = trackWindowScroll(
             <StyledA href='https://www.reddit.com/r/KillLaKill'>/r/KillLaKill</StyledA>.
           </StyledH2>
           <StyledH3>
-            I am really found of{' '}
+            <StyledA href='https://www.reddit.com/u/Grimalkin8675'>I</StyledA> am really found of{' '}
             <StyledA href='https://www.reddit.com/r/iamonlyonesubreddit/comments/aye80k/these_are_not_screenshots/'>
               his series
             </StyledA>{' '}
