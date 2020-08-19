@@ -56,9 +56,6 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
 
 const Container = styled.div({
   flexShrink: 0,
-  fontFamily: 'monospace',
-  color: 'white',
-  fontSize: '14px',
   margin: `${theme.Gallery.margin}px 0`,
   display: 'flex',
   flexDirection: 'column',

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React, { useCallback, useState, useEffect } from 'react'
-import { ScrollPosition, trackWindowScroll } from 'react-lazy-load-image-component'
+import { ScrollPosition } from 'react-lazy-load-image-component'
 
 import { Maybe, pipe } from '../../shared/utils/fp'
 
@@ -17,78 +17,73 @@ type Props = Readonly<{
   scrollPosition: ScrollPosition
 }>
 
-export const Gallery = trackWindowScroll(
-  ({ klkPosts, scrollPosition }: Props): JSX.Element => {
-    const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
+export const Gallery = ({ klkPosts, scrollPosition }: Props): JSX.Element => {
+  const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
 
-    const getMaxDimension = useCallback(
-      (): [number, number] =>
-        pipe(
-          ref.current,
-          Maybe.fold(
-            () => [
-              window.innerWidth - 2 * theme.Gallery.margin,
-              window.innerHeight * theme.Gallery.maxHeight,
-            ],
-            _ => [
-              _.clientWidth - 2 * theme.Gallery.margin,
-              _.clientHeight * theme.Gallery.maxHeight,
-            ],
-          ),
+  const getMaxDimension = useCallback(
+    (): [number, number] =>
+      pipe(
+        ref.current,
+        Maybe.fold(
+          () => [
+            window.innerWidth - 2 * theme.Gallery.margin,
+            window.innerHeight * theme.Gallery.maxHeight,
+          ],
+          _ => [_.clientWidth - 2 * theme.Gallery.margin, _.clientHeight * theme.Gallery.maxHeight],
         ),
-      [ref],
-    )
+      ),
+    [ref],
+  )
 
-    const [[maxWidth, maxHeight], setMaxDimensions] = useState<[number, number]>(getMaxDimension)
-    const updateMaxDimensions = useCallback((): void => setMaxDimensions(getMaxDimension()), [
-      getMaxDimension,
-    ])
+  const [[maxWidth, maxHeight], setMaxDimensions] = useState<[number, number]>(getMaxDimension)
+  const updateMaxDimensions = useCallback((): void => setMaxDimensions(getMaxDimension()), [
+    getMaxDimension,
+  ])
 
-    const onMount = useCallback(
-      (elt: HTMLDivElement | null) => {
-        mountRef(elt)
-        updateMaxDimensions()
-      },
-      [mountRef, updateMaxDimensions],
-    )
+  const onMount = useCallback(
+    (elt: HTMLDivElement | null) => {
+      mountRef(elt)
+      updateMaxDimensions()
+    },
+    [mountRef, updateMaxDimensions],
+  )
 
-    useEffect(() => {
-      window.addEventListener('resize', updateMaxDimensions)
-      return () => window.removeEventListener('resize', updateMaxDimensions)
-    }, [updateMaxDimensions])
+  useEffect(() => {
+    window.addEventListener('resize', updateMaxDimensions)
+    return () => window.removeEventListener('resize', updateMaxDimensions)
+  }, [updateMaxDimensions])
 
-    const resizeImg = useCallback(
-      (size: Size): Size => {
-        const { width, height } = size
-        if (width > height) {
-          const w = widthFromHeight(size, theme.Gallery.smallestSide)
-          return w > maxWidth
-            ? { width: maxWidth, height: heightFromWidth(size, maxWidth) }
-            : { width: w, height: theme.Gallery.smallestSide }
-        }
+  const resizeImg = useCallback(
+    (size: Size): Size => {
+      const { width, height } = size
+      if (width > height) {
+        const w = widthFromHeight(size, theme.Gallery.smallestSide)
+        return w > maxWidth
+          ? { width: maxWidth, height: heightFromWidth(size, maxWidth) }
+          : { width: w, height: theme.Gallery.smallestSide }
+      }
 
-        const h = heightFromWidth(size, theme.Gallery.smallestSide)
-        return h > maxHeight
-          ? { width: widthFromHeight(size, maxHeight), height: maxHeight }
-          : { width: theme.Gallery.smallestSide, height: h }
-      },
-      [maxWidth, maxHeight],
-    )
+      const h = heightFromWidth(size, theme.Gallery.smallestSide)
+      return h > maxHeight
+        ? { width: widthFromHeight(size, maxHeight), height: maxHeight }
+        : { width: theme.Gallery.smallestSide, height: h }
+    },
+    [maxWidth, maxHeight],
+  )
 
-    return (
-      <StyledContainer ref={onMount}>
-        {klkPosts.map(_ => (
-          <ImageWithDetail
-            key={KlkPostId.unwrap(_.id)}
-            scrollPosition={scrollPosition}
-            resizeImg={resizeImg}
-            post={_}
-          />
-        ))}
-      </StyledContainer>
-    )
-  },
-)
+  return (
+    <StyledContainer ref={onMount}>
+      {klkPosts.map(_ => (
+        <ImageWithDetail
+          key={KlkPostId.unwrap(_.id)}
+          scrollPosition={scrollPosition}
+          resizeImg={resizeImg}
+          post={_}
+        />
+      ))}
+    </StyledContainer>
+  )
+}
 
 function widthFromHeight({ width, height }: Size, newHeight: number): number {
   return (width * newHeight) / height
@@ -99,13 +94,10 @@ function heightFromWidth({ width, height }: Size, newWidth: number): number {
 }
 
 const StyledContainer = styled.div({
-  height: '100vh',
-  overflow: 'auto scroll',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
-  background: `linear-gradient(0deg, ${theme.colors.black} 0%, ${theme.colors.darkblue} 33%, ${theme.colors.darkred} 67%, ${theme.colors.black} 100%)`,
   paddingBottom: `${theme.Gallery.margin}px`,
 })
 
