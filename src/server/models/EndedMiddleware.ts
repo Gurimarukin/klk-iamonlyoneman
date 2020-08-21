@@ -1,6 +1,6 @@
 import * as H from 'hyper-ts'
 
-import { pipe, Dict, unknownToError } from '../../shared/utils/fp'
+import { Dict, pipe, unknownToError } from '../../shared/utils/fp'
 
 export type EndedMiddleware = H.Middleware<H.StatusOpen, H.ResponseEnded, unknown, void>
 

@@ -1,6 +1,6 @@
 import * as D from 'io-ts/lib/Decoder'
 
-import { Future, Either, Try, flow } from '../../shared/utils/fp'
+import { Either, Future, Try, flow } from '../../shared/utils/fp'
 
 export namespace Http {
   export function get<A>(

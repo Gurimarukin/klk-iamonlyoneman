@@ -8,11 +8,11 @@ import * as _TaskEither from 'fp-ts/lib/TaskEither'
 import * as _IO from 'fp-ts/lib/IO'
 import * as _IOEither from 'fp-ts/lib/IOEither'
 import {
-  identity as _identity,
-  flow as _flow,
-  not as _not,
-  Predicate,
   Lazy,
+  Predicate,
+  flow as _flow,
+  identity as _identity,
+  not as _not,
 } from 'fp-ts/lib/function'
 import { pipe as _pipe } from 'fp-ts/lib/pipeable'
 

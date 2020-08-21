@@ -2,7 +2,7 @@ import express, { Request } from 'express'
 import * as H from 'hyper-ts'
 import { ExpressConnection, fromRequestHandler } from 'hyper-ts/lib/express'
 
-import { pipe, Either, Future } from '../../shared/utils/fp'
+import { Either, Future, pipe } from '../../shared/utils/fp'
 
 import { EndedMiddleware } from '../models/EndedMiddleware'
 

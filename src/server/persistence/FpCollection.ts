@@ -19,7 +19,7 @@ import {
   WithId,
 } from 'mongodb'
 
-import { Future, pipe, Maybe, Either, flow } from '../../shared/utils/fp'
+import { Either, Future, Maybe, flow, pipe } from '../../shared/utils/fp'
 
 import { IndexSpecification } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'

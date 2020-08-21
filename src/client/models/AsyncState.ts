@@ -1,4 +1,4 @@
-import { Try, pipe, Either } from '../../shared/utils/fp'
+import { Either, Try, pipe } from '../../shared/utils/fp'
 
 export type AsyncState<A> = AsyncState.Loading | AsyncState.Failure | AsyncState.Success<A>
 

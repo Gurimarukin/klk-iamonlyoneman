@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollPosition } from 'react-lazy-load-image-component'
 
 import { Maybe, pipe } from '../../shared/utils/fp'

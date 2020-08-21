@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Future, Task, pipe, flow } from '../../shared/utils/fp'
+import { Future, Task, flow, pipe } from '../../shared/utils/fp'
 
 import { AsyncState } from '../models/AsyncState'
 

@@ -1,16 +1,14 @@
-import Axios from 'axios'
 import * as D from 'io-ts/lib/Decoder'
+import Axios from 'axios'
 import querystring from 'querystring'
 
-import { Future, pipe, Either, List, IO, flow, Dict, Maybe } from '../../shared/utils/fp'
-
-import { StringUtils } from '../../shared/utils/StringUtils'
+import { Dict, Either, Future, IO, List, Maybe, flow, pipe } from '../../shared/utils/fp'
 
 import { PartialLogger } from './Logger'
 import { AxiRes } from '../models/AxiRes'
-import { Listing } from '../models/Listing'
-import { Link } from '../models/link/Link'
-import { LinksListing } from '../models/link/LinksListing'
+import { Link } from '../models/Link'
+import { Listing, UnknownListing } from '../models/Listing'
+import { StringUtils } from '../../shared/utils/StringUtils'
 
 export type KlkSearchService = ReturnType<typeof KlkSearchService>
 
@@ -26,13 +24,13 @@ export function KlkSearchService(Logger: PartialLogger) {
   })
 
   return {
-    search: (after?: string): Future<Maybe<LinksListing>> =>
+    search: (after?: string): Future<Maybe<Listing<Link>>> =>
       pipe(
         request(after),
-        Future.chain<Error, AxiRes, Maybe<LinksListing>>(res =>
+        Future.chain<Error, AxiRes, Maybe<Listing<Link>>>(res =>
           res.status === 200
             ? pipe(
-                Listing.decoder.decode(res.data),
+                UnknownListing.decoder.decode(res.data),
                 Either.fold(
                   e =>
                     pipe(
@@ -59,6 +57,7 @@ export function KlkSearchService(Logger: PartialLogger) {
       sort: 'new',
       t: 'all',
       show: 'all',
+      include_over_18: 'on',
       restrict_sr: 'on',
       limit: '100',
     }
@@ -74,7 +73,7 @@ export function KlkSearchService(Logger: PartialLogger) {
     )
   }
 
-  function linksListing(listing: Listing): IO<LinksListing> {
+  function linksListing(listing: UnknownListing): IO<Listing<Link>> {
     return pipe(
       listing.data.children,
       List.reduceWithIndex<unknown, IO<Link[]>>(IO.right([]), (i, ioAcc, child) =>

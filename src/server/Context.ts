@@ -1,6 +1,6 @@
-import { MongoClient, Collection } from 'mongodb'
+import { Collection, MongoClient } from 'mongodb'
 
-import { pipe, Future, Task, Either, IO } from '../shared/utils/fp'
+import { Either, Future, IO, Task, pipe } from '../shared/utils/fp'
 
 import { startWebServer } from './Webserver'
 import { Config } from './config/Config'
@@ -63,9 +63,7 @@ export function Context(config: Config) {
         ),
       ),
 
-    initDbIfEmpty: (): Future<void> => klkPostService.initDbIfEmpty(),
-
-    scheduleRedditPolling: (): Future<void> => klkPostService.scheduleRedditPolling(),
+    klkPostService,
 
     startWebServer: () => startWebServer(Logger, config, routes),
   }

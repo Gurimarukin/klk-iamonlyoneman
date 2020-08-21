@@ -1,7 +1,7 @@
 import fmt from 'dateformat'
 import util from 'util'
 
-import { IO, Future } from '../../shared/utils/fp'
+import { Future, IO } from '../../shared/utils/fp'
 
 import { LogLevel, LogLevelOrOff } from '../models/LogLevel'
 

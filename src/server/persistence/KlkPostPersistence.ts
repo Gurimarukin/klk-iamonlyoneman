@@ -1,6 +1,6 @@
 import { Collection } from 'mongodb'
 
-import { Future, pipe, Either, Task, List, flow } from '../../shared/utils/fp'
+import { Either, Future, List, Task, flow, pipe } from '../../shared/utils/fp'
 
 import { KlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'

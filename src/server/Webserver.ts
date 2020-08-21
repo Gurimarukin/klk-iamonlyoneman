@@ -1,26 +1,26 @@
 import express, { ErrorRequestHandler } from 'express'
 import * as H from 'hyper-ts'
-import { toRequestHandler, ExpressConnection, toArray, Action } from 'hyper-ts/lib/express'
+import { Action, ExpressConnection, toArray, toRequestHandler } from 'hyper-ts/lib/express'
 import { Server } from 'http'
 
 import {
+  Dict,
   Do,
-  pipe,
-  IO,
-  Task,
   Either,
+  Future,
+  IO,
   List,
   Maybe,
-  Future,
   NonEmptyArray,
-  Dict,
+  Task,
   flow,
+  pipe,
 } from '../shared/utils/fp'
 
 import { Config } from './config/Config'
 import { EndedMiddleware } from './models/EndedMiddleware'
 import { Route } from './models/Route'
-import { PartialLogger, Logger } from './services/Logger'
+import { Logger, PartialLogger } from './services/Logger'
 
 export const startWebServer = (
   Logger: PartialLogger,

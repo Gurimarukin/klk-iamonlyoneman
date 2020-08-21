@@ -1,4 +1,4 @@
-import { pipe, Maybe } from './fp'
+import { Maybe, pipe } from './fp'
 
 const margin = /^\s*\|/gm
 

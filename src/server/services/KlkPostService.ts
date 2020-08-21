@@ -1,6 +1,7 @@
+import Axios from 'axios'
 import { Lens as MonocleLens } from 'monocle-ts'
 
-import { Future, pipe, Maybe, List, IO, Task, Do } from '../../shared/utils/fp'
+import { Do, Future, IO, List, Maybe, Task, pipe } from '../../shared/utils/fp'
 
 import { KlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
@@ -10,9 +11,9 @@ import { StringUtils } from '../../shared/utils/StringUtils'
 import { KlkSearchService } from './KlkSearchService'
 import { PartialLogger } from './Logger'
 import { Listing } from '../models/Listing'
-import { Link } from '../models/link/Link'
-import { LinksListing } from '../models/link/LinksListing'
+import { Link } from '../models/Link'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
+import { ReducerReturn, reduceListings } from '../utils/reduceListings'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
@@ -43,6 +44,10 @@ namespace PollCounter {
   }
 }
 
+// const userAgent = 'browser:klk-iamonlyoneman:v1.0.0 (by /u/Grimalkin8675)'
+const searchLimit = 100
+const authorFilter = 'iamonlyoneman'
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function KlkPostService(
   Logger: PartialLogger,
@@ -51,12 +56,17 @@ export function KlkPostService(
 ) {
   const logger = Logger('KlkPostService')
 
+  // const reddit = Axios.create({ headers: { 'User-Agent': userAgent } })
+  const reddit = Axios.create({})
+
   return {
+    fullPollKlkSubreddit,
+
     initDbIfEmpty: (): Future<void> =>
       pipe(
         klkPostPersistence.count(),
         Future.chain(_ =>
-          _ === 0 ? pollReddit({ all: true }) : Future.fromIOEither(logger.info('Nothing to poll')),
+          _ === 0 ? fullPollKlkSubreddit() : Future.fromIOEither(logger.info('Nothing to poll')),
         ),
       ),
 
@@ -90,6 +100,73 @@ export function KlkPostService(
         setInterval(() => pipe(pollReddit({ all: false }), Future.runUnsafe), pollRedditEvery),
       ),
       IO.map(_ => {}),
+    )
+  }
+
+  function fullPollKlkSubreddit(): Future<void> {
+    return pipe(
+      Future.fromIOEither(logger.info('Start polling')),
+      Future.chain(_ =>
+        reduceListings(
+          logger,
+          reddit,
+          {
+            url: 'https://reddit.com/r/KillLaKill.json',
+            params: { sort: 'new', limit: searchLimit },
+          },
+          Link.decoder,
+          PollCounter.empty,
+          (listing, { accumulator }) => syncListingBis(listing, accumulator),
+        ),
+      ),
+      Future.chain(({ requestsCount, accumulator: c }) =>
+        Future.fromIOEither(
+          logger.info(
+            `End polling - requests: ${requestsCount}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
+          ),
+        ),
+      ),
+    )
+  }
+
+  function syncListingBis(
+    listing: Listing<Link>,
+    pollCounter: PollCounter,
+  ): Future<ReducerReturn<PollCounter>> {
+    return pipe(
+      klkPostPersistence.findByIds(listing.data.children.map(_ => _.data.id)),
+      Future.chain(inDb => {
+        const filtered = listing.data.children.filter(_ => _.data.author === authorFilter)
+        const { left: notInDb, right: alreadyInDb } = pipe(
+          filtered,
+          List.partition(link =>
+            pipe(
+              inDb,
+              List.exists(_ => _ === link.data.id),
+            ),
+          ),
+        )
+        const newPollCounter = pipe(
+          pollCounter,
+          PollCounter.Lens.postsFound.modify(_ => _ + filtered.length),
+          PollCounter.Lens.postsAlreadyInDb.modify(_ => _ + alreadyInDb.length),
+        )
+        return pipe(
+          logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
+          IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
+          Future.fromIOEither,
+          Future.chain(_ => addToDb(notInDb, newPollCounter)),
+          Future.chain(newAcc =>
+            pipe(
+              Future.right<Error, ReducerReturn<PollCounter>>({
+                shouldContinue: true,
+                accumulator: newAcc,
+              }),
+              Task.delay(5000),
+            ),
+          ),
+        )
+      }),
     )
   }
 
@@ -128,7 +205,7 @@ export function KlkPostService(
   }
 
   function syncListing(
-    listing: LinksListing,
+    listing: Listing<Link>,
     options: PollOptions,
     pollCounter: PollCounter,
   ): Future<PollCounter> {
@@ -169,7 +246,7 @@ export function KlkPostService(
 
   function addToDbAndContinuePolling(
     links: Link[],
-    listing: Listing,
+    listing: Listing<Link>,
     options: PollOptions,
     pollCounter: PollCounter,
   ): Future<PollCounter> {

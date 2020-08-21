@@ -75,7 +75,16 @@ module.exports = {
     'react/no-unescaped-entities': 'off',
     'react/prop-types': 'off',
     'react/self-closing-comp': ['warn', { component: true, html: true }],
-    'sort-imports': 'off',
+    'sort-imports': [
+      'warn',
+      {
+        ignoreCase: false,
+        ignoreDeclarationSort: true,
+        ignoreMemberSort: false,
+        memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+        allowSeparatedGroups: true,
+      },
+    ],
     'space-in-parens': ['warn', 'never'],
     strict: 'warn',
   },
