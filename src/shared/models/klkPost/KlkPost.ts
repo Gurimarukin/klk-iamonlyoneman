@@ -1,4 +1,5 @@
 import * as C from 'io-ts/lib/Codec'
+import { Lens as MLens } from 'monocle-ts'
 
 import { Maybe, pipe } from '../../utils/fp'
 
@@ -13,8 +14,14 @@ export namespace KlkPost {
     id: KlkPostId.codec,
   })
 
+  const urlCodec = C.type({
+    url: C.string,
+  })
+
+  export const onlyWithIdAndUrlCodec = pipe(onlyWithIdCodec, C.intersect(urlCodec))
+
   export const codec = pipe(
-    onlyWithIdCodec,
+    onlyWithIdAndUrlCodec,
     C.intersect(
       C.type({
         title: C.string,
@@ -22,13 +29,18 @@ export namespace KlkPost {
         size: Maybe.codec(Size.codec),
         createdAt: DateFromISOString.codec,
         permalink: C.string,
-        url: C.string,
       }),
     ),
   )
+
+  export namespace Lens {
+    export const size = MLens.fromPath<KlkPost>()(['size'])
+  }
 }
 
 export type KlkPost = C.TypeOf<typeof KlkPost.codec>
+
+export type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof KlkPost.onlyWithIdAndUrlCodec>
 
 // KlkPosts
 

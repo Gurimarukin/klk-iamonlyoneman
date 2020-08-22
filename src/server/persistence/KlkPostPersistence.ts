@@ -2,8 +2,9 @@ import { Collection } from 'mongodb'
 
 import { Either, Future, List, Task, flow, pipe } from '../../shared/utils/fp'
 
-import { KlkPost } from '../../shared/models/klkPost/KlkPost'
+import { KlkPost, OnlyWithIdAndUrlKlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { Size } from '../../shared/models/klkPost/Size'
 
 import { FpCollection, decodeError } from './FpCollection'
 import { PartialLogger } from '../services/Logger'
@@ -30,8 +31,8 @@ export function KlkPostPersistence(
 
     findAll: (): Future<KlkPost[]> =>
       pipe(
-        collection.collection(c =>
-          c
+        collection.collection(coll =>
+          coll
             .find({})
             .sort({ 'metadata.episode': 1, createdAt: 1 })
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
@@ -40,14 +41,26 @@ export function KlkPostPersistence(
         Future.chain(flow(List.array.sequence(Either.either), Task.of)),
       ),
 
+    findWithEmptySize: (): Future<OnlyWithIdAndUrlKlkPost[]> =>
+      pipe(
+        collection.collection(coll =>
+          coll
+            .find({ size: null }, { projection: { id: 1, url: 1 } })
+            .map(flow(KlkPost.onlyWithIdAndUrlCodec.decode, Either.mapLeft(decodeError)))
+            .toArray(),
+        ),
+        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
+      ),
+
     findByIds: (ids: KlkPostId[]): Future<KlkPostId[]> =>
       pipe(
-        collection.collection(_ =>
-          _.find({ id: { $in: ids } }, { projection: { id: 1 } })
+        collection.collection(coll =>
+          coll
+            .find({ id: { $in: ids } }, { projection: { id: 1 } })
             .map(
               flow(
                 KlkPost.onlyWithIdCodec.decode,
-                Either.bimap(decodeError, _ => _.id),
+                Either.bimap(decodeError, p => p.id),
               ),
             )
             .toArray(),
@@ -56,6 +69,12 @@ export function KlkPostPersistence(
       ),
 
     // find: (id: GuildId): Future<Maybe<KlkPost>> => collection.findOne({ id }),
+
+    updateSizeById: (id: KlkPostId, size: Size): Future<boolean> =>
+      pipe(
+        collection.collection(coll => coll.updateOne({ id: id }, { $set: { size } })),
+        Future.map(r => r.modifiedCount === 1),
+      ),
 
     insertMany: (posts: KlkPost[]) => collection.insertMany(posts),
 

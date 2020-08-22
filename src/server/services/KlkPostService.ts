@@ -14,11 +14,10 @@ import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
 import { RedditSort } from '../models/RedditSort'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
+import { ProbeUtils } from '../utils/ProbeUtils'
 import { ReducerAccumulator, ReducerReturn, reduceListing } from '../utils/reduceListing'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
-
-type PollOptions = Readonly<{ all: boolean }>
 
 type FullPoll = Readonly<{
   fullPoll: boolean
@@ -66,6 +65,7 @@ const delayBetweenPolls = 1000 // ms
 
 const redditDotCom = 'https://reddit.com'
 // const userAgent = 'browser:klk-iamonlyoneman:v1.0.0 (by /u/Grimalkin8675)'
+const postHint = 'image' // for Link.post_hint
 const iamonlyoneman = 'iamonlyoneman' // for Link.author
 const rKillLaKill = 'r/KillLaKill' // for Link.subreddit_name_prefixed
 const searchLimit = 100
@@ -77,6 +77,8 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
 
   return {
     fullPoll,
+
+    addMissingSize,
 
     initDbIfEmpty: (): Future<void> =>
       pipe(
@@ -122,6 +124,34 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
     )
   }
 
+  function addMissingSize(): Future<void> {
+    return pipe(
+      klkPostPersistence.findWithEmptySize(),
+      Future.chain(posts =>
+        pipe(
+          posts,
+          List.map(post =>
+            pipe(
+              ProbeUtils.probeSize(post.url, logger),
+              Future.chain(
+                Maybe.fold(
+                  () => Future.right(false),
+                  size => klkPostPersistence.updateSizeById(post.id, size),
+                ),
+              ),
+            ),
+          ),
+          List.array.sequence(Future.taskEitherSeq),
+        ),
+      ),
+      Future.chain(res =>
+        Future.fromIOEither(
+          logger.info(`Added missing sizes: ${res.filter(s => s).length}/${res.length}`),
+        ),
+      ),
+    )
+  }
+
   function fullPoll(): Future<void> {
     const opts = { fullPoll: true, allSort: true }
     return pipe(
@@ -152,7 +182,7 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
           limit: searchLimit.toString(),
         },
       },
-      l => l.data.author === iamonlyoneman,
+      l => l.data.post_hint === postHint && l.data.author === iamonlyoneman,
     )
   }
 
@@ -171,7 +201,7 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
           limit: searchLimit.toString(),
         },
       },
-      l => l.data.subreddit_name_prefixed === rKillLaKill,
+      l => l.data.post_hint === postHint && l.data.subreddit_name_prefixed === rKillLaKill,
     )
   }
 
@@ -195,7 +225,7 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
           limit: searchLimit.toString(),
         },
       },
-      _ => true,
+      l => l.data.post_hint === postHint,
     )
   }
 
@@ -269,7 +299,7 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
           logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
           IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
           Future.fromIOEither,
-          Future.chain(_ => addToDb(notInDb, newCounter)),
+          Future.chain(_ => probeSizeAndAddToDb(notInDb, newCounter)),
           Future.chain(newAcc => {
             const shouldContinue = fullPoll || List.isEmpty(alreadyInDb)
             return pipe(
@@ -282,10 +312,36 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
     )
   }
 
-  function addToDb(links: Link[], counter: Counter): Future<Counter> {
+  function probeSizeAndAddToDb(links: Link[], counter: Counter): Future<Counter> {
     if (List.isEmpty(links)) return Future.right(counter)
 
-    const posts = links.map(klkPostFromLink)
+    return pipe(
+      links,
+      List.map(link => {
+        const post = klkPostFromLink(link)
+        return pipe(
+          post.size,
+          Maybe.fold(
+            () =>
+              pipe(
+                ProbeUtils.probeSize(post.url, logger),
+                Future.map(
+                  Maybe.fold(
+                    () => post,
+                    size => KlkPost.Lens.size.set(Maybe.some(size))(post),
+                  ),
+                ),
+              ),
+            _ => Future.right(post),
+          ),
+        )
+      }),
+      List.sequence(Future.taskEitherSeq),
+      Future.chain(posts => addToDb(posts, counter)),
+    )
+  }
+
+  function addToDb(posts: KlkPost[], counter: Counter): Future<Counter> {
     return pipe(
       List.sequence(IO.ioEither)(
         pipe(

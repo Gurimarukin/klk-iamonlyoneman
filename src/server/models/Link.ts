@@ -7,6 +7,7 @@ export namespace Link {
     kind: D.literal('t3'),
     data: D.type({
       id: KlkPostId.codec,
+      post_hint: D.string,
       subreddit_name_prefixed: D.string,
       author: D.string,
       title: D.string,
