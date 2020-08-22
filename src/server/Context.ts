@@ -9,7 +9,6 @@ import { Route } from './models/Route'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
 import { Routes } from './routes/Routes'
 import { KlkPostService } from './services/KlkPostService'
-import { KlkSearchService } from './services/KlkSearchService'
 import { PartialLogger } from './services/Logger'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -43,9 +42,7 @@ export function Context(config: Config) {
 
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
 
-  const klkSearchService = KlkSearchService(Logger)
-
-  const klkPostService = KlkPostService(Logger, klkPostPersistence, klkSearchService)
+  const klkPostService = KlkPostService(Logger, klkPostPersistence)
 
   const klkPostController = KlkPostController(Logger, klkPostService)
 

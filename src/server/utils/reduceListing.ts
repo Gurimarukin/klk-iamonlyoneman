@@ -1,39 +1,37 @@
-import { AxiosInstance, AxiosRequestConfig } from 'axios'
+import Axios from 'axios'
 import * as D from 'io-ts/lib/Decoder'
-import { Lens as MLens } from 'monocle-ts'
 import querystring from 'querystring'
 
 import { Dict, Either, Future, IO, List, Maybe, flow, pipe } from '../../shared/utils/fp'
 
 import { StringUtils } from '../../shared/utils/StringUtils'
 
+import { AxiosConfig } from '../models/AxiosConfig'
 import { AxiRes } from '../models/AxiRes'
 import { Listing, UnknownListing } from '../models/Listing'
 import { Logger } from '../services/Logger'
 
-namespace AxiosRequestConfig {
-  export namespace Lens {
-    export const after: MLens<AxiosRequestConfig, string> = MLens.fromPath<AxiosRequestConfig>()([
-      'params',
-      'after',
-    ])
-
-    export const count: MLens<AxiosRequestConfig, number> = MLens.fromPath<AxiosRequestConfig>()([
-      'params',
-      'count',
-    ])
-  }
-}
-
 export type ReducerAccumulator<A> = Readonly<{
-  distCount: number
   requestsCount: number
+  distCount: number
   accumulator: A
 }>
 
 export namespace ReducerAccumulator {
   export function empty<A>(accumulator: A): ReducerAccumulator<A> {
     return { distCount: 0, requestsCount: 0, accumulator }
+  }
+
+  export function add<A>(
+    acc1: ReducerAccumulator<A>,
+    acc2: ReducerAccumulator<A>,
+    addA: (a1: A, a2: A) => A,
+  ): ReducerAccumulator<A> {
+    return {
+      requestsCount: acc1.requestsCount + acc2.requestsCount,
+      distCount: acc1.distCount + acc2.distCount,
+      accumulator: addA(acc1.accumulator, acc2.accumulator),
+    }
   }
 
   export function modify<A, K extends keyof ReducerAccumulator<A>>(
@@ -50,10 +48,9 @@ export type ReducerReturn<A> = Readonly<{
 }>
 
 // config.params.after and config.params.count will be overriden
-export function reduceListings<A, B>(
+export function reduceListing<A, B>(
   logger: Logger,
-  axiosInstance: AxiosInstance,
-  config: AxiosRequestConfig,
+  config: AxiosConfig,
   decoder: D.Decoder<unknown, A>,
   emptyAccumulator: B,
   foreachListing: (l: Listing<A>, reducerAcc: ReducerAccumulator<B>) => Future<ReducerReturn<B>>,
@@ -73,7 +70,7 @@ export function reduceListings<A, B>(
         )
         return pipe(
           maybe,
-          Maybe.fold<Listing<A>, Future<ReducerAccumulator<B>>>(
+          Maybe.fold(
             () => Future.right(newReducerAcc),
             l => foreachListingAndContinue(newReducerAcc, l),
           ),
@@ -110,7 +107,7 @@ export function reduceListings<A, B>(
     return shouldContinue
       ? pipe(
           listing.data.after,
-          Maybe.fold<string, Future<ReducerAccumulator<B>>>(
+          Maybe.fold(
             () => Future.right(newReducerAcc),
             a => reduceRec(newReducerAcc, a),
           ),
@@ -120,11 +117,11 @@ export function reduceListings<A, B>(
 
   function fetchListing(after?: string, count = 0): Future<Maybe<Listing<A>>> {
     const newConfig = pipe(
-      after === undefined ? config : AxiosRequestConfig.Lens.after.set(after)(config),
-      AxiosRequestConfig.Lens.count.set(count),
+      after === undefined ? config : AxiosConfig.setParam('after', after)(config),
+      AxiosConfig.setParam('count', count.toString()),
     )
     return pipe(
-      Future.apply(() => axiosInstance.request<unknown>(newConfig)),
+      Future.apply(() => Axios.request<unknown>(newConfig)),
       Future.chain(res =>
         pipe(
           Future.fromIOEither(logger.debug(printResponse(res))),

@@ -174,6 +174,10 @@ export type Future<A> = _Task.Task<Try<A>>
 export const Future = {
   ..._TaskEither,
 
+  right: <A>(a: A): Future<A> => _TaskEither.right(a),
+
+  left: <A = never>(e: Error): Future<A> => _TaskEither.left(e),
+
   apply: <A>(f: Lazy<Promise<A>>): Future<A> => Future.tryCatch(f, unknownToError),
 
   unit: _TaskEither.right<Error, void>(undefined),

@@ -1,5 +1,6 @@
-import { metadataFromTitle } from '../../../src/server/models/klkPost/KlkPost'
 import { Maybe } from '../../../src/shared/utils/fp'
+
+import { metadataFromTitle } from '../../../src/server/services/KlkPostService'
 
 describe('metadataFromTitle', () => {
   it('should parse title', () => {

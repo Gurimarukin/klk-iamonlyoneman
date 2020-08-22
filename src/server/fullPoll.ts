@@ -10,7 +10,7 @@ pipe(
     return pipe(
       Future.right(undefined),
       Future.chain(_ => context.ensureIndexes()),
-      Future.chain(_ => context.klkPostService.fullPollKlkSubreddit()),
+      Future.chain(_ => context.klkPostService.fullPoll()),
       Future.recover(e => Future.fromIOEither(logger.error(e))),
       Future.chain(_ => Future.fromIOEither(logger.info('Done'))),
     )
