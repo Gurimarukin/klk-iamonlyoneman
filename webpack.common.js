@@ -43,7 +43,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/client/index.html'),
-      favicon: path.resolve(__dirname, 'src/client/icon.jpg'),
+      favicon: path.resolve(__dirname, 'src/client/img/icon2.png'),
     }),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
