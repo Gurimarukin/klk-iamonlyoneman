@@ -24,7 +24,7 @@ export function KlkPostPersistence(
       collection.ensureIndexes([
         { key: { id: -1 }, unique: true },
         { key: { createdAt: -1 } },
-        { key: { ['metadata.episode' as keyof KlkPost]: -1 } },
+        { key: { episode: -1 } },
       ]),
 
     count: (): Future<number> => collection.count({}),
@@ -34,7 +34,10 @@ export function KlkPostPersistence(
         collection.collection(coll =>
           coll
             .find({})
-            .sort({ 'metadata.episode': 1, createdAt: 1 })
+            .sort([
+              ['episode', 1],
+              ['createdAt', 1],
+            ])
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
