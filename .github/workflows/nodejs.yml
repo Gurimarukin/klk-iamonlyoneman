@@ -28,6 +28,7 @@ jobs:
       uses: Jaid/action-npm-install@v1.2.4
       with: 
         packageManager: pnpm
+    - run: echo "API_HOST=http://localhost:8676" > conf/client/.env
     - run: npm run server-build
     - run: npm run client-build
     - run: npm run lint
