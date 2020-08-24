@@ -1,5 +1,6 @@
 {
   "logLevel": "debug",
+  "isDev": true,
   "port": 8676,
   "allowedOrigins": ["*"],
   "db": {

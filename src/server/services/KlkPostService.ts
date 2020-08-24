@@ -16,6 +16,7 @@ import { RedditSort } from '../models/RedditSort'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
 import { ProbeUtils } from '../utils/ProbeUtils'
 import { ReducerAccumulator, ReducerReturn, reduceListing } from '../utils/reduceListing'
+import { Config } from '../config/Config'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
@@ -72,7 +73,11 @@ const searchLimit = 100
 const defaultSort: RedditSort = 'new'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPostPersistence) {
+export function KlkPostService(
+  Logger: PartialLogger,
+  config: Config,
+  klkPostPersistence: KlkPostPersistence,
+) {
   const logger = Logger('KlkPostService')
 
   return {
@@ -88,39 +93,31 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
         ),
       ),
 
-    scheduleRedditPolling: (): Future<void> => {
-      const now = new Date()
-      const tomorrow8am = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8)
-      const untilTomorrow8am = new Date(tomorrow8am.getTime() - now.getTime())
-      return pipe(
-        logger.info(
-          `Scheduling poll: 8am is in ${padded(untilTomorrow8am.getHours())}h${padded(
-            untilTomorrow8am.getMinutes(),
-          )}`,
-        ),
-        IO.chain(_ =>
-          pipe(
-            Future.fromIOEither(setRefreshActivityInterval()),
-            Task.delay(untilTomorrow8am.getTime()),
-            IO.runFuture,
-          ),
-        ),
-        Future.fromIOEither,
-      )
-    },
+    scheduleRedditPolling: (): Future<void> =>
+      pipe(
+        config.isDev ? dailyPoll() : Future.unit,
+        Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
+      ),
 
     findAll: (): Future<KlkPost[]> => klkPostPersistence.findAll(),
   }
 
   function setRefreshActivityInterval(): IO<void> {
+    const now = new Date()
+    const tomorrow8am = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8)
+    const untilTomorrow8am = new Date(tomorrow8am.getTime() - now.getTime())
     return pipe(
-      IO.apply(() =>
-        setInterval(
-          () => pipe(uIamonlyonemanPoll({ fullPoll: false, allSort: false }), Future.runUnsafe),
-          pollRedditEvery,
-        ),
+      logger.info(
+        `Scheduling poll: 8am is in ${padded(untilTomorrow8am.getHours())}h${padded(
+          untilTomorrow8am.getMinutes(),
+        )}`,
       ),
-      IO.map(_ => {}),
+      IO.chain(_ =>
+        IO.apply(() => setInterval(() => pipe(dailyPoll(), Future.runUnsafe), pollRedditEvery)),
+      ),
+      Future.fromIOEither,
+      Task.delay(untilTomorrow8am.getTime()),
+      IO.runFuture,
     )
   }
 
@@ -150,6 +147,10 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
         ),
       ),
     )
+  }
+
+  function dailyPoll(): Future<ReducerAccumulator<Counter>> {
+    return uIamonlyonemanPoll({ fullPoll: false, allSort: false })
   }
 
   function fullPoll(): Future<void> {

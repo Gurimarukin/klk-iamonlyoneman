@@ -17,13 +17,6 @@ export function Context(config: Config) {
   const logger = Logger('Context')
 
   const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
-  // const collections: Promise<MongoClient[]> = pipe(
-  //   List.makeBy(10, _ => 0),
-  //   List.map(_ => Future.apply(() => new MongoClient(url, { useUnifiedTopology: true })
-  // .connect())),
-  //   List.sequence(Future.taskEither),
-  //   Future.runUnsafe,
-  // )
   const mongoCollection = (coll: string) => <A>(f: (coll: Collection) => Promise<A>): Future<A> =>
     pipe(
       Future.apply(() => new MongoClient(url, { useUnifiedTopology: true }).connect()),
@@ -42,7 +35,7 @@ export function Context(config: Config) {
 
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
 
-  const klkPostService = KlkPostService(Logger, klkPostPersistence)
+  const klkPostService = KlkPostService(Logger, config, klkPostPersistence)
 
   const klkPostController = KlkPostController(Logger, klkPostService)
 
