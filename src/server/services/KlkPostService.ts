@@ -95,12 +95,7 @@ export function KlkPostService(
 
     scheduleRedditPolling: (): Future<void> =>
       pipe(
-        config.isDev
-          ? pipe(
-              dailyPoll(),
-              Future.map(_ => {}),
-            )
-          : Future.unit,
+        config.isDev ? dailyPoll() : Future.unit,
         Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 
@@ -118,11 +113,13 @@ export function KlkPostService(
         )}`,
       ),
       IO.chain(_ =>
-        IO.apply(() => setInterval(() => pipe(dailyPoll(), Future.runUnsafe), pollRedditEvery)),
+        pipe(
+          IO.apply(() => setInterval(() => pipe(dailyPoll(), Future.runUnsafe), pollRedditEvery)),
+          Future.fromIOEither,
+          Task.delay(untilTomorrow8am.getTime()),
+          IO.runFuture,
+        ),
       ),
-      Future.fromIOEither,
-      Task.delay(untilTomorrow8am.getTime()),
-      IO.runFuture,
     )
   }
 
@@ -154,15 +151,19 @@ export function KlkPostService(
     )
   }
 
-  function dailyPoll(): Future<ReducerAccumulator<Counter>> {
-    return uIamonlyonemanPoll({ fullPoll: false, allSort: false })
+  function dailyPoll(): Future<void> {
+    return logPoll(uIamonlyonemanPoll({ fullPoll: false, allSort: false }))
   }
 
   function fullPoll(): Future<void> {
     const opts = { fullPoll: true, allSort: true }
+    return logPoll(reduceMultipleListing([rKillLaKillPoll(opts), uIamonlyonemanPoll(opts)]))
+  }
+
+  function logPoll(f: Future<ReducerAccumulator<Counter>>): Future<void> {
     return pipe(
       Future.fromIOEither(logger.info('Start polling')),
-      Future.chain(_ => reduceMultipleListing([rKillLaKillPoll(opts), uIamonlyonemanPoll(opts)])),
+      Future.chain(_ => f),
       Future.chain(({ requestsCount, accumulator: c }) =>
         Future.fromIOEither(
           logger.info(
