@@ -2,13 +2,10 @@ import styled from '@emotion/styled'
 import React from 'react'
 import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 
-import { Maybe, pipe } from '../../shared/utils/fp'
-
-import { KlkPost } from '../../shared/models/klkPost/KlkPost'
-import { Size } from '../../shared/models/klkPost/Size'
-
-import { Question } from './svgs'
-import { theme } from '../utils/theme'
+import { KlkPost } from '../../../shared/models/klkPost/KlkPost'
+import { Size } from '../../../shared/models/klkPost/Size'
+import { Maybe, pipe } from '../../../shared/utils/fp'
+import { theme } from '../../utils/theme'
 
 type Props = Readonly<{
   scrollPosition: ScrollPosition
@@ -36,7 +33,7 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
         {...size}
       />
       <TitleContainer style={{ width: size.width }}>
-        <StyledQuestion /> {post.title}
+        {post.title}
         <div className={DETAIL}>
           <span>{post.createdAt.toLocaleString()}</span>
           <Links>
@@ -54,6 +51,8 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
   )
 }
 
+const imgBorderRadius = '4px'
+
 const Container = styled.div({
   flexShrink: 0,
   margin: `${theme.Gallery.margin}px 0`,
@@ -63,6 +62,8 @@ const Container = styled.div({
   [`& .${PLACEHOLDER}`]: {
     display: 'flex',
     background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
+    overflow: 'hidden',
+    borderRadius: imgBorderRadius,
   },
 })
 
@@ -72,7 +73,7 @@ const StyledImage = styled(LazyLoadImage)({
 
 const TitleContainer = styled.span({
   padding: '0.3em 0',
-  textShadow: '-1px -1px 4px black, 1px -1px 4px black, -1px 1px 4px black, 1px 1px 4px black',
+  textShadow: '-1px -1px 1px black, 1px -1px 1px black, -1px 1px 1px black, 1px 1px 1px black',
   position: 'relative',
 
   [`& .${DETAIL}`]: {
@@ -82,35 +83,30 @@ const TitleContainer = styled.span({
     flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
-    padding: '0.67em',
+    padding: '0.67em 0.67em 0.33em',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    textShadow: '2px 2px 0 black',
+    textShadow: '1px 1px 0 black',
+    overflow: 'hidden',
+    borderRadius: `0 0 ${imgBorderRadius} ${imgBorderRadius}`,
     opacity: 0,
     filter: 'blur(10px)',
-    visibility: 'hidden',
     transition: 'all 0.3s',
   },
 
   [`&:hover .${DETAIL}`]: {
     opacity: 1,
     filter: 'blur(0)',
-    visibility: 'visible',
   },
 })
 
-const StyledQuestion = styled(Question)({
-  verticalAlign: 'sub',
-  marginRight: '0.33em',
-  filter: 'drop-shadow(2px 2px 4px black) drop-shadow(-2px -2px 4px black)',
-})
-
 const Links = styled.nav({
-  marginTop: '0.67em',
+  marginTop: '0.33em',
 })
 
 const StyledA = styled.a({
+  display: 'inline-block',
   color: 'inherit',
-  padding: '0.3em',
+  padding: '0.4em 0.3em',
   margin: '0 0.3em',
   borderRadius: '2px',
   transition: 'all 0.3s',

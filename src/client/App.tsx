@@ -1,24 +1,33 @@
 import styled from '@emotion/styled'
-import React, { useMemo } from 'react'
-import { ScrollPosition, trackWindowScroll } from 'react-lazy-load-image-component'
-
-import { pipe } from '../shared/utils/fp'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
+import { trackWindowScroll } from 'react-lazy-load-image-component'
 
 import { KlkPosts } from '../shared/models/klkPost/KlkPost'
-
+import { pipe } from '../shared/utils/fp'
 import { ABlank } from './components/ABlank'
-import { Gallery } from './components/Gallery'
+import { HistoryContext } from './contexts/HistoryContext'
+import baloopaaji2BoldTTF from './fonts/baloopaaji2-bold.ttf'
+import baloopaaji2TTF from './fonts/baloopaaji2.ttf'
 import { useAsyncState } from './hooks/useAsyncState'
 import { AsyncState } from './models/AsyncState'
+import { Gallery } from './pages/home/Gallery'
+import { Router } from './Router'
 import { Config } from './utils/Config'
 import { Http } from './utils/Http'
-import { theme } from './utils/theme'
 
-type Props = Readonly<{
-  scrollPosition: ScrollPosition
-}>
+export const App = (): JSX.Element => {
+  const history = useContext(HistoryContext)
+  const [path, setPath] = useState(history.location.pathname)
+  useEffect(() => history.listen(location => setPath(location.location.pathname)), [history])
 
-export const App = trackWindowScroll(
+  return (
+    <Container>
+      <Router path={path} />
+    </Container>
+  )
+}
+
+export const PouaApp = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
     const future = useMemo(
       () => Http.get(`${Config.apiHost}/api/klk-posts`, KlkPosts.codec.decode),
@@ -58,14 +67,33 @@ export const App = trackWindowScroll(
   },
 )
 
-const Container = styled.div({
-  height: '100vh',
-  overflow: 'auto scroll',
-  fontFamily: 'monospace',
-  fontSize: '14px',
-  color: 'white',
-  background: `linear-gradient(0deg, ${theme.colors.black} 0%, ${theme.colors.darkblue} 33%, ${theme.colors.darkred} 67%, ${theme.colors.black} 100%)`,
-})
+export const fontFamily = {
+  baloopaaji2: 'baloopaaji2',
+}
+
+const Container = styled.div(
+  {
+    '@font-face': {
+      fontFamily: fontFamily.baloopaaji2,
+      src: `url('${baloopaaji2TTF}')`,
+      fontWeight: 'normal',
+    },
+  },
+  {
+    '@font-face': {
+      fontFamily: fontFamily.baloopaaji2,
+      src: `url('${baloopaaji2BoldTTF}')`,
+      fontWeight: 'bold',
+    },
+  },
+  {
+    overflow: 'auto auto',
+    fontFamily: fontFamily.baloopaaji2,
+    fontSize: '16px',
+    letterSpacing: '0.04em',
+    color: 'white',
+  },
+)
 
 const Header = styled.header({
   display: 'flex',

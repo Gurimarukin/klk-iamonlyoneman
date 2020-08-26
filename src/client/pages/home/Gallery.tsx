@@ -2,22 +2,20 @@ import styled from '@emotion/styled'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollPosition } from 'react-lazy-load-image-component'
 
-import { Maybe, pipe } from '../../shared/utils/fp'
-
-import { KlkPosts } from '../../shared/models/klkPost/KlkPost'
-import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
-import { Size } from '../../shared/models/klkPost/Size'
-
+import { KlkPosts } from '../../../shared/models/klkPost/KlkPost'
+import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
+import { Size } from '../../../shared/models/klkPost/Size'
+import { Maybe, pipe } from '../../../shared/utils/fp'
+import { useMaybeRef } from '../../hooks/useMaybeRef'
+import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
-import { useMaybeRef } from '../hooks/useMaybeRef'
-import { theme } from '../utils/theme'
 
 type Props = Readonly<{
   klkPosts: KlkPosts
   scrollPosition: ScrollPosition
 }>
 
-export const Gallery = ({ klkPosts, scrollPosition }: Props): JSX.Element => {
+export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {
   const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
 
   const getMaxDimension = useCallback(
@@ -72,7 +70,8 @@ export const Gallery = ({ klkPosts, scrollPosition }: Props): JSX.Element => {
   )
 
   return (
-    <StyledContainer ref={onMount}>
+    <Container ref={onMount}>
+      {children}
       {klkPosts.map(_ => (
         <ImageWithDetail
           key={KlkPostId.unwrap(_.id)}
@@ -81,7 +80,7 @@ export const Gallery = ({ klkPosts, scrollPosition }: Props): JSX.Element => {
           post={_}
         />
       ))}
-    </StyledContainer>
+    </Container>
   )
 }
 
@@ -93,7 +92,9 @@ function heightFromWidth({ width, height }: Size, newWidth: number): number {
   return (height * newWidth) / width
 }
 
-const StyledContainer = styled.div({
+const Container = styled.div({
+  height: '100%',
+  overflowY: 'auto',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-around',

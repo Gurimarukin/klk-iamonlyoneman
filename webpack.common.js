@@ -34,6 +34,18 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.(ttf|otf|woff|woff2|eot|svg|png|jpg|jpeg|ico|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name]-[hash].[ext]',
+              outputPath: 'assets/',
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
