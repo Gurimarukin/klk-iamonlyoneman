@@ -1,14 +1,12 @@
 import { Predicate } from 'fp-ts/lib/function'
 import { Lens as MonocleLens } from 'monocle-ts'
 
-import { Do, Future, IO, List, Maybe, Task, pipe } from '../../shared/utils/fp'
-
 import { KlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
+import { Do, Future, IO, List, Maybe, Task, pipe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
-
-import { PartialLogger } from './Logger'
+import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
@@ -16,7 +14,7 @@ import { RedditSort } from '../models/RedditSort'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
 import { ProbeUtils } from '../utils/ProbeUtils'
 import { ReducerAccumulator, ReducerReturn, reduceListing } from '../utils/reduceListing'
-import { Config } from '../config/Config'
+import { PartialLogger } from './Logger'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
@@ -116,6 +114,7 @@ export function KlkPostService(
         pipe(
           IO.apply(() => setInterval(() => pipe(dailyPoll(), Future.runUnsafe), pollRedditEvery)),
           Future.fromIOEither,
+          Future.chain(_ => dailyPoll()),
           Task.delay(untilTomorrow8am.getTime()),
           IO.runFuture,
         ),
