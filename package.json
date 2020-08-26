@@ -60,6 +60,7 @@
     "fp-ts-contrib": "^0.1.17",
     "html-webpack-plugin": "^4.3.0",
     "hyper-ts": "^0.6.0",
+    "import-sort-parser-typescript": "^6.0.0",
     "io-ts": "^2.2.9",
     "jest": "^26.4.0",
     "mongodb": "^3.6.0",
@@ -80,5 +81,11 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.1.1"
+  },
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "module",
+      "parser": "typescript"
+    }
   }
 }

@@ -4,12 +4,13 @@ import { Lens as MonocleLens } from 'monocle-ts'
 import { KlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Do, Future, IO, List, Maybe, Task, pipe } from '../../shared/utils/fp'
+import { Do, Future, IO, List, Maybe, pipe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
+import { MsDuration } from '../models/MsDuration'
 import { RedditSort } from '../models/RedditSort'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
 import { ProbeUtils } from '../utils/ProbeUtils'
@@ -58,9 +59,9 @@ namespace Counter {
   }
 }
 
-const pollRedditEvery = 24 * 60 * 60 * 1000 // ms
+const pollRedditEvery = MsDuration.days(1)
 
-const delayBetweenPolls = 1000 // ms
+const delayBetweenPolls = MsDuration.seconds(1)
 
 const redditDotCom = 'https://reddit.com'
 // const userAgent = 'browser:klk-iamonlyoneman:v1.0.0 (by /u/Grimalkin8675)'
@@ -112,10 +113,15 @@ export function KlkPostService(
       ),
       IO.chain(_ =>
         pipe(
-          IO.apply(() => setInterval(() => pipe(dailyPoll(), Future.runUnsafe), pollRedditEvery)),
+          IO.apply(() =>
+            setInterval(
+              () => pipe(dailyPoll(), Future.runUnsafe),
+              MsDuration.unwrap(pollRedditEvery),
+            ),
+          ),
           Future.fromIOEither,
           Future.chain(_ => dailyPoll()),
-          Task.delay(untilTomorrow8am.getTime()),
+          Future.delay(MsDuration.wrap(untilTomorrow8am.getTime())),
           IO.runFuture,
         ),
       ),
@@ -255,7 +261,7 @@ export function KlkPostService(
       List.reduce(Future.right(ReducerAccumulator.empty(Counter.empty)), (acc, f) =>
         pipe(
           acc,
-          Task.delay(delayBetweenPolls),
+          Future.delay(delayBetweenPolls),
           Future.chain(acc1 =>
             pipe(
               f,
@@ -310,7 +316,7 @@ export function KlkPostService(
             const shouldContinue = fullPoll || List.isEmpty(alreadyInDb)
             return pipe(
               Future.right({ shouldContinue, accumulator: newAcc }),
-              Task.delay(delayBetweenPolls),
+              Future.delay(delayBetweenPolls),
             )
           }),
         )

@@ -1,12 +1,6 @@
+import { Do as _Do } from 'fp-ts-contrib/lib/Do'
 import * as _Array from 'fp-ts/lib/Array'
-import * as _NonEmptyArray from 'fp-ts/lib/NonEmptyArray'
-import * as _Record from 'fp-ts/lib/Record'
-import * as _Option from 'fp-ts/lib/Option'
 import * as _Either from 'fp-ts/lib/Either'
-import * as _Task from 'fp-ts/lib/Task'
-import * as _TaskEither from 'fp-ts/lib/TaskEither'
-import * as _IO from 'fp-ts/lib/IO'
-import * as _IOEither from 'fp-ts/lib/IOEither'
 import {
   Lazy,
   Predicate,
@@ -14,13 +8,19 @@ import {
   identity as _identity,
   not as _not,
 } from 'fp-ts/lib/function'
+import * as _IO from 'fp-ts/lib/IO'
+import * as _IOEither from 'fp-ts/lib/IOEither'
+import * as _NonEmptyArray from 'fp-ts/lib/NonEmptyArray'
+import * as _Option from 'fp-ts/lib/Option'
 import { pipe as _pipe } from 'fp-ts/lib/pipeable'
-
+import * as _Record from 'fp-ts/lib/Record'
+import * as _Task from 'fp-ts/lib/Task'
+import * as _TaskEither from 'fp-ts/lib/TaskEither'
 import * as C from 'io-ts/lib/Codec'
 import * as D from 'io-ts/lib/Decoder'
 import * as E from 'io-ts/lib/Encoder'
 
-import { Do as _Do } from 'fp-ts-contrib/lib/Do'
+import { MsDuration } from '../../server/models/MsDuration'
 
 export const unknownToError = (e: unknown): Error =>
   e instanceof Error ? e : new Error('unknown error')
@@ -197,6 +197,9 @@ export const Future = {
     ),
 
   runUnsafe: <A>(future: Future<A>): Promise<A> => _pipe(future, _Task.map(Try.get))(),
+
+  delay: <A>(ms: MsDuration) => (future: Future<A>): Future<A> =>
+    _pipe(future, _Task.delay(MsDuration.unwrap(ms))),
 }
 
 /**

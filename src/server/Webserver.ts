@@ -1,7 +1,8 @@
+import { Server } from 'http'
+
 import express, { ErrorRequestHandler } from 'express'
 import * as H from 'hyper-ts'
 import { Action, ExpressConnection, toArray, toRequestHandler } from 'hyper-ts/lib/express'
-import { Server } from 'http'
 
 import {
   Dict,
@@ -16,7 +17,6 @@ import {
   flow,
   pipe,
 } from '../shared/utils/fp'
-
 import { Config } from './config/Config'
 import { EndedMiddleware } from './models/EndedMiddleware'
 import { Route } from './models/Route'
@@ -87,7 +87,7 @@ export const startWebServer = (
     return conn =>
       Do(Task.task)
         .bind('res', middleware(conn))
-        .bindL('_', ({ res }) =>
+        .doL(({ res }) =>
           pipe(
             res,
             Either.fold(
