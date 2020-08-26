@@ -1,17 +1,18 @@
 import styled from '@emotion/styled'
 import React from 'react'
 
+import { GradientContainer } from '../components/GradientContainer'
 import { Link } from '../components/Link'
 import { routes } from '../Router'
 
 export const NotFound = (): JSX.Element => (
   <Container>
-    <span>PAGE NOT FOUND.</span>
+    <StyledH3>Page not found</StyledH3>
     <StyledLink to={routes.home}>home</StyledLink>
   </Container>
 )
 
-const Container = styled.div({
+const Container = styled(GradientContainer)({
   height: '100vh',
   display: 'flex',
   flexDirection: 'column',
@@ -19,7 +20,12 @@ const Container = styled.div({
   alignItems: 'center',
 })
 
+const StyledH3 = styled.h3({
+  fontSize: '1.8em',
+})
+
 const StyledLink = styled(Link)({
   color: 'inherit',
-  marginTop: '0.67em',
+  fontSize: '1.2em',
+  marginTop: '3em',
 })

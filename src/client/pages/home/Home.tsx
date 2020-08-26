@@ -3,9 +3,9 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import React from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
 
+import { GradientContainer } from '../../components/GradientContainer'
 import { useAsyncState } from '../../hooks/useAsyncState'
 import { AsyncState } from '../../models/AsyncState'
-import { theme } from '../../utils/theme'
 import { Gallery } from './Gallery'
 import { getKlkPosts } from './klkPostsApi'
 
@@ -27,9 +27,8 @@ export const Home = trackWindowScroll(
   },
 )
 
-const Container = styled.div({
+const Container = styled(GradientContainer)({
   height: '100vh',
-  background: `linear-gradient(0deg, ${theme.colors.black} 0%, ${theme.colors.darkblue} 33%, ${theme.colors.darkred} 67%, ${theme.colors.black} 100%)`,
 })
 
 const LoadingOrError = styled.div({
