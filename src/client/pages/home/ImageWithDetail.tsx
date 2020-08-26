@@ -62,14 +62,13 @@ const Container = styled.div({
   [`& .${PLACEHOLDER}`]: {
     display: 'flex',
     background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
+    boxShadow: '0 0 8px black',
     overflow: 'hidden',
     borderRadius: imgBorderRadius,
   },
 })
 
-const StyledImage = styled(LazyLoadImage)({
-  boxShadow: '0 0 8px black',
-})
+const StyledImage = styled(LazyLoadImage)({})
 
 const TitleContainer = styled.span({
   padding: '0.3em 0',
