@@ -23,7 +23,6 @@ export const Home = trackWindowScroll(
 
     const [ref, mountRef] = useMaybeRef<HTMLElement>()
     const scrollToTop = useCallback((): void => {
-      console.log('ref.current =', ref.current)
       pipe(
         ref.current,
         Maybe.map(e => e.scrollIntoView({ behavior: 'smooth' })),
@@ -40,7 +39,7 @@ export const Home = trackWindowScroll(
             onFailure: _ => <LoadingOrError>error</LoadingOrError>,
             onSuccess: klkPosts => (
               <>
-                <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} />
+                <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} headerRef={ref} />
                 {List.isEmpty(klkPosts) ? null : (
                   <ScrollToTop onClick={scrollToTop} title='Scroll to top'>
                     <ChevronUp />

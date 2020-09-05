@@ -47,7 +47,6 @@ export const Header = forwardRef<HTMLElement>(
 const StyledHeader = styled.header({
   background: `linear-gradient(135deg, ${theme.colors.darklila} 0%, ${theme.colors.lila} 100%)`,
   color: theme.colors.white,
-  marginBottom: theme.spacing.large,
   boxShadow: theme.boxShadow,
   padding: '0.67em',
   fontWeight: 'bold',

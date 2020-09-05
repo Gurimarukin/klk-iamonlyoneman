@@ -13,9 +13,10 @@ import { ImageWithDetail } from './ImageWithDetail'
 type Props = Readonly<{
   klkPosts: KlkPosts
   scrollPosition: ScrollPosition
+  headerRef: React.MutableRefObject<Maybe<HTMLElement>>
 }>
 
-export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {
+export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, headerRef, children }) => {
   const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
 
   const getMaxDimension = useCallback(
@@ -34,22 +35,20 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
   )
 
   const [[maxWidth, maxHeight], setMaxDimensions] = useState<[number, number]>(getMaxDimension)
-  const updateMaxDimensions = useCallback((): void => setMaxDimensions(getMaxDimension()), [
-    getMaxDimension,
-  ])
+  const onResize = useCallback((): void => setMaxDimensions(getMaxDimension()), [getMaxDimension])
 
   const onMount = useCallback(
     (elt: HTMLDivElement | null) => {
       mountRef(elt)
-      updateMaxDimensions()
+      onResize()
     },
-    [mountRef, updateMaxDimensions],
+    [mountRef, onResize],
   )
 
   useEffect(() => {
-    window.addEventListener('resize', updateMaxDimensions)
-    return () => window.removeEventListener('resize', updateMaxDimensions)
-  }, [updateMaxDimensions])
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [onResize])
 
   const resizeImg = useCallback(
     (size: Size): Size => {
@@ -70,7 +69,22 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
   )
 
   return (
-    <Container ref={onMount} style={List.isEmpty(klkPosts) ? {} : { height: '100%' }}>
+    <Container
+      ref={onMount}
+      style={
+        List.isEmpty(klkPosts)
+          ? {}
+          : {
+              height: pipe(
+                headerRef.current,
+                Maybe.fold(
+                  () => '100%',
+                  e => `calc(100% - ${e.clientHeight}px)`,
+                ),
+              ),
+            }
+      }
+    >
       {children}
       {List.isEmpty(klkPosts)
         ? 'no result.'
@@ -99,5 +113,6 @@ const Container = styled.div({
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
-  paddingBottom: `${theme.Gallery.margin}px`,
+  paddingTop: theme.spacing.large,
+  paddingBottom: theme.Gallery.margin,
 })
