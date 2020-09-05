@@ -1,11 +1,12 @@
-import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
+import { PartialKlkPostQuery, Sort } from '../../shared/models/PartialKlkPostQuery'
 import { Maybe } from '../../shared/utils/fp'
 
 export namespace KlkPostsQuery {
   export const fromPartial = (partial: PartialKlkPostQuery): KlkPostsQuery => {
     const episode = Maybe.fromNullable(partial.episode)
     const search = Maybe.fromNullable(partial.search)
-    const sort = partial.sort !== undefined ? partial.sort : Maybe.isSome(episode) ? 'old' : 'new'
+    const sort =
+      partial.sort !== undefined ? partial.sort : PartialKlkPostQuery.defaultSort(episode)
     return { episode, search, sort }
   }
 }
@@ -13,5 +14,5 @@ export namespace KlkPostsQuery {
 export type KlkPostsQuery = Readonly<{
   episode: Maybe<Maybe<number>>
   search: Maybe<string>
-  sort: 'new' | 'old'
+  sort: Sort
 }>

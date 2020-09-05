@@ -12,12 +12,18 @@ const between1and25 = pipe(
   D.refine((n): n is number => n <= 25, 'lower or equal to 25'),
 )
 
+export const Sort = D.union(D.literal('new'), D.literal('old'))
+export type Sort = D.TypeOf<typeof Sort>
+
 export namespace PartialKlkPostQuery {
   export const decoder = D.partial({
     episode: Maybe.decoder(between1and25),
     search: D.string,
-    sort: D.union(D.literal('new'), D.literal('old')),
+    sort: Sort,
   })
+
+  export const defaultSort = (episode: Maybe<Maybe<number>>): Sort =>
+    Maybe.isSome(episode) ? 'old' : 'new'
 }
 
 export type PartialKlkPostQuery = D.TypeOf<typeof PartialKlkPostQuery.decoder>
