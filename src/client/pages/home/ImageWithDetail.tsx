@@ -55,7 +55,7 @@ const imgBorderRadius = '4px'
 
 const Container = styled.div({
   flexShrink: 0,
-  margin: `${theme.Gallery.margin}px 0`,
+  margin: `${theme.Gallery.margin}px`,
   display: 'flex',
   flexDirection: 'column',
 
