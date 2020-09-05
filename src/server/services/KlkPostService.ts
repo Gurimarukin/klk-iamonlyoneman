@@ -94,7 +94,7 @@ export function KlkPostService(
 
     scheduleRedditPolling: (): Future<void> =>
       pipe(
-        config.isDev ? dailyPoll() : Future.unit,
+        config.pollOnStart ? dailyPoll() : Future.unit,
         Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 

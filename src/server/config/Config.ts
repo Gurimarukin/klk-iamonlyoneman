@@ -10,6 +10,7 @@ import { ConfReader, ValidatedNea } from './ConfReader'
 export interface Config {
   logLevel: LogLevelOrOff
   isDev: boolean
+  pollOnStart: boolean
   port: number
   allowedOrigins: Maybe<NonEmptyArray<string>>
   db: DbConfig
@@ -18,11 +19,12 @@ export interface Config {
 export function Config(
   logLevel: LogLevelOrOff,
   isDev: boolean,
+  pollOnStart: boolean,
   port: number,
   allowedOrigins: Maybe<NonEmptyArray<string>>,
   db: DbConfig,
 ): Config {
-  return { logLevel, isDev, port, allowedOrigins, db }
+  return { logLevel, isDev, pollOnStart, port, allowedOrigins, db }
 }
 
 export namespace Config {
@@ -45,12 +47,13 @@ function readConfig(reader: ConfReader): ValidatedNea<Config> {
     sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
       reader.read(LogLevelOrOff.decoder)('logLevel'),
       reader.read(D.boolean)('isDev'),
+      reader.read(D.boolean)('pollOnStart'),
       reader.read(D.number)('port'),
       reader.readOpt(NonEmptyArray.decoder(D.string))('allowedOrigins'),
       DbConfig.read(reader),
     ),
-    Either.map(([logLevel, isDev, port, allowedOrigins, db]) =>
-      Config(logLevel, isDev, port, allowedOrigins, db),
+    Either.map(([logLevel, isDev, pollOnStart, port, allowedOrigins, db]) =>
+      Config(logLevel, isDev, pollOnStart, port, allowedOrigins, db),
     ),
   )
 }
