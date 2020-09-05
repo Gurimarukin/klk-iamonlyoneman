@@ -1,5 +1,6 @@
+import { Interpolation } from '@emotion/core'
 import styled from '@emotion/styled'
-import React, { CSSProperties } from 'react'
+import React from 'react'
 
 import { ABlank } from '../components/ABlank'
 import { GradientContainer } from '../components/GradientContainer'
@@ -46,7 +47,7 @@ const StyledA = styled(ABlank)({
   color: 'inherit',
 })
 
-const common: CSSProperties = {
+const common: Interpolation = {
   fontSize: '1.2em',
   marginTop: '3em',
 }
