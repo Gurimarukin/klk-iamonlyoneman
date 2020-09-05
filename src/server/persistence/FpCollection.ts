@@ -27,7 +27,7 @@ import { Logger } from '../services/Logger'
 export type FpCollection = ReturnType<typeof FpCollection>
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function FpCollection<A, O>(
+export function FpCollection<A, O extends { [key: string]: unknown }>(
   logger: Logger,
   collection: <T>(f: (coll: Collection<O>) => Promise<T>) => Future<T>,
   codec: C.Codec<unknown, OptionalId<O>, A>,
@@ -112,7 +112,10 @@ export function FpCollection<A, O>(
 
     count: (filter: FilterQuery<O>): Future<number> => collection(c => c.countDocuments(filter)),
 
-    findOne: (filter: FilterQuery<O>, options?: FindOneOptions): Future<Maybe<A>> =>
+    findOne: <T = O>(
+      filter: FilterQuery<O>,
+      options?: FindOneOptions<T extends O ? O : T>,
+    ): Future<Maybe<A>> =>
       pipe(
         collection(c => c.findOne(filter, options)),
         Future.map(Maybe.fromNullable),
@@ -124,7 +127,10 @@ export function FpCollection<A, O>(
         ),
       ),
 
-    find: (query: FilterQuery<O>, options?: FindOneOptions): Future<Cursor<Either<Error, A>>> =>
+    find: <T = O>(
+      query: FilterQuery<O>,
+      options?: FindOneOptions<T extends O ? O : T>,
+    ): Future<Cursor<Either<Error, A>>> =>
       collection(c =>
         Promise.resolve(
           c.find(query, options).map(flow(codec.decode, Either.mapLeft(decodeError))),
