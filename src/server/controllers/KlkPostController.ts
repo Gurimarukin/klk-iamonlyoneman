@@ -2,24 +2,15 @@ import * as H from 'hyper-ts'
 import * as D from 'io-ts/lib/Decoder'
 
 import { KlkPosts } from '../../shared/models/klkPost/KlkPost'
-import { Maybe, flow, pipe } from '../../shared/utils/fp'
+import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
+import { flow, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
+import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { ControllerUtils } from '../routes/ControllerUtils'
 import { KlkPostService } from '../services/KlkPostService'
 import { PartialLogger } from '../services/Logger'
 
-const between1and25 = pipe(
-  D.string,
-  D.parse(s => {
-    const n = parseInt(s, 10)
-    return isNaN(n) ? D.failure(s, 'number from string') : D.success(n)
-  }),
-  D.refine((n): n is number => 1 <= n, 'greater or equal to 1'),
-  D.refine((n): n is number => n <= 25, 'lower or equal to 25'),
-)
-
-const qEpisode = D.type({ q: D.union(between1and25, D.literal('unknown')) })
-// const qSearch = D.type({ q: D.string })
+const klkPostsQuery = pipe(PartialKlkPostQuery.decoder, D.map(KlkPostsQuery.fromPartial))
 
 export type KlkPostController = ReturnType<typeof KlkPostController>
 
@@ -27,19 +18,15 @@ export type KlkPostController = ReturnType<typeof KlkPostController>
 export function KlkPostController(Logger: PartialLogger, klkPostService: KlkPostService) {
   const logger = Logger('KlkPostController')
 
-  const episode: EndedMiddleware = ControllerUtils.withQuery(qEpisode.decode)(
-    ({ q }) =>
+  const klkPosts: EndedMiddleware = ControllerUtils.withQuery(klkPostsQuery.decode)(
+    query =>
       pipe(
-        q,
-        Maybe.fromPredicate((q): q is number => q !== 'unknown'),
-        klkPostService.findByEpisode,
+        klkPostService.findAll(query),
         H.fromTaskEither,
         H.ichain(posts => EndedMiddleware.json(H.Status.OK)(KlkPosts.codec.encode(posts))),
       ),
     flow(D.draw, logger.debug),
   )
 
-  const search: EndedMiddleware = ControllerUtils.notImplementedYet
-
-  return { episode, search }
+  return { klkPosts }
 }

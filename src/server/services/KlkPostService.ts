@@ -8,6 +8,7 @@ import { Do, Future, IO, List, Maybe, pipe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
+import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
 import { MsDuration } from '../models/MsDuration'
@@ -98,8 +99,7 @@ export function KlkPostService(
         Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 
-    findByEpisode: (episode: Maybe<number>): Future<KlkPost[]> =>
-      klkPostPersistence.findByEpisode(episode),
+    findAll: (query: KlkPostsQuery): Future<KlkPost[]> => klkPostPersistence.findAll(query),
   }
 
   function setRefreshActivityInterval(): IO<void> {

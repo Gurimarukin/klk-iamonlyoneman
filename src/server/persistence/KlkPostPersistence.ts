@@ -1,11 +1,15 @@
-import { Collection } from 'mongodb'
+import * as C from 'io-ts/lib/Codec'
+import { Collection, Cursor, FilterQuery } from 'mongodb'
 
 import { KlkPost, OnlyWithIdAndUrlKlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 import { Either, Future, List, Maybe, Task, flow, pipe } from '../../shared/utils/fp'
+import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
 import { FpCollection, decodeError } from './FpCollection'
+
+const limitIfNoEpisode = 100
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
@@ -17,25 +21,23 @@ export function KlkPostPersistence(
   const logger = Logger('KlkPostPersistence')
   const collection = FpCollection(logger, mongoCollection('klkPost'), KlkPost.codec)
 
+  type OutputType = C.OutputOf<typeof KlkPost.codec>
+
   return {
     ensureIndexes: (): Future<void> =>
       collection.ensureIndexes([
         { key: { id: -1 }, unique: true },
         { key: { createdAt: -1 } },
         { key: { episode: -1 } },
+        { key: { title: 'text' } },
       ]),
 
     count: (): Future<number> => collection.count({}),
 
-    findByEpisode: (episode: Maybe<number>): Future<KlkPost[]> =>
+    findAll: (query: KlkPostsQuery): Future<KlkPost[]> =>
       pipe(
         collection.collection(coll =>
-          coll
-            .find({ episode: Maybe.toNullable(episode) })
-            .sort([
-              ['episode', 1],
-              ['createdAt', 1],
-            ])
+          cursorFromQueryParams(query, coll)
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
@@ -84,5 +86,36 @@ export function KlkPostPersistence(
         collection.updateOne({ id }, post, { upsert: true }),
         Future.map(_ => _.modifiedCount + _.upsertedCount === 1),
       ),
+  }
+
+  function cursorFromQueryParams(
+    { episode, search, sort }: KlkPostsQuery,
+    coll: Collection<OutputType>,
+  ): Cursor<OutputType> {
+    const find = coll.find({
+      ...foldRecord(episode, e => ({ episode: Maybe.toNullable(e) })),
+      ...foldRecord(search, s => ({ $text: { $search: s } })),
+    })
+
+    const sorted = (() => {
+      switch (sort) {
+        case 'new':
+          return find.sort([['createdAt', -1]])
+        case 'old':
+          return find.sort([['createdAt', 1]])
+      }
+    })()
+
+    return Maybe.isNone(episode) ? sorted.limit(limitIfNoEpisode) : sorted
+  }
+
+  function foldRecord<A, B>(
+    maybe: Maybe<A>,
+    f: (a: A) => FilterQuery<OutputType>,
+  ): FilterQuery<OutputType> {
+    return pipe(
+      maybe,
+      Maybe.fold(() => ({}), f),
+    )
   }
 }

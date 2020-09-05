@@ -2,9 +2,8 @@ import * as C from 'io-ts/lib/Codec'
 import { Lens as MLens } from 'monocle-ts'
 
 import { Maybe, pipe } from '../../utils/fp'
-
-import { KlkPostId } from './KlkPostId'
 import { DateFromISOString } from '../DateFromISOString'
+import { KlkPostId } from './KlkPostId'
 import { Size } from './Size'
 
 // KlkPost
