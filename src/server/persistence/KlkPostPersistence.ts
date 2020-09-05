@@ -1,13 +1,11 @@
 import { Collection } from 'mongodb'
 
-import { Either, Future, List, Task, flow, pipe } from '../../shared/utils/fp'
-
 import { KlkPost, OnlyWithIdAndUrlKlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-
-import { FpCollection, decodeError } from './FpCollection'
+import { Either, Future, List, Maybe, Task, flow, pipe } from '../../shared/utils/fp'
 import { PartialLogger } from '../services/Logger'
+import { FpCollection, decodeError } from './FpCollection'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
@@ -29,11 +27,11 @@ export function KlkPostPersistence(
 
     count: (): Future<number> => collection.count({}),
 
-    findAll: (): Future<KlkPost[]> =>
+    findByEpisode: (episode: Maybe<number>): Future<KlkPost[]> =>
       pipe(
         collection.collection(coll =>
           coll
-            .find({})
+            .find({ episode: Maybe.toNullable(episode) })
             .sort([
               ['episode', 1],
               ['createdAt', 1],

@@ -98,7 +98,8 @@ export function KlkPostService(
         Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 
-    findAll: (): Future<KlkPost[]> => klkPostPersistence.findAll(),
+    findByEpisode: (episode: Maybe<number>): Future<KlkPost[]> =>
+      klkPostPersistence.findByEpisode(episode),
   }
 
   function setRefreshActivityInterval(): IO<void> {

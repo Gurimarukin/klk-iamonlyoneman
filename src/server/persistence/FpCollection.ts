@@ -20,7 +20,6 @@ import {
 } from 'mongodb'
 
 import { Either, Future, Maybe, flow, pipe } from '../../shared/utils/fp'
-
 import { IndexSpecification } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'
 
