@@ -1,4 +1,3 @@
-import { Interpolation } from '@emotion/core'
 import styled from '@emotion/styled'
 import React from 'react'
 
@@ -47,7 +46,7 @@ const StyledA = styled(ABlank)({
   color: 'inherit',
 })
 
-const common: Interpolation = {
+const common = {
   fontSize: '1.2em',
   marginTop: '3em',
 }
