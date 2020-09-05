@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import React, { useCallback } from 'react'
+import React, { forwardRef, useCallback } from 'react'
 
 import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
 import { List } from '../../../shared/utils/fp'
@@ -11,36 +11,38 @@ import { theme } from '../../utils/theme'
 
 const SELECTED = 'selected'
 
-export const Header = (): JSX.Element => {
-  const query = useKlkPostsQuery()
-  const homeLink = useCallback(
-    (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => (
-      <StyledLink
-        key={key}
-        to={routes.home(toQuery)}
-        className={toQuery.episode === query.episode ? SELECTED : undefined}
-      >
-        {label}
-      </StyledLink>
-    ),
-    [query.episode],
-  )
-  return (
-    <StyledHeader>
-      <StyledNav>
-        {homeLink({}, 'new')}
-        <EpisodesContainer>
-          <EpisodesTitle>Episodes:</EpisodesTitle>
-          <Episodes>
-            {List.range(1, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
-            {homeLink({ episode: EpisodeNumber.unknown }, 'unknown')}
-          </Episodes>
-        </EpisodesContainer>
-        <StyledLink to={routes.about}>about</StyledLink>
-      </StyledNav>
-    </StyledHeader>
-  )
-}
+export const Header = forwardRef<HTMLElement>(
+  ({}, ref): JSX.Element => {
+    const query = useKlkPostsQuery()
+    const homeLink = useCallback(
+      (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => (
+        <StyledLink
+          key={key}
+          to={routes.home(toQuery)}
+          className={toQuery.episode === query.episode ? SELECTED : undefined}
+        >
+          {label}
+        </StyledLink>
+      ),
+      [query.episode],
+    )
+    return (
+      <StyledHeader ref={ref}>
+        <StyledNav>
+          {homeLink({}, 'newest')}
+          <EpisodesContainer>
+            <EpisodesTitle>Episodes:</EpisodesTitle>
+            <Episodes>
+              {List.range(1, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
+              {homeLink({ episode: EpisodeNumber.unknown }, 'unknown')}
+            </Episodes>
+          </EpisodesContainer>
+          <StyledLink to={routes.about}>about</StyledLink>
+        </StyledNav>
+      </StyledHeader>
+    )
+  },
+)
 
 const StyledHeader = styled.header({
   background: `linear-gradient(135deg, ${theme.colors.darklila} 0%, ${theme.colors.lila} 100%)`,
