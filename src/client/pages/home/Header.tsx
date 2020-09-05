@@ -79,7 +79,7 @@ const EpisodesContainer = styled.div({
   '&::after': {
     content: `''`,
     position: 'absolute',
-    right: 2,
+    right: 1,
     top: -2,
     height: '100%',
     borderRight: `1px solid ${theme.colors.ocre}`,
