@@ -30,6 +30,11 @@
     "url": "https://github.com/gurimarukin/klk-iamonlyoneman/issues"
   },
   "homepage": "https://github.com/gurimarukin/klk-iamonlyoneman#readme",
+  "nodemonConfig": {
+    "ignore": [
+      "src/client/*"
+    ]
+  },
   "devDependencies": {
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
@@ -71,6 +76,7 @@
     "nodemon": "^2.0.4",
     "prettier": "^2.1.1",
     "probe-image-size": "^5.0.0",
+    "qs": "^6.9.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-lazy-load-image-component": "^1.5.0",

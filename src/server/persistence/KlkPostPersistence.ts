@@ -4,6 +4,7 @@ import { Collection, Cursor, FilterQuery } from 'mongodb'
 import { KlkPost, OnlyWithIdAndUrlKlkPost } from '../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
+import { EpisodeNumber } from '../../shared/models/PartialKlkPostQuery'
 import { Either, Future, List, Maybe, Task, flow, pipe } from '../../shared/utils/fp'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
@@ -93,7 +94,7 @@ export function KlkPostPersistence(
     coll: Collection<OutputType>,
   ): Cursor<OutputType> {
     const find = coll.find({
-      ...foldRecord(episode, e => ({ episode: Maybe.toNullable(e) })),
+      ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
       ...foldRecord(search, s => ({ $text: { $search: s } })),
     })
 

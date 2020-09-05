@@ -108,9 +108,9 @@ export function KlkPostService(
     const untilTomorrow8am = new Date(tomorrow8am.getTime() - now.getTime())
     return pipe(
       logger.info(
-        `Scheduling poll: 8am is in ${padded(untilTomorrow8am.getHours())}h${padded(
-          untilTomorrow8am.getMinutes(),
-        )}`,
+        `Scheduling poll: 8am is in ${StringUtils.pad10(
+          untilTomorrow8am.getHours(),
+        )}h${StringUtils.pad10(untilTomorrow8am.getMinutes())}`,
       ),
       IO.chain(_ =>
         pipe(
@@ -438,8 +438,4 @@ function printLinkIds(links: Link[]): string {
     StringUtils.mkString(','),
   )
   return `(${links.length}) ${res}`
-}
-
-function padded(n: number): string {
-  return n < 10 ? `0${n}` : `${n}`
 }

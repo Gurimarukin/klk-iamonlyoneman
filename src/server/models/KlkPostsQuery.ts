@@ -1,4 +1,8 @@
-import { PartialKlkPostQuery, Sort } from '../../shared/models/PartialKlkPostQuery'
+import {
+  EpisodeNumber,
+  PartialKlkPostQuery,
+  PostsSort,
+} from '../../shared/models/PartialKlkPostQuery'
 import { Maybe } from '../../shared/utils/fp'
 
 export namespace KlkPostsQuery {
@@ -12,7 +16,7 @@ export namespace KlkPostsQuery {
 }
 
 export type KlkPostsQuery = Readonly<{
-  episode: Maybe<Maybe<number>>
+  episode: Maybe<EpisodeNumber>
   search: Maybe<string>
-  sort: Sort
+  sort: PostsSort
 }>

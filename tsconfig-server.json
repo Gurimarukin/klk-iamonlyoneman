@@ -8,6 +8,7 @@
     "strict": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
+    "strictNullChecks": true,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true

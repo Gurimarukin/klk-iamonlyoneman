@@ -4,11 +4,12 @@ import React from 'react'
 import { GradientContainer } from '../components/GradientContainer'
 import { Link } from '../components/Link'
 import { routes } from '../Router'
+import { theme } from '../utils/theme'
 
 export const NotFound = (): JSX.Element => (
   <Container>
     <StyledH3>Page not found</StyledH3>
-    <StyledLink to={routes.home}>home</StyledLink>
+    <StyledLink to={routes.home()}>home</StyledLink>
   </Container>
 )
 
@@ -28,4 +29,21 @@ const StyledLink = styled(Link)({
   color: 'inherit',
   fontSize: '1.2em',
   marginTop: '3em',
+  position: 'relative',
+  transition: 'all 0.3s',
+
+  '&::after': {
+    content: `''`,
+    position: 'absolute',
+    width: `100%`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
+    left: 0,
+    bottom: -2,
+    transition: 'all 0.3s',
+    opacity: 0,
+  },
+
+  '&:hover::after': {
+    opacity: 1,
+  },
 })

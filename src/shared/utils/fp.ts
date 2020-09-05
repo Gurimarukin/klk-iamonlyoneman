@@ -61,7 +61,7 @@ function neaDecoder<A>(decoder: D.Decoder<unknown, A>): D.Decoder<unknown, NonEm
   )
 }
 
-function neaEncoder<O, A>(encoder: E.Encoder<O, A>): E.Encoder<O[], NonEmptyArray<A>> {
+function neaEncoder<A>(encoder: E.Encoder<A, A>): E.Encoder<A[], NonEmptyArray<A>> {
   return { encode: _ => E.array(encoder).encode(_) }
 }
 
@@ -72,7 +72,7 @@ export const NonEmptyArray = {
 
   encoder: neaEncoder,
 
-  codec: <O, A>(codec: C.Codec<unknown, O, A>): C.Codec<unknown, O[], NonEmptyArray<A>> =>
+  codec: <A>(codec: C.Codec<unknown, A, A>): C.Codec<unknown, A[], NonEmptyArray<A>> =>
     C.make(neaDecoder(codec), neaEncoder(codec)),
 }
 
@@ -109,7 +109,7 @@ function optDecoder<I, A>(decoder: D.Decoder<I, A>): D.Decoder<I, Maybe<A>> {
   }
 }
 
-function optEncoder<O, A>(encoder: E.Encoder<O, A>): E.Encoder<O | null, Maybe<A>> {
+function optEncoder<A>(encoder: E.Encoder<A, A>): E.Encoder<A | null, Maybe<A>> {
   return { encode: _flow(_Option.map(encoder.encode), _Option.toNullable) }
 }
 
@@ -129,7 +129,7 @@ export const Maybe = {
 
   encoder: optEncoder,
 
-  codec: <O, A>(codec: C.Codec<unknown, O, A>): C.Codec<unknown, O | null, Maybe<A>> =>
+  codec: <A>(codec: C.Codec<unknown, A, A>): C.Codec<unknown, A | null, Maybe<A>> =>
     C.make(optDecoder(codec), optEncoder(codec)),
 }
 
@@ -144,6 +144,8 @@ export const Either = _Either
  */
 export type Try<A> = Either<Error, A>
 export const Try = {
+  ..._Either,
+
   right: <A>(a: A): Try<A> => Either.right(a),
 
   apply: <A>(a: Lazy<A>): Try<A> => Either.tryCatch(a, unknownToError),

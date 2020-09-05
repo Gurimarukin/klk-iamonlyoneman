@@ -36,4 +36,6 @@ export namespace StringUtils {
 
   export const matcher3 = (regex: RegExp): ((str: string) => Maybe<[string, string, string]>) =>
     matcher(regex, ([, a, b, c]) => [a, b, c])
+
+  export const pad10 = (n: number): string => (n < 10 ? `0${n}` : `${n}`)
 }

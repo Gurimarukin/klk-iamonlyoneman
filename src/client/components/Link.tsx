@@ -1,6 +1,6 @@
-import React, { useCallback, useContext } from 'react'
+import React, { useCallback } from 'react'
 
-import { HistoryContext } from '../contexts/HistoryContext'
+import { useHistory } from '../contexts/HistoryContext'
 
 interface Props {
   to: string
@@ -9,14 +9,14 @@ interface Props {
 }
 
 export const Link: React.FC<Props> = ({ to, target, className, children }) => {
-  const history = useContext(HistoryContext)
+  const { navigate } = useHistory()
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
-      history.push(to)
+      navigate(to)
     },
-    [history, to],
+    [navigate, to],
   )
 
   return (

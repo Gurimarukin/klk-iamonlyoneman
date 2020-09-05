@@ -5,6 +5,7 @@ import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 import { KlkPost } from '../../../shared/models/klkPost/KlkPost'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { Maybe, pipe } from '../../../shared/utils/fp'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { theme } from '../../utils/theme'
 
 type Props = Readonly<{
@@ -35,7 +36,7 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
       <TitleContainer style={{ width: size.width }}>
         {post.title}
         <div className={DETAIL}>
-          <span>{post.createdAt.toLocaleString()}</span>
+          <span>{formatDate(post.createdAt)}</span>
           <Links>
             <StyledABlue href={post.url} target='_blank'>
               View image
@@ -51,6 +52,16 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
   )
 }
 
+const pad10 = StringUtils.pad10
+function formatDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = pad10(date.getMonth())
+  const day = pad10(date.getDay())
+  const hours = pad10(date.getHours())
+  const minutes = pad10(date.getMinutes())
+  return `${year}/${month}/${day}, ${hours}:${minutes}`
+}
+
 const imgBorderRadius = '4px'
 
 const Container = styled.div({
@@ -62,7 +73,7 @@ const Container = styled.div({
   [`& .${PLACEHOLDER}`]: {
     display: 'flex',
     background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
-    boxShadow: '0 0 8px black',
+    boxShadow: theme.boxShadow,
     overflow: 'hidden',
     borderRadius: imgBorderRadius,
   },
@@ -72,7 +83,7 @@ const StyledImage = styled(LazyLoadImage)({})
 
 const TitleContainer = styled.span({
   padding: '0.3em 0',
-  textShadow: '-1px -1px 1px black, 1px -1px 1px black, -1px 1px 1px black, 1px 1px 1px black',
+  textShadow: theme.textOutline,
   position: 'relative',
 
   [`& .${DETAIL}`]: {
@@ -84,7 +95,7 @@ const TitleContainer = styled.span({
     width: '100%',
     padding: '0.67em 0.67em 0.33em',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    textShadow: '1px 1px 0 black',
+    textShadow: theme.textShadow(theme.colors.black),
     overflow: 'hidden',
     borderRadius: `0 0 ${imgBorderRadius} ${imgBorderRadius}`,
     opacity: 0,

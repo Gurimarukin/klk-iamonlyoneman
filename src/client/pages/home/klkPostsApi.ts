@@ -1,5 +1,8 @@
 import { KlkPosts } from '../../../shared/models/klkPost/KlkPost'
-import { Config } from '../../utils/Config'
+import { PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
+import { Future } from '../../../shared/utils/fp'
+import { apiRoutes } from '../../utils/apiRoutes'
 import { Http } from '../../utils/Http'
 
-export const getKlkPosts = Http.get(`${Config.apiHost}/api/klk-posts`, KlkPosts.codec.decode)
+export const getKlkPosts = (query: PartialKlkPostQuery): Future<KlkPosts> =>
+  Http.get(apiRoutes.klkPosts(query), KlkPosts.codec.decode)

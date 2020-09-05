@@ -1,9 +1,18 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-
 import './css/reset.css'
 import './css/react-lazy-load-image.css'
 
-import { App } from './App'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 
-ReactDOM.render(<App />, document.getElementById('root'))
+import { App } from './App'
+import { HistoryContextProvider } from './contexts/HistoryContext'
+import { KlkPostsQueryContextProvider } from './contexts/KlkPostsQueryContext'
+
+ReactDOM.render(
+  <HistoryContextProvider>
+    <KlkPostsQueryContextProvider>
+      <App />
+    </KlkPostsQueryContextProvider>
+  </HistoryContextProvider>,
+  document.getElementById('root'),
+)

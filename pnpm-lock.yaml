@@ -39,6 +39,7 @@ devDependencies:
   nodemon: 2.0.4
   prettier: 2.1.1
   probe-image-size: 5.0.0
+  qs: 6.9.4
   react: 16.13.1
   react-dom: 16.13.1_react@16.13.1
   react-lazy-load-image-component: 1.5.0_react-dom@16.13.1+react@16.13.1
@@ -6662,6 +6663,12 @@ packages:
       node: '>=0.6'
     resolution:
       integrity: sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
+  /qs/6.9.4:
+    dev: true
+    engines:
+      node: '>=0.6'
+    resolution:
+      integrity: sha512-A1kFqHekCTM7cz0udomYUoYNWjBebHm/5wzU/XqrBRBNWectVH0QIiN+NEcZ0Dte5hvzHwbr8+XQmguPhJ6WdQ==
   /querystring-es3/0.2.1:
     dev: true
     engines:
@@ -8826,6 +8833,7 @@ specifiers:
   nodemon: ^2.0.4
   prettier: ^2.1.1
   probe-image-size: ^5.0.0
+  qs: ^6.9.4
   react: ^16.13.1
   react-dom: ^16.13.1
   react-lazy-load-image-component: ^1.5.0

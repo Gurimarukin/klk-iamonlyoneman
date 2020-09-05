@@ -1,11 +1,11 @@
 import styled from '@emotion/styled'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
 
 import { KlkPosts } from '../shared/models/klkPost/KlkPost'
 import { pipe } from '../shared/utils/fp'
 import { ABlank } from './components/ABlank'
-import { HistoryContext } from './contexts/HistoryContext'
+import { useHistory } from './contexts/HistoryContext'
 import baloopaaji2BoldTTF from './fonts/baloopaaji2-bold.ttf'
 import baloopaaji2TTF from './fonts/baloopaaji2.ttf'
 import { useAsyncState } from './hooks/useAsyncState'
@@ -16,13 +16,11 @@ import { Config } from './utils/Config'
 import { Http } from './utils/Http'
 
 export const App = (): JSX.Element => {
-  const history = useContext(HistoryContext)
-  const [path, setPath] = useState(history.location.pathname)
-  useEffect(() => history.listen(location => setPath(location.location.pathname)), [history])
+  const { location } = useHistory()
 
   return (
     <Container>
-      <Router path={path} />
+      <Router path={location.pathname} />
     </Container>
   )
 }
@@ -33,7 +31,7 @@ export const PouaApp = trackWindowScroll(
       () => Http.get(`${Config.apiHost}/api/klk-posts`, KlkPosts.codec.decode),
       [],
     )
-    const [state] = useAsyncState(future)
+    const [state] = useAsyncState(`${Config.apiHost}/api/klk-posts`, future)
 
     return (
       <Container>

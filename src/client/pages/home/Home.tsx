@@ -4,16 +4,21 @@ import React from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
 
 import { GradientContainer } from '../../components/GradientContainer'
+import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useAsyncState } from '../../hooks/useAsyncState'
 import { AsyncState } from '../../models/AsyncState'
+import { apiRoutes } from '../../utils/apiRoutes'
 import { Gallery } from './Gallery'
+import { Header } from './Header'
 import { getKlkPosts } from './klkPostsApi'
 
 export const Home = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
-    const [state] = useAsyncState(getKlkPosts)
+    const query = useKlkPostsQuery()
+    const [state] = useAsyncState(apiRoutes.klkPosts(query), getKlkPosts(query))
     return (
       <Container>
+        <Header />
         {pipe(
           state,
           AsyncState.fold({
@@ -29,6 +34,7 @@ export const Home = trackWindowScroll(
 
 const Container = styled(GradientContainer)({
   height: '100vh',
+  overflowY: 'auto',
 })
 
 const LoadingOrError = styled.div({

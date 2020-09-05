@@ -5,7 +5,7 @@ import { ScrollPosition } from 'react-lazy-load-image-component'
 import { KlkPosts } from '../../../shared/models/klkPost/KlkPost'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { Maybe, pipe } from '../../../shared/utils/fp'
+import { List, Maybe, pipe } from '../../../shared/utils/fp'
 import { useMaybeRef } from '../../hooks/useMaybeRef'
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
@@ -70,16 +70,18 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
   )
 
   return (
-    <Container ref={onMount}>
+    <Container ref={onMount} style={List.isEmpty(klkPosts) ? {} : { height: '100%' }}>
       {children}
-      {klkPosts.map(_ => (
-        <ImageWithDetail
-          key={KlkPostId.unwrap(_.id)}
-          scrollPosition={scrollPosition}
-          resizeImg={resizeImg}
-          post={_}
-        />
-      ))}
+      {List.isEmpty(klkPosts)
+        ? 'no result.'
+        : klkPosts.map(_ => (
+            <ImageWithDetail
+              key={KlkPostId.unwrap(_.id)}
+              scrollPosition={scrollPosition}
+              resizeImg={resizeImg}
+              post={_}
+            />
+          ))}
     </Container>
   )
 }
@@ -93,39 +95,9 @@ function heightFromWidth({ width, height }: Size, newWidth: number): number {
 }
 
 const Container = styled.div({
-  height: '100%',
-  overflowY: 'auto',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
   paddingBottom: `${theme.Gallery.margin}px`,
 })
-
-// Nonon
-// 440821
-// C1BD46
-// F5DAE4
-// ED69D0
-// C52072
-
-// Credits
-// 4C82D8
-// 5E62A9
-// 71486E
-// 9E4C65
-// 030303
-
-// Ryuko 1
-// E994BC
-// A32510
-// 1A1D2C
-// 46C196
-// F4EE6F
-
-// Ryuko 2
-// DDB6AF
-// 7E6572
-// 303142
-// B63016
-// A75549

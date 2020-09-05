@@ -5,6 +5,7 @@ import { ABlank } from '../components/ABlank'
 import { GradientContainer } from '../components/GradientContainer'
 import { Link } from '../components/Link'
 import { routes } from '../Router'
+import { theme } from '../utils/theme'
 
 export const About = (): JSX.Element => (
   <Container>
@@ -20,7 +21,7 @@ export const About = (): JSX.Element => (
       and wanted a better viewer for it.
     </StyledH3>
     <GithubA href='https://github.com/Gurimarukin/klk-iamonlyoneman'>github</GithubA>
-    <StyledLink to={routes.home}>home</StyledLink>
+    <HomeLink to={routes.home()}>home</HomeLink>
   </Container>
 )
 
@@ -44,18 +45,56 @@ const StyledH3 = styled.h3({
 
 const StyledA = styled(ABlank)({
   color: 'inherit',
+  position: 'relative',
+  transition: 'all 0.3s',
+
+  '&::after': {
+    content: `''`,
+    position: 'absolute',
+    width: `100%`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
+    left: 0,
+    bottom: '0.4em',
+    transition: 'all 0.3s',
+    opacity: 0,
+  },
+
+  '&:hover::after': {
+    opacity: 1,
+  },
 })
 
-const common = {
+const githubUnderlineMargin = '0.8ch'
+const GithubA = styled(StyledA)({
   fontSize: '1.2em',
   marginTop: '3em',
-}
 
-const GithubA = styled(StyledA)({
-  ...common,
+  '&::after': {
+    width: `calc(100% - ${githubUnderlineMargin})`,
+    left: githubUnderlineMargin,
+    bottom: -1,
+  },
 })
 
-const StyledLink = styled(Link)({
-  ...common,
+const HomeLink = styled(Link)({
   color: 'inherit',
+  fontSize: '1.2em',
+  marginTop: '3em',
+  position: 'relative',
+  transition: 'all 0.3s',
+
+  '&::after': {
+    content: `''`,
+    position: 'absolute',
+    width: `100%`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
+    left: 0,
+    bottom: -2,
+    transition: 'all 0.3s',
+    opacity: 0,
+  },
+
+  '&:hover::after': {
+    opacity: 1,
+  },
 })
