@@ -8,7 +8,7 @@ import { Routes } from './routes/Routes'
 import { KlkPostService } from './services/KlkPostService'
 import { PartialLogger } from './services/Logger'
 import { FutureUtils } from './utils/FutureUtils'
-import { MongoPoolParty } from './utils/MongoPollParty'
+import { MongoPoolParty } from './utils/MongoPoolParty'
 import { startWebServer } from './Webserver'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
