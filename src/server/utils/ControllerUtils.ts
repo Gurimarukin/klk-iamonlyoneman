@@ -1,18 +1,38 @@
 import express, { Request } from 'express'
 import * as H from 'hyper-ts'
 import { ExpressConnection, fromRequestHandler } from 'hyper-ts/lib/express'
+import * as D from 'io-ts/Decoder'
 
 import { Either, Future, IO, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 
 export namespace ControllerUtils {
-  export const withJsonBody = <A>(decoder: (u: unknown) => Either<unknown, A>) => (
-    f: (a: A) => EndedMiddleware,
+  const stringBody: express.RequestHandler = (req, _res, next) => {
+    let body = ''
+    req.on('data', chunk => (body += chunk.toString()))
+    req.on('end', () => {
+      req.body = body
+      next()
+    })
+  }
+
+  export const withJsonBody = <A>(decode: (i: unknown) => Either<unknown, A>) => (
+    onRight: (a: A) => EndedMiddleware,
   ): EndedMiddleware =>
     pipe(
-      fromRequestHandler(express.json(), _ => undefined),
-      H.ichain(_ => H.decodeBody(decoder)),
-      H.ichain(f),
+      fromRequestHandler(stringBody, req => req.body as string),
+      H.ichain(body =>
+        pipe(
+          H.decodeHeader('Content-Type', D.string.decode),
+          H.filterOrElse<unknown, string>(
+            contentType => contentType === 'application/json',
+            _ => undefined,
+          ),
+          H.ichain(_ => H.fromEither(Either.parseJSON<unknown>(body, _ => undefined))),
+        ),
+      ),
+      H.ichain(parsed => H.fromEither(decode(parsed))),
+      H.ichain(onRight),
       H.orElse(_ => EndedMiddleware.text(H.Status.BadRequest)()),
     )
 
@@ -25,18 +45,12 @@ export namespace ControllerUtils {
     onLeft: (e: E) => IO<void> = _ => IO.unit,
   ): EndedMiddleware =>
     pipe(
-      withRequest,
-      H.ichain(req =>
+      H.decodeQuery(decode),
+      H.ichain(onRight),
+      H.orElse(e =>
         pipe(
-          decode(req.query),
-          Either.fold(
-            e =>
-              pipe(
-                H.fromIOEither(onLeft(e)),
-                H.ichain(_ => EndedMiddleware.text(H.Status.BadRequest)('Invalid query')),
-              ),
-            onRight,
-          ),
+          H.fromIOEither(onLeft(e as E)),
+          H.ichain(_ => EndedMiddleware.text(H.Status.BadRequest)()),
         ),
       ),
     )

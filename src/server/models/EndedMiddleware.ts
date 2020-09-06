@@ -7,8 +7,9 @@ export type EndedMiddleware = H.Middleware<H.StatusOpen, H.ResponseEnded, unknow
 export namespace EndedMiddleware {
   export function text(
     status: H.Status,
-  ): (message?: string, headers?: Dict<string>) => EndedMiddleware {
-    return (message = '', headers: Dict<string> = {}) =>
+    headers: Dict<string> = {},
+  ): (message?: string) => EndedMiddleware {
+    return (message = '') =>
       pipe(
         reduceHeaders(status, headers),
         H.ichain(_ => H.closeHeaders()),
@@ -16,11 +17,15 @@ export namespace EndedMiddleware {
       )
   }
 
-  export function json<A>(status: H.Status): (data: A, headers?: Dict<string>) => EndedMiddleware {
-    return (data: A, headers: Dict<string> = {}) =>
+  export function json<A, O>(
+    status: H.Status,
+    encode: (a: A) => O,
+    headers: Dict<string> = {},
+  ): (data: A) => EndedMiddleware {
+    return (data: A) =>
       pipe(
         reduceHeaders(status, headers),
-        H.ichain(_ => H.json(data, unknownToError)),
+        H.ichain(_ => H.json(encode(data), unknownToError)),
         H.orElse(_ => text(H.Status.InternalServerError)()),
       )
   }

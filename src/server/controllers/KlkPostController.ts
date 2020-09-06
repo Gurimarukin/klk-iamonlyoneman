@@ -23,7 +23,7 @@ export function KlkPostController(Logger: PartialLogger, klkPostService: KlkPost
       pipe(
         klkPostService.findAll(query),
         H.fromTaskEither,
-        H.ichain(posts => EndedMiddleware.json(H.Status.OK)(KlkPosts.codec.encode(posts))),
+        H.ichain(EndedMiddleware.json(H.Status.OK, KlkPosts.codec.encode)),
       ),
     flow(D.draw, logger.debug),
   )

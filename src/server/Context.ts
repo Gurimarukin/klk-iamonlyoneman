@@ -1,12 +1,17 @@
 import { Do, Future, pipe } from '../shared/utils/fp'
 import { Config } from './config/Config'
 import { KlkPostController } from './controllers/KlkPostController'
+import { RateLimiter } from './controllers/RateLimiter'
+import { UserController } from './controllers/UserController'
+import { WithIp } from './controllers/WithIp'
 import { MsDuration } from './models/MsDuration'
 import { Route } from './models/Route'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
+import { UserPersistence } from './persistence/UserPersistence'
 import { Routes } from './Routes'
 import { KlkPostService } from './services/KlkPostService'
 import { PartialLogger } from './services/Logger'
+import { UserService } from './services/UserService'
 import { FutureUtils } from './utils/FutureUtils'
 import { MongoPoolParty } from './utils/MongoPoolParty'
 import { startWebServer } from './Webserver'
@@ -18,19 +23,24 @@ export function Context(Logger: PartialLogger, config: Config, mongo: MongoPoolP
   const { mongoCollection } = mongo
 
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
+  const userPersistence = UserPersistence(Logger, mongoCollection)
 
   const klkPostService = KlkPostService(Logger, config, klkPostPersistence)
+  const userService = UserService(Logger, userPersistence)
 
+  const withIp = WithIp(Logger, config)
   const klkPostController = KlkPostController(Logger, klkPostService)
+  const userController = UserController(Logger, userService)
 
-  const routes: Route[] = Routes(klkPostController)
+  const rateLimiter = RateLimiter(Logger, withIp, MsDuration.days(1))
+  const routes: Route[] = Routes(rateLimiter, klkPostController, userController)
 
   return {
     Logger,
 
     ensureIndexes: (): Future<void> =>
       pipe(
-        [klkPostPersistence.ensureIndexes()],
+        [klkPostPersistence.ensureIndexes(), userPersistence.ensureIndexes()],
         Future.parallel,
         Future.map(_ => {}),
         FutureUtils.retryIfFailed(MsDuration.minutes(5), {
@@ -46,6 +56,8 @@ export function Context(Logger: PartialLogger, config: Config, mongo: MongoPoolP
     fullPoll: klkPostService.fullPoll,
 
     addMissingSize: klkPostService.addMissingSize,
+
+    createUser: userService.createUser,
 
     startWebServer: () => startWebServer(Logger, config, routes),
   }
