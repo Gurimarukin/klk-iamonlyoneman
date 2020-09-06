@@ -1,6 +1,6 @@
 import * as C from 'io-ts/lib/Codec'
 
-import { Token } from '../../server/models/user/Token'
+import { Token } from './Token'
 
 export function TokenPayload(token: Token): TokenPayload {
   return { token }

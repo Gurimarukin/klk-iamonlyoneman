@@ -4,3 +4,4 @@
 /conf/server/local.conf.json
 /dist
 /node_modules
+/tsconfig.json

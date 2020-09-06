@@ -5,7 +5,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 type HistoryContext = Readonly<{
   // eslint-disable-next-line @typescript-eslint/ban-types
   location: Location<object | null>
-  navigate: (to: string) => never
+  navigate: (to: string) => void
   query: qs.ParsedQs
 }>
 
@@ -18,12 +18,7 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
   useEffect(() => history.listen(location => setLocation(location.location)), [history])
 
   const navigate = useCallback(
-    (to: string): never =>
-      history.push({
-        pathname: to,
-        search: '',
-        hash: '',
-      }) as never,
+    (to: string) => history.push({ pathname: to, search: '', hash: '' }),
     [history],
   )
 

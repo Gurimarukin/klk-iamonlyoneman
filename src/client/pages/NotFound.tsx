@@ -19,6 +19,7 @@ const Container = styled(GradientContainer)({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
+  textShadow: '0 0 6px black',
 })
 
 const StyledH3 = styled.h3({

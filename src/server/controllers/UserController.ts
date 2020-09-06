@@ -14,19 +14,19 @@ export type UserController = ReturnType<typeof UserController>
 export function UserController(Logger: PartialLogger, userService: UserService) {
   const _logger = Logger('UserController')
 
-  const login: EndedMiddleware = ControllerUtils.withJsonBody(LoginPayload.codec.decode)(
-    ({ user, password }) =>
-      pipe(
-        userService.login(user, password),
-
-        H.fromTaskEither,
-        H.ichain(
-          Maybe.fold(
-            () => EndedMiddleware.text(H.Status.BadRequest)(),
-            flow(TokenPayload, EndedMiddleware.json(H.Status.OK, TokenPayload.codec.encode)),
-          ),
+  const login: EndedMiddleware = ControllerUtils.withJsonBody(
+    LoginPayload.codec.decode,
+  )(({ user, password }) =>
+    pipe(
+      userService.login(user, password),
+      H.fromTaskEither,
+      H.ichain(
+        Maybe.fold(
+          () => EndedMiddleware.text(H.Status.BadRequest)(),
+          flow(TokenPayload, EndedMiddleware.json(H.Status.OK, TokenPayload.codec.encode)),
         ),
       ),
+    ),
   )
 
   return { login }

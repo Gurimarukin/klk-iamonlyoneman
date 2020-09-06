@@ -62,7 +62,7 @@ module.exports = {
         configFile,
       },
       eslint: {
-        enabled: true,
+        enabled: false,
         files: './src/client/**/*.{tsx,ts}',
       },
     }),

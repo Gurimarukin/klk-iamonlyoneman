@@ -3,22 +3,13 @@ import readline from 'readline'
 import * as D from 'io-ts/Decoder'
 
 import { ClearPassword } from '../../shared/models/ClearPassword'
-import { Do, Either, Future, IO, Maybe, flow, pipe } from '../../shared/utils/fp'
-import { Token } from '../models/user/Token'
+import { LoginPayload } from '../../shared/models/LoginPayload'
+import { Token } from '../../shared/models/Token'
+import { Do, Either, Future, IO, Maybe, pipe } from '../../shared/utils/fp'
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 import { PartialLogger } from './Logger'
-
-const nonEmptyStringDecoder = pipe(
-  D.string,
-  D.parse(str => {
-    const trimed = str.trim()
-    return trimed === '' ? D.failure(trimed, 'non empty string') : D.success(trimed)
-  }),
-)
-
-const clearPasswordDecoder = pipe(nonEmptyStringDecoder, D.map(ClearPassword.wrap))
 
 export type UserService = ReturnType<typeof UserService>
 
@@ -61,24 +52,29 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
       pipe(
         Do(Future.taskEither)
           .do(Future.fromIOEither(IO.apply(() => console.log('Creating user'))))
-          .bind('name', prompt('name: ', nonEmptyStringDecoder))
-          .bind('password', prompt('password: ', clearPasswordDecoder))
-          .bind('confirm', prompt('confirm password: ', clearPasswordDecoder))
+          .bind('user', prompt('name: '))
+          .bind('password', prompt('password: '))
+          .bind('confirm', prompt('confirm password: '))
           .done(),
-        Future.chain(({ name, password, confirm }) =>
+        Future.chain(({ user, password, confirm }) =>
           password !== confirm
             ? Future.left(Error('Passwords must be the same'))
             : pipe(
-                PasswordUtils.hash(password),
-                Future.chain(hashed => Future.fromIOEither(User.create(name, hashed))),
-                Future.chain(userPersistence.create),
+                decodeFuture(LoginPayload.codec.decode)({ user, password }),
+                Future.chain(({ user, password }) =>
+                  pipe(
+                    PasswordUtils.hash(password),
+                    Future.chain(hashed => Future.fromIOEither(User.create(user, hashed))),
+                    Future.chain(userPersistence.create),
+                  ),
+                ),
               ),
         ),
       ),
   }
 }
 
-function prompt<A>(label: string, decoder: D.Decoder<string, A>): Future<A> {
+function prompt(label: string): Future<string> {
   return pipe(
     Future.apply(() => {
       const rl = readline.createInterface({
@@ -92,12 +88,16 @@ function prompt<A>(label: string, decoder: D.Decoder<string, A>): Future<A> {
         },
       )
     }),
-    Future.chain(
-      flow(
-        decoder.decode,
-        Either.mapLeft(e => Error(`Couldn't decode answer:\n${D.draw(e)}`)),
-        Future.fromEither,
-      ),
-    ),
   )
+}
+
+function decodeFuture<A>(
+  decode: (i: unknown) => Either<D.DecodeError, A>,
+): (i: unknown) => Future<A> {
+  return i =>
+    pipe(
+      decode(i),
+      Either.mapLeft(e => Error(`Couldn't decode answer:\n${D.draw(e)}`)),
+      Future.fromEither,
+    )
 }

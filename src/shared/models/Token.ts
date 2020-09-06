@@ -1,10 +1,10 @@
 import * as C from 'io-ts/lib/Codec'
 import { Newtype, iso } from 'newtype-ts'
 
-import { IO, List, flow, pipe } from '../../../shared/utils/fp'
-import { fromNewtype } from '../../../shared/utils/fromNewtype'
-import { StringUtils } from '../../../shared/utils/StringUtils'
-import { UuidUtils } from '../../utils/UuidUtils'
+import { UuidUtils } from '../../server/utils/UuidUtils'
+import { IO, List, flow, pipe } from '../utils/fp'
+import { fromNewtype } from '../utils/fromNewtype'
+import { StringUtils } from '../utils/StringUtils'
 
 export type Token = Newtype<{ readonly Token: unique symbol }, string>
 

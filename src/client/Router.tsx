@@ -5,6 +5,7 @@ import { PartialKlkPostQuery } from '../shared/models/PartialKlkPostQuery'
 import { Dict, Maybe, pipe } from '../shared/utils/fp'
 import { About } from './pages/About'
 import { Home } from './pages/home/Home'
+import { Login } from './pages/Login'
 import { NotFound } from './pages/NotFound'
 
 export const routes = {
@@ -21,6 +22,7 @@ function route(path: string): [Maybe<string>, ReactElement] {
     Dict.lookup<[Maybe<string>, ReactElement]>(path, {
       '/': [Maybe.none, <Home />],
       '/about': [Maybe.some('About'), <About />],
+      '/login': [Maybe.none, <Login />],
     }),
     Maybe.getOrElse(() => [Maybe.some('Not found'), <NotFound />]),
   )

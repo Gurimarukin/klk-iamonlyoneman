@@ -1,7 +1,7 @@
 import { Collection, UpdateWriteOpResult } from 'mongodb'
 
+import { Token } from '../../shared/models/Token'
 import { Future, Maybe, pipe } from '../../shared/utils/fp'
-import { Token } from '../models/user/Token'
 import { User } from '../models/user/User'
 import { UserId } from '../models/user/UserId'
 import { PartialLogger } from '../services/Logger'
@@ -22,6 +22,7 @@ export function UserPersistence(
       collection.ensureIndexes([
         // fu prettier
         { key: { id: -1 }, unique: true },
+        { key: { user: -1 }, unique: true },
         { key: { token: -1 } },
       ]),
 

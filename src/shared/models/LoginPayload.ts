@@ -1,10 +1,11 @@
 import * as C from 'io-ts/lib/Codec'
 
 import { ClearPassword } from './ClearPassword'
+import { NonEmptyString } from './NonEmptyString'
 
 export namespace LoginPayload {
   export const codec = C.type({
-    user: C.string,
+    user: NonEmptyString.codec,
     password: ClearPassword.codec,
   })
 }

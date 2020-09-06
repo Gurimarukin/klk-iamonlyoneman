@@ -8,4 +8,6 @@ export const apiRoutes = {
     const str = qs.stringify(PartialKlkPostQuery.encoder.encode(query))
     return `${Config.apiHost}/api/klk-posts${str === '' ? '' : '?'}${str}`
   },
+
+  login: `${Config.apiHost}/api/login`,
 }
