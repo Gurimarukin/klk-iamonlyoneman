@@ -2,17 +2,22 @@ import styled from '@emotion/styled'
 import React, { forwardRef, useCallback } from 'react'
 
 import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
-import { List } from '../../../shared/utils/fp'
+import { List, Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Link } from '../../components/Link'
+import { Logout } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
+import { useUser } from '../../contexts/UserContext'
 import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 
 const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
-  ({}, ref): JSX.Element => {
+  (_, ref): JSX.Element => {
+    const { token, logout } = useUser()
+    const isAdmin = Maybe.isSome(token)
+
     const query = useKlkPostsQuery()
     const homeLink = useCallback(
       (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => (
@@ -30,14 +35,24 @@ export const Header = forwardRef<HTMLElement>(
       <StyledHeader ref={ref}>
         <StyledNav>
           {homeLink({}, 'newest')}
+          <Separator />
           <EpisodesContainer>
             <EpisodesTitle>Episodes:</EpisodesTitle>
             <Episodes>
               {List.range(1, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
-              {homeLink({ episode: EpisodeNumber.unknown }, 'unknown')}
+              {isAdmin ? homeLink({ episode: EpisodeNumber.unknown }, 'unknown') : null}
             </Episodes>
           </EpisodesContainer>
+          <Separator />
           <StyledLink to={routes.about}>about</StyledLink>
+          {isAdmin ? (
+            <>
+              <Separator />
+              <StyledButton onClick={logout}>
+                <Logout />
+              </StyledButton>
+            </>
+          ) : null}
         </StyledNav>
       </StyledHeader>
     )
@@ -59,20 +74,16 @@ const StyledNav = styled.nav({
   alignItems: 'center',
 })
 
-const EpisodesContainer = styled.div({
-  display: 'flex',
-  alignItems: 'center',
+const Separator = styled.span({
+  alignSelf: 'stretch',
   margin: `0 ${theme.spacing.small}px`,
-  borderLeft: `1px solid ${theme.colors.white}`,
-  borderRight: `1px solid ${theme.colors.white}`,
-  padding: `0 ${theme.spacing.small}px`,
   position: 'relative',
 
   '&::before': {
     content: `''`,
     position: 'absolute',
-    left: -3,
-    top: -2,
+    left: -1,
+    top: -1,
     height: '100%',
     borderLeft: `1px solid ${theme.colors.ocre}`,
   },
@@ -80,11 +91,16 @@ const EpisodesContainer = styled.div({
   '&::after': {
     content: `''`,
     position: 'absolute',
-    right: 1,
-    top: -2,
+    left: 1,
+    top: 1,
     height: '100%',
-    borderRight: `1px solid ${theme.colors.ocre}`,
+    borderLeft: `1px solid ${theme.colors.white}`,
   },
+})
+
+const EpisodesContainer = styled.div({
+  display: 'flex',
+  alignItems: 'center',
 })
 
 const EpisodesTitle = styled.span({
@@ -127,6 +143,36 @@ const StyledLink = styled(Link)({
     borderBottom: `2px solid ${theme.colors.lime}`,
     left: linkPadding.left,
     bottom: `calc(${linkPadding.top} - 1px)`,
+    transition: 'all 0.3s',
+    opacity: 0,
+  },
+
+  '&:hover::after': {
+    opacity: 1,
+  },
+})
+
+const StyledButton = styled.button({
+  border: 'none',
+  background: 'none',
+  color: 'inherit',
+  width: '1.1em',
+  height: '1.1em',
+  fontSize: '1.4em',
+  cursor: 'pointer',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 0,
+  filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+
+  '&::after': {
+    content: `''`,
+    position: 'absolute',
+    width: '100%',
+    borderBottom: `2px solid ${theme.colors.lime}`,
+    left: 0,
+    bottom: -1,
     transition: 'all 0.3s',
     opacity: 0,
   },
