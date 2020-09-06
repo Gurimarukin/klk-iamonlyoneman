@@ -1,4 +1,4 @@
-import { Collection, MongoClient } from 'mongodb'
+import { Collection, Db, MongoClient } from 'mongodb'
 
 import { Future, IO, List, pipe } from '../../shared/utils/fp'
 import { Config } from '../config/Config'
@@ -21,6 +21,8 @@ export function MongoPoolParty(
 
   const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
 
+  let connections: Db[] = []
+
   return pipe(
     List.makeBy(poolSize, _ =>
       pipe(
@@ -30,24 +32,17 @@ export function MongoPoolParty(
     ),
     List.sequence(Future.taskEither),
     Future.map(conn => {
-      let connections = conn
-
-      const rotateConnections = (): IO<void> =>
-        IO.apply(() => {
-          connections = List.rotate(1)(connections)
-        })
+      connections = conn
 
       const mongoCollection = (coll: string) => <A>(
         f: (coll: Collection) => Promise<A>,
       ): Future<A> =>
         pipe(
           Future.apply(() => f(connections[0].collection(coll))),
-          Future.chain(res =>
-            pipe(
-              Future.fromIOEither(rotateConnections()),
-              Future.map(_ => res),
-            ),
-          ),
+          Future.map(res => {
+            connections = List.rotate(1)(connections)
+            return res
+          }),
         )
 
       return { mongoCollection }
