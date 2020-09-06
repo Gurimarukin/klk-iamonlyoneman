@@ -61,6 +61,7 @@ const Container = styled(GradientContainer)({
 })
 
 const LoadingOrError = styled.div({
+  paddingTop: theme.spacing.large,
   textAlign: 'center',
 })
 
