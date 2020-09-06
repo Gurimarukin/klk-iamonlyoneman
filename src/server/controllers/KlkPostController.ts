@@ -6,9 +6,9 @@ import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
 import { flow, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
-import { ControllerUtils } from '../routes/ControllerUtils'
 import { KlkPostService } from '../services/KlkPostService'
 import { PartialLogger } from '../services/Logger'
+import { ControllerUtils } from '../utils/ControllerUtils'
 
 const klkPostsQuery = pipe(PartialKlkPostQuery.decoder, D.map(KlkPostsQuery.fromPartial))
 
