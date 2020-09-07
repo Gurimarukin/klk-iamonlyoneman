@@ -1,8 +1,7 @@
-import * as D from 'io-ts/lib/Decoder'
-
-import { Maybe } from '../../shared/utils/fp'
+import * as D from 'io-ts/Decoder'
 
 import { Unknown } from '../../shared/models/Unknown'
+import { Maybe } from '../../shared/utils/fp'
 
 export namespace Listing {
   export function decoder<A>(decoder: D.Decoder<unknown, A>): D.Decoder<unknown, Listing<A>> {

@@ -1,4 +1,4 @@
-import * as C from 'io-ts/lib/Codec'
+import * as C from 'io-ts/Codec'
 import { AnyNewtype, CarrierOf, iso } from 'newtype-ts'
 
 import { Either, flow } from './fp'

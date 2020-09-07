@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import { Lens as MLens } from 'monocle-ts'
 import React, { useCallback, useState } from 'react'
 
-import { LoginPayload } from '../../shared/models/LoginPayload'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Either, Maybe, pipe } from '../../shared/utils/fp'
 import { GradientContainer } from '../components/GradientContainer'
 import { useHistory } from '../contexts/HistoryContext'

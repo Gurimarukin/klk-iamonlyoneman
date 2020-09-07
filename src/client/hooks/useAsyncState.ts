@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Future, Task, flow, pipe } from '../../shared/utils/fp'
 import { AsyncState } from '../models/AsyncState'
 
-export function useAsyncState<A>(
-  key: string,
-  future: Future<A>,
-): [AsyncState<A>, React.Dispatch<React.SetStateAction<AsyncState<A>>>] {
+type Update<A> = (f: (a: A) => A) => void
+
+export function useAsyncState<A>(key: string, future: Future<A>): [AsyncState<A>, Update<A>] {
   const [state, setState] = useState<AsyncState<A>>(AsyncState.Loading)
 
   useEffect(() => {
@@ -14,5 +13,7 @@ export function useAsyncState<A>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 
-  return [state, setState]
+  const update: Update<A> = useCallback(f => setState(AsyncState.map(f)), [])
+
+  return [state, update]
 }

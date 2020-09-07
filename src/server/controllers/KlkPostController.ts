@@ -1,32 +1,56 @@
 import * as H from 'hyper-ts'
-import * as D from 'io-ts/lib/Decoder'
+import * as D from 'io-ts/Decoder'
 
-import { KlkPosts } from '../../shared/models/klkPost/KlkPost'
+import { KlkPostDAO, KlkPostDAOs } from '../../shared/models/klkPost/KlkPostDAO'
+import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
+import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
-import { flow, pipe } from '../../shared/utils/fp'
+import { Maybe, flow, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
+import { User } from '../models/user/User'
 import { KlkPostService } from '../services/KlkPostService'
 import { PartialLogger } from '../services/Logger'
 import { ControllerUtils } from '../utils/ControllerUtils'
+import { WithAuth } from './WithAuth'
 
 const klkPostsQuery = pipe(PartialKlkPostQuery.decoder, D.map(KlkPostsQuery.fromPartial))
 
 export type KlkPostController = ReturnType<typeof KlkPostController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function KlkPostController(Logger: PartialLogger, klkPostService: KlkPostService) {
+export function KlkPostController(
+  Logger: PartialLogger,
+  withAuth: WithAuth,
+  klkPostService: KlkPostService,
+) {
   const logger = Logger('KlkPostController')
 
   const klkPosts: EndedMiddleware = ControllerUtils.withQuery(klkPostsQuery.decode)(
     query =>
       pipe(
-        klkPostService.findAll(query),
-        H.fromTaskEither,
-        H.ichain(EndedMiddleware.json(H.Status.OK, KlkPosts.codec.encode)),
+        H.fromTaskEither(klkPostService.findAll(query)),
+        H.ichain(EndedMiddleware.json(H.Status.OK, KlkPostDAOs.codec.encode)),
       ),
     flow(D.draw, logger.debug),
   )
 
-  return { klkPosts }
+  const klkPostEdit = (id: KlkPostId): EndedMiddleware =>
+    withAuth(user =>
+      User.canEditPost(user)
+        ? ControllerUtils.withJsonBody(KlkPostEditPayload.codec.decode)(payload =>
+            pipe(
+              H.fromTaskEither(klkPostService.updatePostAndGetUpdated(id, payload)),
+              H.ichain(
+                Maybe.fold(
+                  () => EndedMiddleware.text(H.Status.BadRequest)(),
+                  EndedMiddleware.json(H.Status.OK, KlkPostDAO.codec.encode),
+                ),
+              ),
+            ),
+          )
+        : EndedMiddleware.text(H.Status.Forbidden)(),
+    )
+
+  return { klkPosts, klkPostEdit }
 }

@@ -49,7 +49,13 @@ module.exports = {
     ],
     'max-len': [
       'warn',
-      { code: 100, tabWidth: 2, ignoreStrings: true, ignoreTemplateLiterals: true },
+      {
+        code: 100,
+        tabWidth: 2,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreComments: true,
+      },
     ],
     'no-console': 'off',
     'no-empty-function': 'off',

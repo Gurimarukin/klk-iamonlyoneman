@@ -1,4 +1,4 @@
-import * as C from 'io-ts/lib/Codec'
+import * as C from 'io-ts/Codec'
 import { Newtype, iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../utils/fromNewtype'

@@ -1,11 +1,10 @@
-import Axios from 'axios'
-import * as D from 'io-ts/lib/Decoder'
 import querystring from 'querystring'
 
+import Axios from 'axios'
+import * as D from 'io-ts/Decoder'
+
 import { Dict, Either, Future, IO, List, Maybe, flow, pipe } from '../../shared/utils/fp'
-
 import { StringUtils } from '../../shared/utils/StringUtils'
-
 import { AxiosConfig } from '../models/AxiosConfig'
 import { AxiRes } from '../models/AxiRes'
 import { Listing, UnknownListing } from '../models/Listing'

@@ -1,5 +1,5 @@
-import { sequenceT } from 'fp-ts/lib/Apply'
-import * as D from 'io-ts/lib/Decoder'
+import { sequenceT } from 'fp-ts/Apply'
+import * as D from 'io-ts/Decoder'
 
 import { Either, IO, Maybe, NonEmptyArray, pipe } from '../../shared/utils/fp'
 import { LogLevelOrOff } from '../models/LogLevel'

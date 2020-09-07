@@ -1,6 +1,6 @@
-import * as C from 'io-ts/lib/Codec'
-import * as D from 'io-ts/lib/Decoder'
-import * as E from 'io-ts/lib/Encoder'
+import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
+import * as E from 'io-ts/Encoder'
 
 import { pipe } from '../utils/fp'
 

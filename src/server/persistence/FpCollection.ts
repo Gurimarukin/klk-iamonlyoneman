@@ -1,5 +1,5 @@
-import * as C from 'io-ts/lib/Codec'
-import * as D from 'io-ts/lib/Decoder'
+import * as C from 'io-ts/Codec'
+import * as D from 'io-ts/Decoder'
 import {
   ClientSession,
   Collection,
@@ -10,7 +10,6 @@ import {
   FindOneOptions,
   InsertOneWriteOpResult,
   InsertWriteOpResult,
-  MatchKeysAndValues,
   OptionalId,
   ReplaceOneOptions,
   ReplaceWriteOpResult,
@@ -82,7 +81,7 @@ export function FpCollection<A, O extends { [key: string]: unknown }>(
     ): Future<UpdateWriteOpResult> => {
       const encoded = codec.encode(doc)
       return pipe(
-        collection(c => c.updateOne(filter, { $set: encoded as MatchKeysAndValues<O> }, options)),
+        collection(c => c.updateOne(filter, { $set: encoded }, options)),
         Future.chain(res =>
           pipe(
             Future.fromIOEither(logger.debug('updated', encoded)),

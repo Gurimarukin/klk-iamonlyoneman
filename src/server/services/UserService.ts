@@ -3,7 +3,7 @@ import readline from 'readline'
 import * as D from 'io-ts/Decoder'
 
 import { ClearPassword } from '../../shared/models/ClearPassword'
-import { LoginPayload } from '../../shared/models/LoginPayload'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Token } from '../../shared/models/Token'
 import { Do, Either, Future, IO, Maybe, pipe } from '../../shared/utils/fp'
 import { User } from '../models/user/User'

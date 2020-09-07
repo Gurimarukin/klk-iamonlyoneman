@@ -15,7 +15,7 @@ export function UserPersistence(
   mongoCollection: (coll: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
 ) {
   const logger = Logger('UserPersistence')
-  const collection = FpCollection(logger, mongoCollection('user'), User.codec)
+  const collection = FpCollection<User, User.Output>(logger, mongoCollection('user'), User.codec)
 
   return {
     ensureIndexes: (): Future<void> =>
@@ -28,7 +28,8 @@ export function UserPersistence(
 
     findByUserName: (user: string): Future<Maybe<User>> => collection.findOne({ user }),
 
-    findByToken: (token: Token): Future<Maybe<User>> => collection.findOne({ token }),
+    findByToken: (token: Token): Future<Maybe<User>> =>
+      collection.findOne({ token: Token.unwrap(token) }),
 
     create: (user: User): Future<void> =>
       pipe(
@@ -37,6 +38,8 @@ export function UserPersistence(
       ),
 
     setToken: (id: UserId, token: Token): Future<UpdateWriteOpResult> =>
-      collection.collection(coll => coll.updateOne({ id }, { $set: { token } })),
+      collection.collection(coll =>
+        coll.updateOne({ id: UserId.unwrap(id) }, { $set: { token: Token.unwrap(token) } }),
+      ),
   }
 }

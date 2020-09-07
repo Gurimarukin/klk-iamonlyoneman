@@ -1,11 +1,13 @@
 import styled from '@emotion/styled'
-import { pipe } from 'fp-ts/lib/pipeable'
 import React, { useCallback } from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
 
-import { List, Maybe } from '../../../shared/utils/fp'
+import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
+import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
+import { List, Maybe, pipe } from '../../../shared/utils/fp'
 import { GradientContainer } from '../../components/GradientContainer'
 import { ChevronUp } from '../../components/svgs'
+import { KlkPostsContextProvider } from '../../contexts/KlkPostsContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useAsyncState } from '../../hooks/useAsyncState'
 import { useMaybeRef } from '../../hooks/useMaybeRef'
@@ -19,7 +21,11 @@ import { getKlkPosts } from './klkPostsApi'
 export const Home = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
     const query = useKlkPostsQuery()
-    const [state] = useAsyncState(apiRoutes.klkPosts(query), getKlkPosts(query))
+    const [state, update] = useAsyncState(apiRoutes.klkPosts(query), getKlkPosts(query))
+    const updateById = useCallback(
+      (id: KlkPostId, post: KlkPostDAO) => update(List.map(p => (p.id === id ? post : p))),
+      [update],
+    )
 
     const [ref, mountRef] = useMaybeRef<HTMLElement>()
     const scrollToTop = useCallback((): void => {
@@ -38,14 +44,14 @@ export const Home = trackWindowScroll(
             onLoading: () => <LoadingOrError>loading...</LoadingOrError>,
             onFailure: _ => <LoadingOrError>error</LoadingOrError>,
             onSuccess: klkPosts => (
-              <>
+              <KlkPostsContextProvider updateById={updateById}>
                 <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} headerRef={ref} />
                 {List.isEmpty(klkPosts) ? null : (
                   <ScrollToTop onClick={scrollToTop} title='Scroll to top'>
                     <ChevronUp />
                   </ScrollToTop>
                 )}
-              </>
+              </KlkPostsContextProvider>
             ),
           }),
         )}
@@ -73,7 +79,7 @@ const ScrollToTop = styled.button({
   height: '1.3em',
   border: 'none',
   backgroundColor: theme.colors.darkgrey,
-  color: theme.colors.darkred,
+  color: theme.colors.pink2,
   opacity: 0.9,
   fontSize: '2em',
   cursor: 'pointer',

@@ -1,13 +1,14 @@
-import { Predicate } from 'fp-ts/lib/function'
+import { Predicate } from 'fp-ts/function'
 import { Lens as MonocleLens } from 'monocle-ts'
 
-import { KlkPost } from '../../shared/models/klkPost/KlkPost'
+import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 import { Do, Future, IO, List, Maybe, pipe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
+import { KlkPost } from '../models/KlkPost'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { Link } from '../models/Link'
 import { Listing } from '../models/Listing'
@@ -100,6 +101,12 @@ export function KlkPostService(
       ),
 
     findAll: (query: KlkPostsQuery): Future<KlkPost[]> => klkPostPersistence.findAll(query),
+
+    updatePostAndGetUpdated: (id: KlkPostId, payload: KlkPostEditPayload): Future<Maybe<KlkPost>> =>
+      pipe(
+        klkPostPersistence.updatePostById(id, payload),
+        Future.chain(ok => (ok ? klkPostPersistence.findById(id) : Future.right(Maybe.none))),
+      ),
   }
 
   function setRefreshActivityInterval(): IO<void> {
@@ -399,6 +406,7 @@ function klkPostFromLink(l: Link): KlkPost {
     createdAt: new Date(l.data.created_utc * 1000),
     permalink: l.data.permalink,
     url: l.data.url,
+    active: true,
   }
 }
 

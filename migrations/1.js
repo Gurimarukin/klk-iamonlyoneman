@@ -1,3 +1,5 @@
+// NOT A REAL MIGRATION
+
 db.klkPost.find({ id: 'd9nkyr' }).pretty()
 // {
 //   "_id" : ObjectId("5f40f8af09df4159d5c8af50"),

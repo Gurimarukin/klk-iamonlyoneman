@@ -1,14 +1,15 @@
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
-import { LoginPayload } from '../../shared/models/LoginPayload'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
+import { TokenDAO } from '../../shared/models/login/TokenDAO'
 import { Token } from '../../shared/models/Token'
-import { TokenPayload } from '../../shared/models/TokenPayload'
 import { Future, Maybe, pipe } from '../../shared/utils/fp'
 import { apiRoutes } from '../utils/apiRoutes'
 import { Http } from '../utils/Http'
 
 type UserContext = Readonly<{
   token: Maybe<Token>
+  isAdmin: boolean
   login: (payload: LoginPayload) => Promise<Maybe<Token>>
   logout: () => void
 }>
@@ -21,6 +22,8 @@ export const UserContextProvider: React.FC = ({ children }) => {
   const [token, setToken] = useState<Maybe<Token>>(() =>
     pipe(Maybe.fromNullable(localStorage.getItem(USER_TOKEN)), Maybe.map(Token.wrap)),
   )
+
+  const isAdmin = Maybe.isSome(token)
 
   const updateToken = useCallback((token: Maybe<Token>) => {
     pipe(
@@ -36,9 +39,9 @@ export const UserContextProvider: React.FC = ({ children }) => {
   const login = useCallback(
     (payload: LoginPayload): Promise<Maybe<Token>> =>
       pipe(
-        Http.post(apiRoutes.login, payload, LoginPayload.codec.encode, TokenPayload.codec.decode),
+        Http.post(apiRoutes.login, payload, LoginPayload.codec.encode, TokenDAO.codec.decode),
         Future.map(Maybe.some),
-        Future.recover<Maybe<TokenPayload>>(_ => Future.right(Maybe.none)),
+        Future.recover<Maybe<TokenDAO>>(_ => Future.right(Maybe.none)),
         Future.map(
           Maybe.map(({ token }) => {
             updateToken(Maybe.some(token))
@@ -54,6 +57,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const value: UserContext = {
     token,
+    isAdmin,
     login,
     logout,
   }

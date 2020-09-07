@@ -1,8 +1,7 @@
-import * as D from 'io-ts/lib/Decoder'
-
-import { pipe } from '../../shared/utils/fp'
+import * as D from 'io-ts/Decoder'
 
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { pipe } from '../../shared/utils/fp'
 
 export namespace Link {
   export const decoder = D.type({

@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollPosition } from 'react-lazy-load-image-component'
 
-import { KlkPosts } from '../../../shared/models/klkPost/KlkPost'
+import { KlkPostDAOs } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { List, Maybe, pipe } from '../../../shared/utils/fp'
@@ -11,7 +11,7 @@ import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 
 type Props = Readonly<{
-  klkPosts: KlkPosts
+  klkPosts: KlkPostDAOs
   scrollPosition: ScrollPosition
   headerRef: React.MutableRefObject<Maybe<HTMLElement>>
 }>

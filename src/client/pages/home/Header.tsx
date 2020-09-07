@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import React, { forwardRef, useCallback } from 'react'
 
 import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { List } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
@@ -15,8 +15,7 @@ const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
   (_, ref): JSX.Element => {
-    const { token, logout } = useUser()
-    const isAdmin = Maybe.isSome(token)
+    const { isAdmin, logout } = useUser()
 
     const query = useKlkPostsQuery()
     const homeLink = useCallback(
@@ -34,13 +33,13 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          {homeLink({}, 'newest')}
+          {homeLink({}, '100 newest')}
           <Separator />
           <EpisodesContainer>
             <EpisodesTitle>Episodes:</EpisodesTitle>
             <Episodes>
               {List.range(1, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
-              {isAdmin ? homeLink({ episode: EpisodeNumber.unknown }, 'unknown') : null}
+              {homeLink({ episode: EpisodeNumber.unknown }, 'unknown')}
             </Episodes>
           </EpisodesContainer>
           <Separator />
@@ -123,7 +122,7 @@ const StyledLink = styled(Link)({
   padding: `${linkPadding.top} ${linkPadding.left}`,
   color: 'inherit',
   textShadow: theme.textShadow(theme.colors.darkgrey),
-  borderRadius: '2px',
+  borderRadius: 2,
   position: 'relative',
   transition: 'all 0.3s',
 

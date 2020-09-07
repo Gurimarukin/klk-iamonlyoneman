@@ -3,6 +3,7 @@ import { Config } from './config/Config'
 import { KlkPostController } from './controllers/KlkPostController'
 import { RateLimiter } from './controllers/RateLimiter'
 import { UserController } from './controllers/UserController'
+import { WithAuth } from './controllers/WithAuth'
 import { WithIp } from './controllers/WithIp'
 import { MsDuration } from './models/MsDuration'
 import { Route } from './models/Route'
@@ -29,7 +30,8 @@ export function Context(Logger: PartialLogger, config: Config, mongo: MongoPoolP
   const userService = UserService(Logger, userPersistence)
 
   const withIp = WithIp(Logger, config)
-  const klkPostController = KlkPostController(Logger, klkPostService)
+  const withAuth = WithAuth(Logger, userService)
+  const klkPostController = KlkPostController(Logger, withAuth, klkPostService)
   const userController = UserController(Logger, userService)
 
   const rateLimiter = RateLimiter(Logger, withIp, MsDuration.days(1))

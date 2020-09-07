@@ -1,4 +1,4 @@
-import { Either, Try, pipe } from '../../shared/utils/fp'
+import { Either, Try, flow, pipe } from '../../shared/utils/fp'
 
 export type AsyncState<A> = AsyncState.Loading | AsyncState.Failure | AsyncState.Success<A>
 
@@ -47,22 +47,28 @@ export namespace AsyncState {
 
   // methods
 
-  export function fold<A, B>({
-    onLoading,
-    onFailure,
-    onSuccess,
-  }: FoldArgs<A, B>): (state: AsyncState<A>) => B {
-    return state => {
-      switch (state._tag) {
-        case 'Loading':
-          return onLoading()
-        case 'Failure':
-          return onFailure(state.error)
-        case 'Success':
-          return onSuccess(state.value)
-      }
+  export const fold = <A, B>({ onLoading, onFailure, onSuccess }: FoldArgs<A, B>) => (
+    state: AsyncState<A>,
+  ): B => {
+    switch (state._tag) {
+      case 'Loading':
+        return onLoading()
+      case 'Failure':
+        return onFailure(state.error)
+      case 'Success':
+        return onSuccess(state.value)
     }
   }
+
+  export const map = <A, B>(f: (a: A) => B) => (state: AsyncState<A>): AsyncState<B> =>
+    pipe(
+      state,
+      fold({
+        onLoading: () => Loading,
+        onFailure: e => Failure(e),
+        onSuccess: flow(f, Success),
+      }),
+    )
 
   export function fromTry<A>(t: Try<A>): AsyncState<A> {
     return pipe(t, Either.fold(Failure, Success))

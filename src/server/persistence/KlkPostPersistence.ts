@@ -1,11 +1,12 @@
-import * as C from 'io-ts/lib/Codec'
+import * as C from 'io-ts/Codec'
 import { Collection, Cursor, FilterQuery } from 'mongodb'
 
-import { KlkPost, OnlyWithIdAndUrlKlkPost } from '../../shared/models/klkPost/KlkPost'
+import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 import { EpisodeNumber } from '../../shared/models/PartialKlkPostQuery'
 import { Either, Future, List, Maybe, Task, flow, pipe } from '../../shared/utils/fp'
+import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
 import { FpCollection, decodeError } from './FpCollection'
@@ -20,7 +21,11 @@ export function KlkPostPersistence(
   mongoCollection: (coll: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
 ) {
   const logger = Logger('KlkPostPersistence')
-  const collection = FpCollection(logger, mongoCollection('klkPost'), KlkPost.codec)
+  const collection = FpCollection<KlkPost, KlkPost.Output>(
+    logger,
+    mongoCollection('klkPost'),
+    KlkPost.codec,
+  )
 
   type OutputType = C.OutputOf<typeof KlkPost.codec>
 
@@ -60,7 +65,7 @@ export function KlkPostPersistence(
       pipe(
         collection.collection(coll =>
           coll
-            .find({ id: { $in: ids } }, { projection: { id: 1 } })
+            .find({ id: { $in: ids.map(KlkPostId.unwrap) } }, { projection: { id: 1 } })
             .map(
               flow(
                 KlkPost.onlyWithIdCodec.decode,
@@ -72,19 +77,33 @@ export function KlkPostPersistence(
         Future.chain(flow(List.array.sequence(Either.either), Task.of)),
       ),
 
-    // find: (id: GuildId): Future<Maybe<KlkPost>> => collection.findOne({ id }),
+    findById: (id: KlkPostId): Future<Maybe<KlkPost>> =>
+      collection.findOne({ id: KlkPostId.unwrap(id) }),
 
     updateSizeById: (id: KlkPostId, size: Size): Future<boolean> =>
       pipe(
-        collection.collection(coll => coll.updateOne({ id: id }, { $set: { size } })),
-        Future.map(r => r.modifiedCount === 1),
+        collection.collection(coll =>
+          coll.updateOne({ id: KlkPostId.unwrap(id) }, { $set: { size } }),
+        ),
+        Future.map(r => r.matchedCount === 1),
+      ),
+
+    updatePostById: (id: KlkPostId, payload: KlkPostEditPayload): Future<boolean> =>
+      pipe(
+        collection.collection(coll =>
+          coll.updateOne(
+            { id: KlkPostId.unwrap(id) },
+            { $set: klkPostEditPayloadEncoder.encode(payload) },
+          ),
+        ),
+        Future.map(r => r.matchedCount === 1),
       ),
 
     insertMany: (posts: KlkPost[]) => collection.insertMany(posts),
 
     upsert: (id: KlkPostId, post: KlkPost): Future<boolean> =>
       pipe(
-        collection.updateOne({ id }, post, { upsert: true }),
+        collection.updateOne({ id: KlkPostId.unwrap(id) }, post, { upsert: true }),
         Future.map(_ => _.modifiedCount + _.upsertedCount === 1),
       ),
   }

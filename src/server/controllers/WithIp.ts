@@ -1,9 +1,10 @@
-import { IncomingHttpHeaders } from 'http'
-
 import { Request } from 'express'
 import * as H from 'hyper-ts'
+import * as D from 'io-ts/Decoder'
 
-import { List, Maybe, pipe } from '../../shared/utils/fp'
+import { NonEmptyString } from '../../shared/models/NonEmptyString'
+import { Undefined } from '../../shared/models/Undefined'
+import { Do, Maybe, pipe } from '../../shared/utils/fp'
 import { Config } from '../config/Config'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { PartialLogger } from '../services/Logger'
@@ -13,41 +14,35 @@ export type WithIp = (
   cause: string,
 ) => (f: (ip: string, req: Request) => EndedMiddleware) => EndedMiddleware
 
-export const WithIp = (Logger: PartialLogger, config: Config): WithIp => cause => f => {
+const maybeStr = D.union(NonEmptyString.decoder, Undefined.decoder).decode
+
+export const WithIp = (Logger: PartialLogger, config: Config): WithIp => {
   const logger = Logger('WithIp')
 
-  return pipe(
-    ControllerUtils.withRequest,
-    H.ichain(req =>
-      pipe(
+  return cause => f =>
+    pipe(
+      Do(H.middleware)
+        .bind('req', ControllerUtils.withRequest)
+        .bind('xForwardedFor', H.decodeHeader('x-forwarded-for', maybeStr))
+        .bind('remoteAddress', H.decodeHeader('remote-address', maybeStr))
+        .bind('xRealIp', H.decodeHeader('x-real-ip', maybeStr))
+        .done(),
+      H.ichain(({ req, xForwardedFor, remoteAddress, xRealIp }) =>
         pipe(
-          extractHeader('x-forwarded-for', req.headers),
-          Maybe.alt(() => extractHeader('remote-address', req.headers)),
-          Maybe.alt(() => extractHeader('x-real-ip', req.headers)),
-          Maybe.alt(() => (config.isDev ? Maybe.some(req.ip) : Maybe.none)),
-        ),
-        Maybe.fold(
-          () =>
-            pipe(
-              logger.error(`Request rejected because ip is required for ${cause}`),
-              H.fromIOEither,
-              H.ichain(_ => EndedMiddleware.text(H.Status.BadRequest)()),
-            ),
-          ip => f(ip, req),
+          Maybe.fromNullable(
+            xForwardedFor || remoteAddress || xRealIp || config.isDev ? '127.0.0.1' : undefined,
+          ),
+          Maybe.fold(
+            () =>
+              pipe(
+                logger.error(`Request rejected because ip is required for ${cause}`),
+                H.fromIOEither,
+                H.ichain(_ => EndedMiddleware.text(H.Status.BadRequest)()),
+              ),
+            ip => f(ip, req),
+          ),
         ),
       ),
-    ),
-  )
-}
-
-function extractHeader(name: string, headers: IncomingHttpHeaders): Maybe<string> {
-  return pipe(Maybe.fromNullable(headers[name]), Maybe.chain(headerToString))
-}
-
-function headerToString(header: string | string[]): Maybe<string> {
-  return Array.isArray(header)
-    ? List.isEmpty(header)
-      ? Maybe.none
-      : Maybe.some(header.join(';'))
-    : Maybe.some(header)
+      H.orElse(_ => EndedMiddleware.text(H.Status.BadRequest)()),
+    )
 }

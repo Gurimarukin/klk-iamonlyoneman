@@ -1,7 +1,7 @@
 import * as H from 'hyper-ts'
 
-import { LoginPayload } from '../../shared/models/LoginPayload'
-import { TokenPayload } from '../../shared/models/TokenPayload'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
+import { TokenDAO } from '../../shared/models/login/TokenDAO'
 import { Maybe, flow, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { PartialLogger } from '../services/Logger'
@@ -23,7 +23,7 @@ export function UserController(Logger: PartialLogger, userService: UserService) 
       H.ichain(
         Maybe.fold(
           () => EndedMiddleware.text(H.Status.BadRequest)(),
-          flow(TokenPayload, EndedMiddleware.json(H.Status.OK, TokenPayload.codec.encode)),
+          flow(TokenDAO, EndedMiddleware.json(H.Status.OK, TokenDAO.codec.encode)),
         ),
       ),
     ),

@@ -1,4 +1,4 @@
-import * as D from 'io-ts/lib/Decoder'
+import * as D from 'io-ts/Decoder'
 
 import {
   Do,
@@ -10,7 +10,6 @@ import {
   pipe,
   unknownToError,
 } from '../../shared/utils/fp'
-
 import { FileUtils } from '../utils/FileUtils'
 
 export type Validated<A> = Either<string, A>
