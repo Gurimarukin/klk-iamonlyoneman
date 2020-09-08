@@ -1,8 +1,9 @@
 import { Future, pipe } from '../shared/utils/fp'
+import { Config } from './config/Config'
 import { Context } from './Context'
 
 pipe(
-  Context.load(),
+  Context.load(Config.Lens.logLevel.set('debug')),
   Future.chain(({ Logger, ensureIndexes, createUser }) => {
     const logger = Logger('Application')
     return pipe(

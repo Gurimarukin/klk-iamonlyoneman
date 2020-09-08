@@ -68,9 +68,9 @@ export function Context(Logger: PartialLogger, config: Config, mongo: MongoPoolP
 type Context = ReturnType<typeof Context>
 
 export namespace Context {
-  export function load(): Future<Context> {
+  export function load(configModifier: (c: Config) => Config = c => c): Future<Context> {
     return Do(Future.taskEitherSeq)
-      .bindL('config', () => Future.fromIOEither(Config.load()))
+      .bind('config', pipe(Config.load(), Future.fromIOEither, Future.map(configModifier)))
       .letL('Logger', ({ config }) => PartialLogger(config.logLevel))
       .bindL('mongo', ({ config, Logger }) => MongoPoolParty(Logger, config))
       .return(({ config, Logger, mongo }) => Context(Logger, config, mongo))

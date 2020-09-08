@@ -1,5 +1,6 @@
 import { sequenceT } from 'fp-ts/Apply'
 import * as D from 'io-ts/Decoder'
+import { Lens as MLens } from 'monocle-ts'
 
 import { Either, IO, Maybe, NonEmptyArray, pipe } from '../../shared/utils/fp'
 import { LogLevelOrOff } from '../models/LogLevel'
@@ -39,6 +40,10 @@ export namespace Config {
         ),
       ),
     )
+  }
+
+  export namespace Lens {
+    export const logLevel = MLens.fromProp<Config>()('logLevel')
   }
 }
 
