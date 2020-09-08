@@ -206,5 +206,5 @@ const StyledForm = styled(PostEditForm)({
   left: 0,
   width: '100%',
   transition: 'all 0.3s',
-  overflow: 'hidden',
+  overflow: 'auto auto',
 })
