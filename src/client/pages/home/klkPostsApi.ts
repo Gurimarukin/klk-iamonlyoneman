@@ -2,6 +2,7 @@ import { KlkPostDAO, KlkPostDAOs } from '../../../shared/models/klkPost/KlkPostD
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
+import { Token } from '../../../shared/models/Token'
 import { Future } from '../../../shared/utils/fp'
 import { apiRoutes } from '../../utils/apiRoutes'
 import { Http } from '../../utils/Http'
@@ -12,10 +13,12 @@ export const getKlkPosts = (query: PartialKlkPostQuery): Future<KlkPostDAOs> =>
 export const postKlkPostEditForm = (
   id: KlkPostId,
   payload: KlkPostEditPayload,
+  token: Token,
 ): Future<KlkPostDAO> =>
   Http.post(
     apiRoutes.klkPost(id),
     payload,
     KlkPostEditPayload.codec.encode,
     KlkPostDAO.codec.decode,
+    Http.withToken(token),
   )

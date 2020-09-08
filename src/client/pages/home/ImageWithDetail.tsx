@@ -29,7 +29,7 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
     Maybe.fold(() => ({ height: theme.Gallery.smallestSide }), resizeImg),
   )
 
-  const { isAdmin } = useUser()
+  const { token } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const toggleEditing = useCallback(() => setIsEditing(e => !e), [])
   const closeEditing = useCallback(() => setIsEditing(false), [])
@@ -61,14 +61,22 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
             </Links>
           </div>
         </TitleContainer>
-        {isAdmin ? (
-          <>
-            <EditButton onClick={toggleEditing} className={EDIT_BTN}>
-              <Pencil />
-            </EditButton>
-            <StyledForm post={post}>form</StyledForm>
-          </>
-        ) : null}
+        {pipe(
+          token,
+          Maybe.fold(
+            () => null,
+            t => (
+              <>
+                <EditButton onClick={toggleEditing} className={EDIT_BTN}>
+                  <Pencil />
+                </EditButton>
+                <StyledForm token={t} post={post}>
+                  form
+                </StyledForm>
+              </>
+            ),
+          ),
+        )}
       </Container>
     </ClickOutside>
   )

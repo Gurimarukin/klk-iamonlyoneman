@@ -33,7 +33,7 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          {homeLink({}, '100 newest')}
+          {homeLink({}, '99 newest')}
           <Separator />
           <EpisodesContainer>
             <EpisodesTitle>Episodes:</EpisodesTitle>

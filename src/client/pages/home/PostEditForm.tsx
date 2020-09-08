@@ -5,12 +5,14 @@ import React, { useCallback, useState } from 'react'
 
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
+import { Token } from '../../../shared/models/Token'
 import { Either, Future, pipe } from '../../../shared/utils/fp'
 import { useKlkPosts } from '../../contexts/KlkPostsContext'
 import { theme } from '../../utils/theme'
 import { postKlkPostEditForm } from './klkPostsApi'
 
 type Props = Readonly<{
+  token: Token
   post: KlkPostDAO
   className?: string
 }>
@@ -22,21 +24,32 @@ type StateKeyString = Diff<keyof State, 'active'>
 
 const activeLens = Lens.fromProp<State>()('active')
 
-export const PostEditForm = ({ post, className }: Props): JSX.Element => {
+namespace Status {
+  export const empty = ''
+  export const loading = 'loading'
+  export const error = 'error'
+  export const done = 'done'
+}
+
+type Status = typeof Status.empty | typeof Status.loading | typeof Status.error | typeof Status.done
+
+export const PostEditForm = ({ post, token, className }: Props): JSX.Element => {
   const { updateById } = useKlkPosts()
-  const [error, setError] = useState('')
+  const [status, setStatus] = useState<Status>(Status.empty)
 
   const [state, setState] = useState<State>(() => KlkPostEditPayload.codec.encode(post))
 
   const updateStringField = useCallback(
-    (key: StateKeyString) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setState(Lens.fromProp<State>()(key).set(e.target.value)),
+    (key: StateKeyString) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setState(Lens.fromProp<State>()(key).set(e.target.value))
+      setStatus(Status.empty)
+    },
     [],
   )
-  const updateActive = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setState(activeLens.set(e.target.checked)),
-    [],
-  )
+  const updateActive = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setState(activeLens.set(e.target.checked))
+    setStatus(Status.empty)
+  }, [])
 
   const validated = KlkPostEditPayload.codec.decode(state)
 
@@ -45,17 +58,22 @@ export const PostEditForm = ({ post, className }: Props): JSX.Element => {
       e.preventDefault()
       pipe(
         validated,
-        Either.map(payload =>
+        Either.map(payload => {
+          setStatus(Status.loading)
           pipe(
-            postKlkPostEditForm(post.id, payload),
-            Future.map(newPost => updateById(post.id, newPost)),
-            Future.recover<unknown>(_ => Future.right(setError('error'))),
+            postKlkPostEditForm(post.id, payload, token),
+            Future.map(newPost => {
+              updateById(post.id, newPost)
+              setStatus(Status.done)
+              setTimeout(() => setStatus(Status.empty), 1000)
+            }),
+            Future.recover<unknown>(_ => Future.right(setStatus(Status.error))),
             Future.runUnsafe,
-          ),
-        ),
+          )
+        }),
       )
     },
-    [post.id, updateById, validated],
+    [post.id, token, updateById, validated],
   )
 
   const input = useCallback(
@@ -83,8 +101,11 @@ export const PostEditForm = ({ post, className }: Props): JSX.Element => {
         <input type='checkbox' checked={state.active} onChange={updateActive} />
       </Active>
       <SubmitContainer>
-        {error}
-        <button role='submit' disabled={Either.isLeft(validated)}>
+        {status}
+        <button
+          role='submit'
+          disabled={Either.isLeft(validated) || status === Status.loading || status === Status.done}
+        >
           Submit
         </button>
       </SubmitContainer>

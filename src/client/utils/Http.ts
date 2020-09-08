@@ -1,8 +1,13 @@
 import * as D from 'io-ts/Decoder'
 
+import { Token } from '../../shared/models/Token'
 import { Either, Future, Try, flow } from '../../shared/utils/fp'
 
 export namespace Http {
+  export const withToken = (token: Token): RequestInit => ({
+    headers: { Authorization: Token.unwrap(token) },
+  })
+
   export function get<A>(
     url: string,
     decode: (u: unknown) => Either<D.DecodeError, A>,

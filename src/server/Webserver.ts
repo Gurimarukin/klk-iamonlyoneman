@@ -22,6 +22,8 @@ import { EndedMiddleware } from './models/EndedMiddleware'
 import { Route } from './models/Route'
 import { Logger, PartialLogger } from './services/Logger'
 
+const allowedHeaders = ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+
 export const startWebServer = (
   Logger: PartialLogger,
   config: Config,
@@ -46,10 +48,7 @@ export const startWebServer = (
                     () => next(),
                     origin => {
                       res.append('Access-Control-Allow-Origin', origin)
-                      res.header(
-                        'Access-Control-Allow-Headers',
-                        'Origin, X-Requested-With, Content-Type, Accept',
-                      )
+                      res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '))
                       if (req.method === 'OPTIONS') res.send()
                       else next()
                     },

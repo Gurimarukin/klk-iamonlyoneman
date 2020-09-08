@@ -1,7 +1,7 @@
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
-import { Dict, List, Maybe, pipe } from '../../shared/utils/fp'
+import { Dict, List, pipe } from '../../shared/utils/fp'
 import { NumberFromString } from './NumberFromString'
 
 export namespace EpisodeNumber {
@@ -29,11 +29,18 @@ export namespace PostsSort {
 
 export type PostsSort = D.TypeOf<typeof PostsSort.decoder>
 
+export namespace PostActive {
+  export const decoder = D.union(D.literal('true'), D.literal('false'))
+}
+
+export type PostActive = D.TypeOf<typeof PostActive.decoder>
+
 export namespace PartialKlkPostQuery {
   export const decoder = D.partial({
     episode: EpisodeNumber.decoder,
     search: D.string,
     sort: PostsSort.decoder,
+    active: PostActive.decoder,
   })
 
   type Out = Partial<Record<keyof PartialKlkPostQuery, string>>
@@ -44,9 +51,6 @@ export namespace PartialKlkPostQuery {
         List.reduce({} as Out, (acc, [key, value]) => ({ ...acc, [key]: String(value) })),
       ),
   }
-
-  export const defaultSort = (episode: Maybe<EpisodeNumber>): PostsSort =>
-    Maybe.isSome(episode) ? 'old' : 'new'
 }
 
 export type PartialKlkPostQuery = D.TypeOf<typeof PartialKlkPostQuery.decoder>

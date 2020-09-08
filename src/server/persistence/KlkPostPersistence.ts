@@ -109,22 +109,15 @@ export function KlkPostPersistence(
   }
 
   function cursorFromQueryParams(
-    { episode, search, sort }: KlkPostsQuery,
+    { episode, search, sortNew, active }: KlkPostsQuery,
     coll: Collection<OutputType>,
   ): Cursor<OutputType> {
     const find = coll.find({
+      active,
       ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
       ...foldRecord(search, s => ({ $text: { $search: s } })),
     })
-
-    const sorted = (() => {
-      switch (sort) {
-        case 'new':
-          return find.sort([['createdAt', -1]])
-        case 'old':
-          return find.sort([['createdAt', 1]])
-      }
-    })()
+    const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
     return Maybe.isNone(episode) ? sorted.limit(limitIfNoEpisode) : sorted
   }

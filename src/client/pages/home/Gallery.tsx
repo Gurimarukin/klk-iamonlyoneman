@@ -113,6 +113,11 @@ const Container = styled.div({
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
-  paddingTop: theme.spacing.large,
-  paddingBottom: theme.Gallery.margin,
+  paddingTop: theme.spacing.extraLarge,
+
+  '&::after': {
+    content: `''`,
+    width: '100%',
+    height: theme.spacing.extraLarge,
+  },
 })
