@@ -6,7 +6,7 @@ export namespace KlkPostsQuery {
     const episode = Maybe.fromNullable(partial.episode)
     const search = Maybe.fromNullable(partial.search)
     const sortNew = partial.sort === 'new' || (partial.sort !== 'old' && Maybe.isNone(episode))
-    const active = partial.active === 'true' || partial.active !== 'false'
+    const active = partial.active !== 'false'
     return { episode, search, sortNew, active }
   }
 }

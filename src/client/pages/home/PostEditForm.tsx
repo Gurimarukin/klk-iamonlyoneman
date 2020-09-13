@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import * as E from 'io-ts/Encoder'
 import { Lens } from 'monocle-ts'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
@@ -65,7 +65,6 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
             Future.map(newPost => {
               updateById(post.id, newPost)
               setStatus(Status.done)
-              setTimeout(() => setStatus(Status.empty), 1000)
             }),
             Future.recover<unknown>(_ => Future.right(setStatus(Status.error))),
             Future.runUnsafe,
@@ -75,6 +74,14 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
     },
     [post.id, token, updateById, validated],
   )
+
+  useEffect(() => {
+    if (status === Status.done) {
+      const timer = setTimeout(() => setStatus(Status.empty), 1000)
+      return () => clearTimeout(timer)
+    }
+    return () => {}
+  }, [status])
 
   const input = useCallback(
     (key: StateKeyString, label: string, type = 'text'): JSX.Element => (

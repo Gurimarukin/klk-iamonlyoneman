@@ -1,7 +1,9 @@
+import { pipe } from 'fp-ts/lib/pipeable'
 import * as C from 'io-ts/Codec'
 
 import { Maybe } from '../../utils/fp'
 import { DateFromISOString } from '../DateFromISOString'
+import { PartialKlkPostQuery } from '../PartialKlkPostQuery'
 import { KlkPostId } from './KlkPostId'
 import { Size } from './Size'
 
@@ -18,6 +20,22 @@ export namespace KlkPostDAO {
     permalink: C.string,
     active: C.boolean,
   })
+
+  export const matchesQuery = (query: PartialKlkPostQuery) => (post: KlkPostDAO): boolean => {
+    const matchesEpisode =
+      query.episode === undefined || query.episode === 'unknown'
+        ? Maybe.isNone(post.episode)
+        : pipe(
+            post.episode,
+            Maybe.exists(e => e === query.episode),
+          )
+    const matchesSearch =
+      query.search === undefined ||
+      post.title.toLowerCase().match(query.search.toLowerCase()) !== null
+    const matchesActive = post.active === (query.active !== 'false')
+
+    return matchesEpisode && matchesSearch && matchesActive
+  }
 }
 
 export type KlkPostDAO = C.TypeOf<typeof KlkPostDAO.codec>

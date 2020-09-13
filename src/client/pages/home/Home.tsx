@@ -43,9 +43,18 @@ export const Home = trackWindowScroll(
 
     const updateById = useCallback(
       (id: KlkPostId, post: KlkPostDAO): void => {
-        mutate(List.map(List.map(p => (p.id === id ? post : p))), false)
+        mutate(
+          List.map(
+            List.filterMap(p =>
+              p.id === id
+                ? pipe(Maybe.some(post), Maybe.filter(KlkPostDAO.matchesQuery(query)))
+                : Maybe.some(p),
+            ),
+          ),
+          false,
+        )
       },
-      [mutate],
+      [mutate, query],
     )
 
     const { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd } = useMemo(() => {
