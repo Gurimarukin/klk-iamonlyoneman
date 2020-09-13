@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
 import { useSWRInfinite } from 'swr'
 
+import { config } from '../../../shared/config'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { List, Maybe, pipe } from '../../../shared/utils/fp'
@@ -64,7 +65,8 @@ export const Home = trackWindowScroll(
         isLoadingInitialData ||
         (size > 0 && data !== undefined && pipe(data, List.lookup(size - 1), Maybe.isNone))
       const isReachingEnd =
-        List.isEmpty(klkPosts) || (data !== undefined && List.isEmpty(data[data.length - 1]))
+        List.isEmpty(klkPosts) ||
+        (data !== undefined && data[data.length - 1].length < config.pageSize)
       // const isRefreshing = isValidating && data !== undefined && data.length === size
       return { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd }
     }, [data, error, size])

@@ -1,6 +1,7 @@
 import * as C from 'io-ts/Codec'
 import { Collection, Cursor, FilterQuery } from 'mongodb'
 
+import { config } from '../../shared/config'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
@@ -10,8 +11,6 @@ import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
 import { FpCollection, decodeError } from './FpCollection'
-
-const limit = 25
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
@@ -120,7 +119,7 @@ export function KlkPostPersistence(
     })
     const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
-    return sorted.skip(page * limit).limit(limit)
+    return sorted.skip(page * config.pageSize).limit(config.pageSize)
   }
 
   function foldRecord<A, B>(
