@@ -15,7 +15,7 @@ export type UserService = ReturnType<typeof UserService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function UserService(Logger: PartialLogger, userPersistence: UserPersistence) {
-  const _logger = Logger('UserService')
+  const logger = Logger('UserService')
 
   return {
     login: (userName: string, clearPassword: ClearPassword): Future<Maybe<Token>> =>
@@ -51,7 +51,7 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
     createUser: (): Future<void> =>
       pipe(
         Do(Future.taskEither)
-          .do(Future.fromIOEither(IO.apply(() => console.log('Creating user'))))
+          .do(Future.fromIOEither(IO.apply(() => logger.info('Creating user'))))
           .bind('user', prompt('name: '))
           .bind('password', prompt('password: '))
           .bind('confirm', prompt('confirm password: '))

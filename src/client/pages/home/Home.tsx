@@ -60,8 +60,6 @@ export const Home = trackWindowScroll(
       return { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd }
     }, [data, error, size])
 
-    console.log('klkPosts.length =', klkPosts.length)
-
     const onScroll = useCallback(
       (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const elt = e.target as HTMLDivElement
