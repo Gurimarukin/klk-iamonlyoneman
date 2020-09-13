@@ -37,7 +37,9 @@ export const Home = trackWindowScroll(
       [query],
     )
 
-    const { data, error, mutate, size, setSize } = useSWRInfinite(getKey, getKlkPosts)
+    const { data, error, mutate, size, setSize } = useSWRInfinite(getKey, getKlkPosts, {
+      revalidateOnFocus: false,
+    })
 
     const updateById = useCallback(
       (id: KlkPostId, post: KlkPostDAO): void => {
@@ -57,6 +59,8 @@ export const Home = trackWindowScroll(
       // const isRefreshing = isValidating && data !== undefined && data.length === size
       return { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd }
     }, [data, error, size])
+
+    console.log('klkPosts.length =', klkPosts.length)
 
     const onScroll = useCallback(
       (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
