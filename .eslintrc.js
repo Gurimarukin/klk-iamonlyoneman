@@ -2,7 +2,10 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    project: './tsconfig-client.json',
+    project: './tsconfig.json',
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
   extends: [
     'plugin:react/recommended',
@@ -16,11 +19,6 @@ module.exports = {
       version: 'detect',
     },
   },
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
   reportUnusedDisableDirectives: true,
   rules: {
     '@typescript-eslint/array-type': ['warn', { default: 'array', readonly: 'array' }],
@@ -29,12 +27,21 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-namespace': 'off',
+    '@typescript-eslint/no-unnecessary-condition': 'warn',
     '@typescript-eslint/no-unused-vars': [
       'warn',
       { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
     ],
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false }],
+    '@typescript-eslint/strict-boolean-expressions': [
+      'warn',
+      {
+        allowString: false,
+        allowNumber: false,
+        allowNullableObject: false,
+      },
+    ],
     'arrow-body-style': ['warn', 'as-needed'],
     'array-callback-return': 'off',
     'comma-dangle': [
@@ -65,6 +72,7 @@ module.exports = {
     'no-redeclare': 'off',
     'no-shadow': 'off',
     'no-undef': 'off',
+    'no-unneeded-ternary': 'warn',
     'no-useless-computed-key': 'warn',
     'no-useless-rename': 'warn',
     'object-shorthand': 'warn',

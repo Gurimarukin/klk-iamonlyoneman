@@ -29,9 +29,10 @@ export const WithIp = (Logger: PartialLogger, config: Config): WithIp => {
         .done(),
       H.ichain(({ req, xForwardedFor, remoteAddress, xRealIp }) =>
         pipe(
-          Maybe.fromNullable(
-            xForwardedFor || remoteAddress || xRealIp || config.isDev ? '127.0.0.1' : undefined,
-          ),
+          Maybe.fromNullable(xForwardedFor),
+          Maybe.alt(() => Maybe.fromNullable(remoteAddress)),
+          Maybe.alt(() => Maybe.fromNullable(xRealIp)),
+          Maybe.alt(() => (config.isDev ? Maybe.some('127.0.0.1') : Maybe.none)),
           Maybe.fold(
             () =>
               pipe(

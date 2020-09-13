@@ -100,7 +100,8 @@ export function KlkPostService(
         Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 
-    findAll: (query: KlkPostsQuery): Future<KlkPost[]> => klkPostPersistence.findAll(query),
+    findAll: (query: KlkPostsQuery, page: number): Future<KlkPost[]> =>
+      klkPostPersistence.findAll(query, page),
 
     updatePostAndGetUpdated: (id: KlkPostId, payload: KlkPostEditPayload): Future<Maybe<KlkPost>> =>
       pipe(

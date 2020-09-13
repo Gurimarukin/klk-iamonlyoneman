@@ -4,6 +4,7 @@ import * as D from 'io-ts/Decoder'
 import { KlkPostDAO, KlkPostDAOs } from '../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { NumberFromString } from '../../shared/models/NumberFromString'
 import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
 import { Maybe, flow, pipe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
@@ -14,7 +15,15 @@ import { PartialLogger } from '../services/Logger'
 import { ControllerUtils } from '../utils/ControllerUtils'
 import { WithAuth } from './WithAuth'
 
-const klkPostsQuery = pipe(PartialKlkPostQuery.decoder, D.map(KlkPostsQuery.fromPartial))
+const klkPostsQuery = pipe(
+  PartialKlkPostQuery.decoder,
+  D.map(KlkPostsQuery.fromPartial),
+  D.intersect(
+    D.partial({
+      page: NumberFromString.decoder,
+    }),
+  ),
+)
 
 export type KlkPostController = ReturnType<typeof KlkPostController>
 
@@ -27,9 +36,9 @@ export function KlkPostController(
   const logger = Logger('KlkPostController')
 
   const klkPosts: EndedMiddleware = ControllerUtils.withQuery(klkPostsQuery.decode)(
-    query =>
+    ({ page, ...query }) =>
       pipe(
-        H.fromTaskEither(klkPostService.findAll(query)),
+        H.fromTaskEither(klkPostService.findAll(query, page === undefined ? 0 : page)),
         H.ichain(EndedMiddleware.json(H.Status.OK, KlkPostDAOs.codec.encode)),
       ),
     flow(D.draw, logger.debug),

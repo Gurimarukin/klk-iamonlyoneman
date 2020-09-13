@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { trackWindowScroll } from 'react-lazy-load-image-component'
+import { useSWRInfinite } from 'swr'
 
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
@@ -9,52 +10,97 @@ import { GradientContainer } from '../../components/GradientContainer'
 import { ChevronUp } from '../../components/svgs'
 import { KlkPostsContextProvider } from '../../contexts/KlkPostsContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
-import { useAsyncState } from '../../hooks/useAsyncState'
 import { useMaybeRef } from '../../hooks/useMaybeRef'
-import { AsyncState } from '../../models/AsyncState'
 import { apiRoutes } from '../../utils/apiRoutes'
 import { theme } from '../../utils/theme'
 import { Gallery } from './Gallery'
 import { Header } from './Header'
 import { getKlkPosts } from './klkPostsApi'
 
+const LOADING = 'loading...'
+const ERROR = 'error'
+const NO_RESULT = 'no result.'
+const NBSP = ' '
+
 export const Home = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
     const query = useKlkPostsQuery()
-    const [state, update] = useAsyncState(apiRoutes.klkPosts(query), getKlkPosts(query))
-    const updateById = useCallback(
-      (id: KlkPostId, post: KlkPostDAO) => update(List.map(p => (p.id === id ? post : p))),
-      [update],
+
+    // A function to get the SWR key of each page,
+    // its return value will be accepted by `fetcher`.
+    // If `null` is returned, the request of that page won't start.
+    const getKey = useCallback(
+      (pageIndex: number, previousPageData: KlkPostDAO[] | null): string | null => {
+        if (previousPageData !== null && previousPageData.length === 0) return null // reached the end
+        return apiRoutes.klkPosts(query, pageIndex) // SWR key
+      },
+      [query],
     )
 
-    const [ref, mountRef] = useMaybeRef<HTMLElement>()
+    const { data, error, mutate, size, setSize } = useSWRInfinite(getKey, getKlkPosts)
+
+    const updateById = useCallback(
+      (id: KlkPostId, post: KlkPostDAO): void => {
+        mutate(List.map(List.map(p => (p.id === id ? post : p))), false)
+      },
+      [mutate],
+    )
+
+    const { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd } = useMemo(() => {
+      const klkPosts = data === undefined ? [] : List.flatten(data)
+      const isLoadingInitialData = data === undefined && error === undefined
+      const isLoadingMore =
+        isLoadingInitialData ||
+        (size > 0 && data !== undefined && pipe(data, List.lookup(size - 1), Maybe.isNone))
+      const isReachingEnd =
+        List.isEmpty(klkPosts) || (data !== undefined && List.isEmpty(data[data.length - 1]))
+      // const isRefreshing = isValidating && data !== undefined && data.length === size
+      return { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd }
+    }, [data, error, size])
+
+    const onScroll = useCallback(
+      (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const elt = e.target as HTMLDivElement
+        if (
+          !isLoadingMore &&
+          !isReachingEnd &&
+          elt.scrollHeight <= elt.scrollTop + elt.clientHeight
+        ) {
+          setSize(s => s + 1)
+        }
+      },
+      [isLoadingMore, isReachingEnd, setSize],
+    )
+
+    const [headerRef, mountHeaderRef] = useMaybeRef<HTMLElement>()
     const scrollToTop = useCallback((): void => {
       pipe(
-        ref.current,
+        headerRef.current,
         Maybe.map(e => e.scrollIntoView({ behavior: 'smooth' })),
       )
-    }, [ref])
+    }, [headerRef])
 
     return (
-      <Container>
-        <Header ref={mountRef} />
-        {pipe(
-          state,
-          AsyncState.fold({
-            onLoading: () => <LoadingOrError>loading...</LoadingOrError>,
-            onFailure: _ => <LoadingOrError>error</LoadingOrError>,
-            onSuccess: klkPosts => (
-              <KlkPostsContextProvider updateById={updateById}>
-                <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} headerRef={ref} />
-                {List.isEmpty(klkPosts) ? null : (
-                  <ScrollToTop onClick={scrollToTop} title='Scroll to top'>
-                    <ChevronUp />
-                  </ScrollToTop>
-                )}
-              </KlkPostsContextProvider>
-            ),
-          }),
-        )}
+      <Container onScroll={onScroll}>
+        <Header ref={mountHeaderRef} />
+        <KlkPostsContextProvider updateById={updateById}>
+          {isLoadingInitialData ? (
+            <LoadingOrError>{LOADING}</LoadingOrError>
+          ) : List.isEmpty(klkPosts) ? (
+            <LoadingOrError>{NO_RESULT}</LoadingOrError>
+          ) : (
+            <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} headerRef={headerRef}>
+              <LoadingOrError>
+                {isLoadingMore ? LOADING : error !== undefined ? ERROR : NBSP}
+              </LoadingOrError>
+            </Gallery>
+          )}
+          {List.isEmpty(klkPosts) ? null : (
+            <ScrollToTop onClick={scrollToTop} title='Scroll to top'>
+              <ChevronUp />
+            </ScrollToTop>
+          )}
+        </KlkPostsContextProvider>
       </Container>
     )
   },
@@ -69,6 +115,7 @@ const Container = styled(GradientContainer)({
 const LoadingOrError = styled.div({
   paddingTop: theme.spacing.large,
   textAlign: 'center',
+  width: '100%',
 })
 
 const ScrollToTop = styled.button({

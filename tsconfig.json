@@ -1,7 +1,7 @@
 {
   "extends": "@type-config/strict",
   "compilerOptions": {
-    "outDir": "dist/client",
+    "outDir": "dist",
     "baseUrl": ".",
     "target": "es5",
     "lib": ["es6", "dom"],
@@ -18,6 +18,6 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/client/**/*.ts", "src/client/**/*.tsx"],
+  "include": ["typings/**/*.d.ts", "src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

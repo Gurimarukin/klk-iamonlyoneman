@@ -11,14 +11,14 @@ import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
 import { FpCollection, decodeError } from './FpCollection'
 
-const limitIfNoEpisode = 100
+const limit = 25
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function KlkPostPersistence(
   Logger: PartialLogger,
-  mongoCollection: (coll: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
+  mongoCollection: (collName: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
 ) {
   const logger = Logger('KlkPostPersistence')
   const collection = FpCollection<KlkPost, KlkPost.Output>(
@@ -40,10 +40,10 @@ export function KlkPostPersistence(
 
     count: (): Future<number> => collection.count({}),
 
-    findAll: (query: KlkPostsQuery): Future<KlkPost[]> =>
+    findAll: (query: KlkPostsQuery, page: number): Future<KlkPost[]> =>
       pipe(
         collection.collection(coll =>
-          cursorFromQueryParams(query, coll)
+          cursorFromQueryParams(coll, query, page)
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
@@ -109,8 +109,9 @@ export function KlkPostPersistence(
   }
 
   function cursorFromQueryParams(
-    { episode, search, sortNew, active }: KlkPostsQuery,
     coll: Collection<OutputType>,
+    { episode, search, sortNew, active }: KlkPostsQuery,
+    page: number,
   ): Cursor<OutputType> {
     const find = coll.find({
       active,
@@ -119,7 +120,7 @@ export function KlkPostPersistence(
     })
     const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
-    return Maybe.isNone(episode) ? sorted.limit(limitIfNoEpisode) : sorted
+    return sorted.skip(page * limit).limit(limit)
   }
 
   function foldRecord<A, B>(

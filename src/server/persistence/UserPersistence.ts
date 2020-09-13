@@ -12,7 +12,7 @@ export type UserPersistence = ReturnType<typeof UserPersistence>
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function UserPersistence(
   Logger: PartialLogger,
-  mongoCollection: (coll: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
+  mongoCollection: (collName: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
 ) {
   const logger = Logger('UserPersistence')
   const collection = FpCollection<User, User.Output>(logger, mongoCollection('user'), User.codec)

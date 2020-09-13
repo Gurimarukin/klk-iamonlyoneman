@@ -12,28 +12,26 @@ export namespace Http {
     url: string,
     decode: (u: unknown) => Either<D.DecodeError, A>,
     config: RequestInit = {},
-  ): Future<A> {
+  ): Promise<A> {
     const headers = {}
-    return () =>
-      fetch(url, {
-        method: 'GET',
-        ...config,
-        headers: {
-          ...headers,
-          ...config.headers,
-        },
-      })
-        .then<unknown>(res => (res.ok ? res.json() : Promise.reject(res)))
-        .then<Try<A>>(
-          flow(
-            decode,
-            Either.fold(
-              e => Promise.reject(D.draw(e)),
-              a => Promise.resolve(Either.right(a)),
-            ),
+    return fetch(url, {
+      method: 'GET',
+      ...config,
+      headers: {
+        ...headers,
+        ...config.headers,
+      },
+    })
+      .then<unknown>(res => (res.ok ? res.json() : Promise.reject(res)))
+      .then<A>(
+        flow(
+          decode,
+          Either.fold(
+            e => Promise.reject(D.draw(e)),
+            a => Promise.resolve(a),
           ),
-        )
-        .catch(Either.left)
+        ),
+      )
   }
 
   export function post<A, O, B>(

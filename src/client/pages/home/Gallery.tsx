@@ -85,17 +85,15 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, headerRef, 
             }
       }
     >
+      {klkPosts.map(_ => (
+        <ImageWithDetail
+          key={KlkPostId.unwrap(_.id)}
+          scrollPosition={scrollPosition}
+          resizeImg={resizeImg}
+          post={_}
+        />
+      ))}
       {children}
-      {List.isEmpty(klkPosts)
-        ? 'no result.'
-        : klkPosts.map(_ => (
-            <ImageWithDetail
-              key={KlkPostId.unwrap(_.id)}
-              scrollPosition={scrollPosition}
-              resizeImg={resizeImg}
-              post={_}
-            />
-          ))}
     </Container>
   )
 }
