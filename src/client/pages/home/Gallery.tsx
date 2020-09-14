@@ -5,7 +5,7 @@ import { ScrollPosition } from 'react-lazy-load-image-component'
 import { KlkPostDAOs } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { List, Maybe, pipe } from '../../../shared/utils/fp'
+import { Maybe, pipe } from '../../../shared/utils/fp'
 import { useMaybeRef } from '../../hooks/useMaybeRef'
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
@@ -13,10 +13,9 @@ import { ImageWithDetail } from './ImageWithDetail'
 type Props = Readonly<{
   klkPosts: KlkPostDAOs
   scrollPosition: ScrollPosition
-  headerRef: React.MutableRefObject<Maybe<HTMLElement>>
 }>
 
-export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, headerRef, children }) => {
+export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {
   const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
 
   const getMaxDimension = useCallback(
@@ -69,22 +68,7 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, headerRef, 
   )
 
   return (
-    <Container
-      ref={onMount}
-      style={
-        List.isEmpty(klkPosts)
-          ? {}
-          : {
-              height: pipe(
-                headerRef.current,
-                Maybe.fold(
-                  () => '100%',
-                  e => `calc(100% - ${e.clientHeight}px)`,
-                ),
-              ),
-            }
-      }
-    >
+    <Container ref={onMount}>
       {klkPosts.map(_ => (
         <ImageWithDetail
           key={KlkPostId.unwrap(_.id)}
@@ -112,6 +96,7 @@ const Container = styled.div({
   justifyContent: 'space-around',
   flexWrap: 'wrap',
   paddingTop: theme.spacing.extraLarge,
+  height: '100%',
 
   '&::after': {
     content: `''`,

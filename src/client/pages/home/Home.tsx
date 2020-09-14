@@ -102,7 +102,7 @@ export const Home = trackWindowScroll(
           ) : List.isEmpty(klkPosts) ? (
             <LoadingOrError>{NO_RESULT}</LoadingOrError>
           ) : (
-            <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition} headerRef={headerRef}>
+            <Gallery klkPosts={klkPosts} scrollPosition={scrollPosition}>
               <LoadingOrError>
                 {isLoadingMore ? LOADING : error !== undefined ? ERROR : NBSP}
               </LoadingOrError>
