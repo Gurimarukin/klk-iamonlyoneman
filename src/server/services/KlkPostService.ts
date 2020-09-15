@@ -156,7 +156,13 @@ export function KlkPostService(
 
   function fullPoll(): Future<void> {
     const opts = { fullPoll: true, allSort: true }
-    return logPoll(reduceMultipleListing([rKillLaKillPoll(opts), uIamonlyonemanPoll(opts)]))
+    return logPoll(
+      reduceMultipleListing([
+        rKillLaKillPoll(opts),
+        uIamonlyonemanPoll(opts),
+        rKillLaKillSearchPoll(opts),
+      ]),
+    )
   }
 
   function logPoll(f: Future<ReducerAccumulator<Counter>>): Future<void> {
@@ -211,10 +217,34 @@ export function KlkPostService(
     )
   }
 
-  function _rKillLaKillSearchPoll({
+  function rKillLaKillSearchPoll({
     fullPoll,
     allSort,
   }: FullPoll & AllSort): Future<ReducerAccumulator<Counter>> {
+    return pipe(
+      [
+        // sizes
+        pipe(
+          List.range(1, 9),
+          List.map(n => rKillLaKillSearchEpisode({ fullPoll, allSort }, `${n}`)),
+        ),
+        // episodes
+        pipe(
+          List.range(1, 25),
+          List.map(n =>
+            rKillLaKillSearchEpisode({ fullPoll, allSort: false }, StringUtils.pad10(n)),
+          ),
+        ),
+      ],
+      List.flatten,
+      reduceMultipleListing,
+    )
+  }
+
+  function rKillLaKillSearchEpisode(
+    { fullPoll, allSort }: FullPoll & AllSort,
+    episode: string,
+  ): Future<ReducerAccumulator<Counter>> {
     const reduce = allSort ? reduceForAllSorts : reduceOneListing
 
     return reduce(
@@ -222,7 +252,7 @@ export function KlkPostService(
       {
         url: `${redditDotCom}/${rKillLaKill}/search.json`,
         params: {
-          q: `author:${iamonlyoneman}`,
+          q: `author:${iamonlyoneman} episode ${episode}`,
           t: 'all',
           show: 'all',
           include_over_18: 'on',
