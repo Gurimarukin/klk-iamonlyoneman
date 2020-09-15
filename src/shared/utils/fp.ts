@@ -1,4 +1,4 @@
-import { Do as _Do } from 'fp-ts-contrib/lib/Do'
+import { Do as _Do } from 'fp-ts-contrib/Do'
 import * as _Array from 'fp-ts/Array'
 import * as _Either from 'fp-ts/Either'
 import { Lazy, Predicate, flow as _flow, identity as _identity, not as _not } from 'fp-ts/function'

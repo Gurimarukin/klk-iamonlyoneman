@@ -28,7 +28,7 @@ devDependencies:
   file-loader: 6.1.0_webpack@4.44.1
   fork-ts-checker-webpack-plugin: 5.1.0
   fp-ts: 2.8.2
-  fp-ts-contrib: 0.1.18_fp-ts@2.8.2
+  fp-ts-contrib: 0.1.19_fp-ts@2.8.2
   history: 5.0.0
   html-webpack-plugin: 4.4.1_webpack@4.44.1
   hyper-ts: 0.6.0_express@4.17.1+fp-ts@2.8.2
@@ -3640,14 +3640,14 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
-  /fp-ts-contrib/0.1.18_fp-ts@2.8.2:
+  /fp-ts-contrib/0.1.19_fp-ts@2.8.2:
     dependencies:
       fp-ts: 2.8.2
     dev: true
     peerDependencies:
       fp-ts: ^2.1.2
     resolution:
-      integrity: sha512-1JV2eLM30DI5Ptic88i7Kv9Y2RRCoZx1VCGrDHNoN/fAx4CJm4V0iF+p6aGtXxQjRZCJnlGH70gLcd+iStHuYA==
+      integrity: sha512-u0dZbkh0gLrtiIV/spcwU7D8uoVAUCD7+Z5xSmDGHVKrw6G7jOQh6MlC0IrHXqiu1+J51ui/oFrKOEj9jA99LQ==
   /fp-ts/2.8.2:
     dev: true
     resolution:
@@ -8907,7 +8907,7 @@ specifiers:
   file-loader: ^6.1.0
   fork-ts-checker-webpack-plugin: ^5.1.0
   fp-ts: ^2.8.2
-  fp-ts-contrib: ^0.1.18
+  fp-ts-contrib: ^0.1.19
   history: ^5.0.0
   html-webpack-plugin: ^4.4.1
   hyper-ts: ^0.6.0

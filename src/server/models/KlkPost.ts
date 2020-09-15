@@ -6,7 +6,9 @@ import { DateFromISOString } from '../../shared/models/DateFromISOString'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Maybe, pipe } from '../../shared/utils/fp'
+import { Do, Maybe, pipe } from '../../shared/utils/fp'
+import { StringUtils } from '../../shared/utils/StringUtils'
+import { Link } from './Link'
 
 // KlkPost
 
@@ -46,6 +48,20 @@ export namespace KlkPost {
 
   export type Output = C.OutputOf<typeof codec>
 
+  export const fromLink = (l: Link): KlkPost => {
+    const { episode, size } = metadataFromTitle(l.data.title)
+    return {
+      id: l.data.id,
+      title: l.data.title,
+      episode,
+      size,
+      createdAt: new Date(l.data.created_utc * 1000),
+      permalink: l.data.permalink,
+      url: l.data.url,
+      active: true,
+    }
+  }
+
   export namespace Lens {
     export const size = MLens.fromPath<KlkPost>()(['size'])
   }
@@ -54,6 +70,36 @@ export namespace KlkPost {
 export type KlkPost = C.TypeOf<typeof KlkPost.codec>
 
 export type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof KlkPost.onlyWithIdAndUrlCodec>
+
+type Metadata = Readonly<{
+  episode: Maybe<number>
+  size: Maybe<Size>
+}>
+
+const Regex = {
+  episode: /eps?is?ode\s+([0-9]+)/i,
+  size: /([0-9]+)\s*[x\*]\s*([0-9]+)/i,
+}
+
+export function metadataFromTitle(title: string): Metadata {
+  const episode = pipe(title, StringUtils.matcher1(Regex.episode), Maybe.chain(toNumber))
+  const size = pipe(
+    title,
+    StringUtils.matcher2(Regex.size),
+    Maybe.chain(([width, height]) =>
+      Do(Maybe.option)
+        .bindL('width', () => toNumber(width))
+        .bindL('height', () => toNumber(height))
+        .done(),
+    ),
+  )
+  return { episode, size }
+}
+
+function toNumber(str: string): Maybe<number> {
+  const n = Number(str.trim())
+  return isNaN(n) ? Maybe.none : Maybe.some(n)
+}
 
 // KlkPosts
 

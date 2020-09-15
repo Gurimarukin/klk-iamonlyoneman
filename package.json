@@ -66,7 +66,7 @@
     "file-loader": "^6.1.0",
     "fork-ts-checker-webpack-plugin": "^5.1.0",
     "fp-ts": "^2.8.2",
-    "fp-ts-contrib": "^0.1.18",
+    "fp-ts-contrib": "^0.1.19",
     "history": "^5.0.0",
     "html-webpack-plugin": "^4.4.1",
     "hyper-ts": "^0.6.0",
