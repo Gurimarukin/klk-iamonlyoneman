@@ -6,6 +6,7 @@ import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { Maybe, pipe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
 import { Pencil } from '../../components/svgs'
 import { useUser } from '../../contexts/UserContext'
@@ -34,30 +35,28 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
   const toggleEditing = useCallback(() => setIsEditing(e => !e), [])
   const closeEditing = useCallback(() => setIsEditing(false), [])
 
+  const permalink = `https://reddit.com${post.permalink}`
+
   return (
     <ClickOutside onClickOutside={closeEditing}>
       <Container className={isEditing ? EDITING : undefined}>
-        <StyledImage
-          alt={post.title}
-          src={post.url}
-          scrollPosition={scrollPosition}
-          effect='blur'
-          placeholder={<span />}
-          wrapperClassName={PLACEHOLDER}
-          {...size}
-        />
+        <ABlank href={post.url}>
+          <StyledImage
+            alt={post.title}
+            src={post.url}
+            scrollPosition={scrollPosition}
+            effect='blur'
+            wrapperClassName={PLACEHOLDER}
+            {...size}
+          />
+        </ABlank>
         <TitleContainer style={{ width: size.width }}>
-          {post.title}
+          <TitleABlank href={permalink}>{post.title}</TitleABlank>
           <div className={DETAIL}>
             <span>{formatDate(post.createdAt)}</span>
             <Links>
-              <StyledABlue href={post.url} target='_blank'>
-                View image
-              </StyledABlue>
-              •
-              <StyledARed href={`https://reddit.com${post.permalink}`} target='_blank'>
-                Reddit post
-              </StyledARed>
+              <ABlankBlue href={post.url}>View image</ABlankBlue>•
+              <ABlankRed href={permalink}>Reddit post</ABlankRed>
             </Links>
           </div>
         </TitleContainer>
@@ -109,29 +108,15 @@ const Container = styled.div({
     borderRadius: imgBorderRadius,
   },
 
-  [`& > .${EDIT_BTN}`]: {
+  [`& > .${EDIT_BTN}, & > form`]: {
     opacity: 0,
+    visibility: 'hidden',
   },
 
-  [`&:hover > .${EDIT_BTN}, &.${EDITING} > .${EDIT_BTN}`]: {
+  [`&:hover > .${EDIT_BTN}, &.${EDITING} > .${EDIT_BTN}, &.${EDITING} > form`]: {
     opacity: 1,
+    visibility: 'visible',
   },
-
-  [`& > form`]: {
-    opacity: 0,
-  },
-
-  [`&.${EDITING} > form`]: {
-    opacity: 1,
-  },
-})
-
-const StyledImage = styled(LazyLoadImage)({})
-
-const TitleContainer = styled.span({
-  padding: '0.3em 0',
-  textShadow: theme.textOutline,
-  position: 'relative',
 
   [`& .${DETAIL}`]: {
     position: 'absolute',
@@ -156,11 +141,23 @@ const TitleContainer = styled.span({
   },
 })
 
+const StyledImage = styled(LazyLoadImage)({})
+
+const TitleContainer = styled.span({
+  padding: '0.3em 0',
+  textShadow: theme.textOutline,
+  position: 'relative',
+})
+
+const TitleABlank = styled(ABlank)({
+  color: 'inherit',
+})
+
 const Links = styled.nav({
   marginTop: '0.33em',
 })
 
-const StyledA = styled.a({
+const StyledABlank = styled(ABlank)({
   display: 'inline-block',
   color: 'inherit',
   padding: '0.4em 0.3em',
@@ -169,13 +166,13 @@ const StyledA = styled.a({
   transition: 'all 0.3s',
 })
 
-const StyledABlue = styled(StyledA)({
+const ABlankBlue = styled(StyledABlank)({
   '&:hover': {
     backgroundColor: theme.colors.darkblue,
   },
 })
 
-const StyledARed = styled(StyledA)({
+const ABlankRed = styled(StyledABlank)({
   '&:hover': {
     backgroundColor: theme.colors.darkred,
   },

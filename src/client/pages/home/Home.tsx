@@ -121,6 +121,8 @@ export const Home = trackWindowScroll(
 
 const Container = styled(GradientContainer)({
   height: '100vh',
+  width: '1OOvw',
+  overflowX: 'hidden',
   overflowY: 'auto',
   position: 'relative',
 })

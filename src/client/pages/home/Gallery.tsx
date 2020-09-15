@@ -59,10 +59,11 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
           : { width: w, height: theme.Gallery.smallestSide }
       }
 
-      const h = heightFromWidth(size, theme.Gallery.smallestSide)
+      const w = Math.min(theme.Gallery.smallestSide, maxWidth)
+      const h = heightFromWidth(size, w)
       return h > maxHeight
         ? { width: widthFromHeight(size, maxHeight), height: maxHeight }
-        : { width: theme.Gallery.smallestSide, height: h }
+        : { width: w, height: h }
     },
     [maxWidth, maxHeight],
   )
