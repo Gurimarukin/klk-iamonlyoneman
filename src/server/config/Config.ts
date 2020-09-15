@@ -4,6 +4,7 @@ import { Lens as MLens } from 'monocle-ts'
 
 import { Either, IO, Maybe, NonEmptyArray, pipe } from '../../shared/utils/fp'
 import { LogLevelOrOff } from '../models/LogLevel'
+import { MsDuration } from '../models/MsDuration'
 import { ConfReader, ValidatedNea } from './ConfReader'
 
 // Config
@@ -12,6 +13,7 @@ export interface Config {
   logLevel: LogLevelOrOff
   isDev: boolean
   pollOnStart: boolean
+  pollEveryHours: MsDuration
   port: number
   allowedOrigins: Maybe<NonEmptyArray<string>>
   db: DbConfig
@@ -21,11 +23,12 @@ export function Config(
   logLevel: LogLevelOrOff,
   isDev: boolean,
   pollOnStart: boolean,
+  pollEveryHours: MsDuration,
   port: number,
   allowedOrigins: Maybe<NonEmptyArray<string>>,
   db: DbConfig,
 ): Config {
-  return { logLevel, isDev, pollOnStart, port, allowedOrigins, db }
+  return { logLevel, isDev, pollOnStart, pollEveryHours, port, allowedOrigins, db }
 }
 
 export namespace Config {
@@ -53,12 +56,21 @@ function readConfig(reader: ConfReader): ValidatedNea<Config> {
       reader.read(LogLevelOrOff.decoder)('logLevel'),
       reader.read(D.boolean)('isDev'),
       reader.read(D.boolean)('pollOnStart'),
+      reader.read(D.number)('pollEveryHours'),
       reader.read(D.number)('port'),
       reader.readOpt(NonEmptyArray.decoder(D.string))('allowedOrigins'),
       DbConfig.read(reader),
     ),
-    Either.map(([logLevel, isDev, pollOnStart, port, allowedOrigins, db]) =>
-      Config(logLevel, isDev, pollOnStart, port, allowedOrigins, db),
+    Either.map(([logLevel, isDev, pollOnStart, pollEveryHours, port, allowedOrigins, db]) =>
+      Config(
+        logLevel,
+        isDev,
+        pollOnStart,
+        MsDuration.hours(pollEveryHours),
+        port,
+        allowedOrigins,
+        db,
+      ),
     ),
   )
 }

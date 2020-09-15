@@ -61,8 +61,6 @@ namespace Counter {
   }
 }
 
-const pollRedditEvery = MsDuration.days(1)
-
 const delayBetweenPolls = MsDuration.seconds(1)
 
 const redditDotCom = 'https://reddit.com'
@@ -111,29 +109,17 @@ export function KlkPostService(
   }
 
   function setRefreshActivityInterval(): IO<void> {
-    const now = new Date()
-    const tomorrow8am = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8)
-    const untilTomorrow8am = new Date(tomorrow8am.getTime() - now.getTime())
     return pipe(
-      logger.info(
-        `Scheduling poll: 8am is in ${StringUtils.pad10(
-          untilTomorrow8am.getHours(),
-        )}h${StringUtils.pad10(untilTomorrow8am.getMinutes())}`,
-      ),
-      IO.chain(_ =>
-        pipe(
-          IO.apply(() =>
-            setInterval(
-              () => pipe(dailyPoll(), Future.runUnsafe),
-              MsDuration.unwrap(pollRedditEvery),
-            ),
-          ),
-          Future.fromIOEither,
-          Future.chain(_ => dailyPoll()),
-          Future.delay(MsDuration.wrap(untilTomorrow8am.getTime())),
-          IO.runFuture,
+      IO.apply(() =>
+        setInterval(
+          () => pipe(dailyPoll(), Future.runUnsafe),
+          MsDuration.unwrap(config.pollEveryHours),
         ),
       ),
+      Future.fromIOEither,
+      Future.chain(_ => dailyPoll()),
+      Future.delay(config.pollEveryHours),
+      IO.runFuture,
     )
   }
 
