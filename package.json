@@ -16,7 +16,7 @@
     "client-compile": "tsc --noEmit -p ./tsconfig-client.json",
     "~client-compile": "tsc -w --noEmit -p ./tsconfig-client.json",
     "~client-run": "webpack-dev-server --config webpack.dev.js",
-    "client-build": "webpack --config webpack.prod.js",
+    "client-build": "rm -fr dist/client/* && webpack --config webpack.prod.js",
     "test": "jest",
     "~test": "jest --watchAll",
     "lint": "eslint --cache --fix --max-warnings 0 --ext .ts,.tsx src/ test/"
