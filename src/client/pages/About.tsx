@@ -15,10 +15,7 @@ export const About = (): JSX.Element => (
     </StyledH2>
     <StyledH3>
       <StyledA href='https://www.reddit.com/u/Grimalkin8675'>I</StyledA> am really found of{' '}
-      <StyledA href='https://www.reddit.com/r/iamonlyonesubreddit/comments/aye80k/these_are_not_screenshots/'>
-        his series
-      </StyledA>{' '}
-      and wanted a better viewer for it.
+      <StyledA href='https://redd.it/j1hn9b'>his series</StyledA> and wanted a better viewer for it.
     </StyledH3>
     <GithubA href='https://github.com/Gurimarukin/klk-iamonlyoneman'>github</GithubA>
     <HomeLink to={routes.home()}>home</HomeLink>
