@@ -57,7 +57,16 @@ export namespace KlkPost {
       size,
       createdAt: new Date(l.data.created_utc * 1000),
       permalink: l.data.permalink,
-      url: l.data.url,
+      url:
+        l.data.post_hint === 'link'
+          ? pipe(
+              imgurId(l.data.url),
+              Maybe.fold(
+                () => l.data.url,
+                id => `https://i.imgur.com/${id}.jpg`,
+              ),
+            )
+          : l.data.url,
       active: true,
     }
   }
@@ -79,6 +88,7 @@ type Metadata = Readonly<{
 const Regex = {
   episode: /eps?is?ode\s+([0-9]+)/i,
   size: /([0-9]+)\s*[x\*]\s*([0-9]+)/i,
+  imgur: /https:\/\/imgur\.com\/([a-zA-Z0-9]+)\/?/,
 }
 
 export function metadataFromTitle(title: string): Metadata {
@@ -99,6 +109,10 @@ export function metadataFromTitle(title: string): Metadata {
 function toNumber(str: string): Maybe<number> {
   const n = Number(str.trim())
   return isNaN(n) ? Maybe.none : Maybe.some(n)
+}
+
+export function imgurId(url: string): Maybe<string> {
+  return StringUtils.matcher1(Regex.imgur)(url)
 }
 
 // KlkPosts

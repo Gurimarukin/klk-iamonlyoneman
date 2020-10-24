@@ -64,7 +64,7 @@ const delayBetweenPolls = MsDuration.seconds(1)
 
 const redditDotCom = 'https://reddit.com'
 // const userAgent = 'browser:klk-iamonlyoneman:v1.0.0 (by /u/Grimalkin8675)'
-const postHint = 'image' // for Link.post_hint
+const postHints = [undefined, 'image', 'link'] // for Link.post_hint
 const iamonlyoneman = 'iamonlyoneman' // for Link.author
 const rKillLaKill = 'r/KillLaKill' // for Link.subreddit_name_prefixed
 const searchLimit = 100
@@ -194,7 +194,7 @@ export function KlkPostService(
           limit: searchLimit.toString(),
         },
       },
-      l => l.data.post_hint === postHint && l.data.author === iamonlyoneman,
+      l => postHints.includes(l.data.post_hint) && l.data.author === iamonlyoneman,
     )
   }
 
@@ -213,7 +213,7 @@ export function KlkPostService(
           limit: searchLimit.toString(),
         },
       },
-      l => l.data.post_hint === postHint && l.data.subreddit_name_prefixed === rKillLaKill,
+      l => postHints.includes(l.data.post_hint) && l.data.subreddit_name_prefixed === rKillLaKill,
     )
   }
 
@@ -261,7 +261,7 @@ export function KlkPostService(
           limit: searchLimit.toString(),
         },
       },
-      l => l.data.post_hint === postHint,
+      l => postHints.includes(l.data.post_hint),
     )
   }
 

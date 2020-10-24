@@ -1,4 +1,4 @@
-import { metadataFromTitle } from '../../../src/server/models/KlkPost'
+import { imgurId, metadataFromTitle } from '../../../src/server/models/KlkPost'
 import { Maybe } from '../../../src/shared/utils/fp'
 
 describe('metadataFromTitle', () => {
@@ -75,5 +75,12 @@ describe('metadataFromTitle', () => {
       episode: Maybe.some(16),
       size: Maybe.some({ width: 1920, height: 1595 }),
     })
+  })
+})
+
+describe('imgurId', () => {
+  it('should parse url', () => {
+    expect(imgurId('https://imgur.com/cHZ6iZW')).toEqual(Maybe.some('cHZ6iZW'))
+    expect(imgurId('https://blbl.ch/cHZ6iZW')).toEqual(Maybe.none)
   })
 })
