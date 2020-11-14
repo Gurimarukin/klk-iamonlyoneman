@@ -6,24 +6,26 @@ const spacing = {
   extraLarge: 52,
 }
 
+const colors = {
+  white: '#ffffff',
+  black: '#010101',
+  red: '#a32510',
+  darkred: '#9b3957',
+  darkblue: '#3f61d4',
+  darkgrey: '#1A1D2C',
+  beige1: '#f5dae4',
+  beige2: '#ddb6af',
+  ocre: '#c1bd46',
+  darklila: '#440821',
+  lila: '#71486e',
+  lime: '#46c196',
+  lemon: '#f4ee6f',
+  pink1: '#e994bc',
+  pink2: '#ed69d0',
+}
+
 export const theme = {
-  colors: {
-    white: '#ffffff',
-    black: '#010101',
-    red: '#a32510',
-    darkred: '#9b3957',
-    darkblue: '#3f61d4',
-    darkgrey: '#1A1D2C',
-    beige1: '#f5dae4',
-    beige2: '#ddb6af',
-    ocre: '#c1bd46',
-    darklila: '#440821',
-    lila: '#71486e',
-    lime: '#46c196',
-    lemon: '#f4ee6f',
-    pink1: '#e994bc',
-    pink2: '#ed69d0',
-  },
+  colors,
 
   spacing,
 
@@ -36,6 +38,20 @@ export const theme = {
     smallestSide: 500,
     margin: spacing.extraSmall,
     maxHeight: 0.9, // * 100vh
+  },
+
+  Header: {
+    gradient: `linear-gradient(135deg, ${colors.darklila} 0%, ${colors.lila} 100%)`,
+    link: {
+      padding: {
+        top: '0.4em',
+        left: '0.3em',
+      },
+    },
+  },
+
+  zIndexes: {
+    episodes: 70,
   },
 
   experimental: [

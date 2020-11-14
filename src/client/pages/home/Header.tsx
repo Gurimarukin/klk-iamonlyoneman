@@ -1,15 +1,14 @@
 import styled from '@emotion/styled'
 import React, { forwardRef, useCallback } from 'react'
 
-import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
-import { List } from '../../../shared/utils/fp'
-import { StringUtils } from '../../../shared/utils/StringUtils'
+import { PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useUser } from '../../contexts/UserContext'
 import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
+import { EpisodePicker } from './EpisodePicker'
 
 const SELECTED = 'selected'
 
@@ -30,28 +29,26 @@ export const Header = forwardRef<HTMLElement>(
       ),
       [query.episode],
     )
+
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          {homeLink({}, 'new')}
-          <Separator />
-          <EpisodesContainer>
-            <EpisodesTitle>Episodes:</EpisodesTitle>
-            <Episodes>
-              {List.range(1, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
-              {homeLink({ episode: EpisodeNumber.unknown }, 'unknown')}
-            </Episodes>
-          </EpisodesContainer>
-          <Separator />
-          <StyledLink to={routes.about}>about</StyledLink>
-          {isAdmin ? (
-            <>
-              <Separator />
-              <StyledButton onClick={logout}>
-                <Logout />
-              </StyledButton>
-            </>
-          ) : null}
+          <NavSection>
+            {homeLink({}, 'new')}
+            <Separator />
+            <EpisodePicker homeLink={homeLink} />
+          </NavSection>
+          <NavSection>
+            <StyledLink to={routes.about}>about</StyledLink>
+            {isAdmin ? (
+              <>
+                <Separator />
+                <StyledButton onClick={logout}>
+                  <Logout />
+                </StyledButton>
+              </>
+            ) : null}
+          </NavSection>
         </StyledNav>
       </StyledHeader>
     )
@@ -59,7 +56,9 @@ export const Header = forwardRef<HTMLElement>(
 )
 
 const StyledHeader = styled.header({
-  background: `linear-gradient(135deg, ${theme.colors.darklila} 0%, ${theme.colors.lila} 100%)`,
+  display: 'flex',
+  justifyContent: 'center',
+  background: theme.Header.gradient,
   color: theme.colors.white,
   boxShadow: theme.boxShadow,
   padding: '0.67em',
@@ -68,14 +67,21 @@ const StyledHeader = styled.header({
 })
 
 const StyledNav = styled.nav({
+  width: '100%',
+  maxWidth: 1200,
   display: 'flex',
-  justifyContent: 'center',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+})
+
+const NavSection = styled.nav({
+  display: 'flex',
   alignItems: 'center',
 })
 
 const Separator = styled.span({
   alignSelf: 'stretch',
-  margin: `0 ${theme.spacing.small}px`,
+  margin: `0 ${theme.spacing.extraSmall}px`,
   position: 'relative',
 
   '&::before': {
@@ -97,29 +103,8 @@ const Separator = styled.span({
   },
 })
 
-const EpisodesContainer = styled.div({
-  display: 'flex',
-  alignItems: 'center',
-})
-
-const EpisodesTitle = styled.span({
-  marginRight: theme.spacing.extraSmall,
-})
-
-const Episodes = styled.span({
-  flexGrow: 1,
-  display: 'flex',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-
-  '& > a': {
-    marginLeft: theme.spacing.extraSmall,
-  },
-})
-
-const linkPadding = { top: '0.4em', left: '0.3em' }
 const StyledLink = styled(Link)({
-  padding: `${linkPadding.top} ${linkPadding.left}`,
+  padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
   color: 'inherit',
   textShadow: theme.textShadow(theme.colors.darkgrey),
   borderRadius: 2,
@@ -138,10 +123,10 @@ const StyledLink = styled(Link)({
   '&::after': {
     content: `''`,
     position: 'absolute',
-    width: `calc(100% - 2 * ${linkPadding.left})`,
+    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
     borderBottom: `2px solid ${theme.colors.lime}`,
-    left: linkPadding.left,
-    bottom: `calc(${linkPadding.top} - 1px)`,
+    left: theme.Header.link.padding.left,
+    bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
     transition: 'all 0.3s',
     opacity: 0,
   },
