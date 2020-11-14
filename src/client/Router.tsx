@@ -10,7 +10,12 @@ import { NotFound } from './pages/NotFound'
 
 export const routes = {
   home: (query: PartialKlkPostQuery = {}): string => {
-    const str = qs.stringify(PartialKlkPostQuery.encoder.encode(query))
+    const str = pipe(
+      query,
+      Dict.filter(isDefined),
+      PartialKlkPostQuery.encoder.encode,
+      qs.stringify,
+    )
     return `/${str === '' ? '' : '?'}${str}`
   },
   about: '/about',
@@ -42,4 +47,8 @@ export const Router = ({ path }: Props): JSX.Element => {
   }, [title])
 
   return node
+}
+
+function isDefined<A>(a: A | undefined): a is A {
+  return a !== undefined
 }

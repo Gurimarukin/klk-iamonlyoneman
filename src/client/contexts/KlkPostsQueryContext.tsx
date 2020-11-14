@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 
 import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
 import { Either, pipe } from '../../shared/utils/fp'
@@ -9,9 +9,13 @@ const KlkPostsQueryContext = createContext<PartialKlkPostQuery | undefined>(unde
 export const KlkPostsQueryContextProvider: React.FC = ({ children }) => {
   const { query } = useHistory()
 
-  const value: PartialKlkPostQuery = pipe(
-    PartialKlkPostQuery.decoder.decode(query),
-    Either.getOrElse(_ => ({})),
+  const value: PartialKlkPostQuery = useMemo(
+    () =>
+      pipe(
+        PartialKlkPostQuery.decoder.decode(query),
+        Either.getOrElse(_ => ({})),
+      ),
+    [query],
   )
 
   return <KlkPostsQueryContext.Provider value={value}>{children}</KlkPostsQueryContext.Provider>

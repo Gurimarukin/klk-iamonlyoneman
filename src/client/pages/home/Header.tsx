@@ -9,25 +9,29 @@ import { useUser } from '../../contexts/UserContext'
 import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 import { EpisodePicker } from './EpisodePicker'
+import { SearchInput } from './SearchInput'
 
 const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
   (_, ref): JSX.Element => {
     const { isAdmin, logout } = useUser()
-
     const query = useKlkPostsQuery()
+
     const homeLink = useCallback(
-      (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => (
-        <StyledLink
-          key={key}
-          to={routes.home(toQuery)}
-          className={toQuery.episode === query.episode ? SELECTED : undefined}
-        >
-          {label}
-        </StyledLink>
-      ),
-      [query.episode],
+      (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => {
+        const { episode: _, ...withoutEpisode } = query
+        return (
+          <StyledLink
+            key={key}
+            to={routes.home({ ...withoutEpisode, ...toQuery })}
+            className={toQuery.episode === query.episode ? SELECTED : undefined}
+          >
+            {label}
+          </StyledLink>
+        )
+      },
+      [query],
     )
 
     return (
@@ -37,6 +41,8 @@ export const Header = forwardRef<HTMLElement>(
             {homeLink({}, 'new')}
             <Separator />
             <EpisodePicker homeLink={homeLink} />
+            <Separator />
+            <SearchInput />
           </NavSection>
           <NavSection>
             <StyledLink to={routes.about}>about</StyledLink>
@@ -76,13 +82,22 @@ const StyledNav = styled.nav({
 
 const NavSection = styled.nav({
   display: 'flex',
-  alignItems: 'center',
+  [theme.mediaQueries.desktop]: {
+    alignItems: 'center',
+  },
+  [theme.mediaQueries.mobile]: {
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+  },
 })
 
 const Separator = styled.span({
   alignSelf: 'stretch',
   margin: `0 ${theme.spacing.extraSmall}px`,
   position: 'relative',
+  [theme.mediaQueries.mobile]: {
+    display: 'none',
+  },
 
   '&::before': {
     content: `''`,
@@ -117,6 +132,7 @@ const StyledLink = styled(Link)({
 
     '&::after': {
       borderColor: theme.colors.white,
+      filter: 'none',
     },
   },
 
@@ -127,8 +143,9 @@ const StyledLink = styled(Link)({
     borderBottom: `2px solid ${theme.colors.lime}`,
     left: theme.Header.link.padding.left,
     bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    transition: 'all 0.3s',
+    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
+    transition: 'all 0.3s',
   },
 
   '&:hover::after': {

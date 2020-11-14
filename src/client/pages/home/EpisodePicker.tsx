@@ -87,6 +87,9 @@ const Container = styled.button({
   font: 'inherit',
   cursor: 'pointer',
   position: 'relative',
+  [theme.mediaQueries.mobile]: {
+    marginTop: theme.spacing.extraSmall,
+  },
 
   [`& .${EPISODE_TITLE}`]: {
     marginRight: theme.spacing.extraSmall,
@@ -101,8 +104,9 @@ const Container = styled.button({
     borderBottom: `2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: -1,
-    transition: 'all 0.3s',
+    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
+    transition: 'all 0.3s',
   },
 
   [`&:hover .${EPISODE_TITLE}::after`]: {
@@ -129,12 +133,14 @@ const Container = styled.button({
     width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
     left: theme.Header.link.padding.left,
     bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    transition: 'all 0.3s',
+    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
+    transition: 'all 0.3s',
   },
 
   [`&.${SELECTED} .${EPISODE_NUMBER}::after`]: {
     borderBottom: `2px solid ${theme.colors.white}`,
+    filter: 'none',
   },
 
   [`&:hover .${EPISODE_NUMBER}::after`]: {
@@ -143,7 +149,6 @@ const Container = styled.button({
 })
 
 const ChevronDown = styled(ChevronUp)({
-  height: '1em',
   marginLeft: theme.spacing.extraSmall,
   transform: 'rotate(-180deg)',
 })
@@ -151,7 +156,7 @@ const ChevronDown = styled(ChevronUp)({
 const Episodes = styled.div({
   position: 'absolute',
   left: 0,
-  top: 'calc(100% + 0.67em)',
+  top: 'calc(100% + 0.33em)',
   zIndex: theme.zIndexes.episodes,
   display: 'grid',
 

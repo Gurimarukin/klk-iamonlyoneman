@@ -24,6 +24,12 @@ const colors = {
   pink2: '#ed69d0',
 }
 
+const mobileLimit = '568px'
+const mediaQueries = {
+  mobile: `@media (max-width: ${mobileLimit})`,
+  desktop: `@media (min-width: ${mobileLimit})`,
+}
+
 export const theme = {
   colors,
 
@@ -53,6 +59,8 @@ export const theme = {
   zIndexes: {
     episodes: 70,
   },
+
+  mediaQueries,
 
   experimental: [
     {
