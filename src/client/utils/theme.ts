@@ -25,7 +25,7 @@ const colors = {
   pink2: '#ed69d0',
 }
 
-const mobileLimit = '568px'
+const mobileLimit = '664px'
 const mediaQueries = {
   mobile: `@media (max-width: ${mobileLimit})`,
   desktop: `@media (min-width: ${mobileLimit})`,
