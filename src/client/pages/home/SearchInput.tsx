@@ -63,7 +63,7 @@ export const SearchInput = (): JSX.Element => {
 
 const Container = styled.div({
   [theme.mediaQueries.mobile]: {
-    marginTop: theme.spacing.extraSmall,
+    gridColumnEnd: 'span 2',
   },
 })
 

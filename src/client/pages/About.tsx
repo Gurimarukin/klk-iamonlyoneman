@@ -28,10 +28,13 @@ const Container = styled(GradientContainer)({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+  padding: theme.spacing.xs,
   textShadow: '0 0 6px black',
 })
 
 const StyledH2 = styled.h2({
+  width: '100%',
+  wordBreak: 'break-word',
   fontSize: '2.8em',
 })
 

@@ -19,6 +19,7 @@ const Container = styled(GradientContainer)({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
+  padding: theme.spacing.xs,
   textShadow: '0 0 6px black',
 })
 

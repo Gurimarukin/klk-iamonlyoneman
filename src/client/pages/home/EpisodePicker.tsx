@@ -19,19 +19,20 @@ export type HomeLink = (
   key?: string | number | undefined,
 ) => JSX.Element
 
-const IS_OPEN = 'is-open'
+const OPENED = 'is-open'
 const SELECTED = 'selected'
 const EPISODE_TITLE = 'episode-title'
 const EPISODE_NUMBER = 'episode-number'
+const EPISODES = 'episodes'
 
 const unknownLabel = 'unknown'
 
 export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
   const query = useKlkPostsQuery()
 
-  const [isOpen, setIsOpen] = useState(false)
-  const toggleOpen = useCallback(() => setIsOpen(o => !o), [])
-  const close = useCallback(() => setIsOpen(false), [])
+  const [isOpened, setIsOpened] = useState(false)
+  const toggleOpen = useCallback(() => setIsOpened(o => !o), [])
+  const close = useCallback(() => setIsOpened(false), [])
 
   useEffect(() => {
     function onKeyUp(e: KeyboardEvent) {
@@ -50,26 +51,29 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
         onClick={toggleOpen}
         className={query.episode !== undefined ? SELECTED : undefined}
       >
-        <span className={EPISODE_TITLE}>episode:</span>
-        <span className={EPISODE_NUMBER}>
-          {query.episode === undefined
-            ? '–'
-            : query.episode === 'unknown'
-            ? unknownLabel
-            : StringUtils.pad10(query.episode)}
-        </span>
-        <ChevronDown />
-        <Episodes className={isOpen ? IS_OPEN : undefined}>
+        <Visible>
+          <span className={EPISODE_TITLE}>episode:</span>
+          <span className={EPISODE_NUMBER}>
+            {query.episode === undefined
+              ? '–'
+              : query.episode === 'unknown'
+              ? unknownLabel
+              : StringUtils.pad10(query.episode)}
+          </span>
+          <ChevronDown />
+        </Visible>
+        <div className={`${EPISODES}${isOpened ? ` ${OPENED}` : ''}`}>
           <EpisodesHalf>
             {List.range(1, 12).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
           </EpisodesHalf>
           <EpisodesHalf>
-            {List.range(13, 25).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
+            {List.range(13, 24).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
           </EpisodesHalf>
-          <EpisodeUnknown>
+          <EpisodeCenter>{homeLink({ episode: 25 }, StringUtils.pad10(25))}</EpisodeCenter>
+          <EpisodeCenter>
             {homeLink({ episode: EpisodeNumber.unknown }, unknownLabel)}
-          </EpisodeUnknown>
-        </Episodes>
+          </EpisodeCenter>
+        </div>
       </Container>
     </ClickOutside>
   )
@@ -77,6 +81,7 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
 
 const Container = styled.button({
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   border: 'none',
   borderRadius: 2,
@@ -88,11 +93,12 @@ const Container = styled.button({
   cursor: 'pointer',
   position: 'relative',
   [theme.mediaQueries.mobile]: {
-    marginTop: theme.spacing.extraSmall,
+    gridColumnEnd: 'span 2',
+    justifySelf: 'end',
   },
 
   [`& .${EPISODE_TITLE}`]: {
-    marginRight: theme.spacing.extraSmall,
+    marginRight: theme.spacing.xxs,
     textDecoration: 'underline',
     position: 'relative',
   },
@@ -146,33 +152,42 @@ const Container = styled.button({
   [`&:hover .${EPISODE_NUMBER}::after`]: {
     opacity: 1,
   },
-})
 
-const ChevronDown = styled(ChevronUp)({
-  marginLeft: theme.spacing.extraSmall,
-  transform: 'rotate(-180deg)',
-})
+  [`& .${EPISODES}`]: {
+    position: 'absolute',
+    top: 'calc(100% + 0.33em)',
+    zIndex: theme.zIndexes.episodes,
+    display: 'grid',
+    gridTemplateColumns: '50% 50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    boxShadow: theme.boxShadow,
+    opacity: 0,
+    filter: 'blur(10px)',
+    visibility: 'hidden',
+    transition: 'all 0.3s',
+    [theme.mediaQueries.desktop]: {
+      // left: 0,
+    },
+    [theme.mediaQueries.mobile]: {
+      right: 0,
+    },
+  },
 
-const Episodes = styled.div({
-  position: 'absolute',
-  left: 0,
-  top: 'calc(100% + 0.33em)',
-  zIndex: theme.zIndexes.episodes,
-  display: 'grid',
-
-  gridTemplateColumns: '50% 50%',
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  boxShadow: theme.boxShadow,
-  opacity: 0,
-  filter: 'blur(10px)',
-  visibility: 'hidden',
-  transition: 'all 0.3s',
-
-  [`&.${IS_OPEN}`]: {
+  [`&:hover .${EPISODES}, & .${EPISODES}.${OPENED}`]: {
     opacity: 1,
     filter: 'blur(0)',
     visibility: 'visible',
   },
+})
+
+const Visible = styled.span({
+  display: 'flex',
+  alignItems: 'center',
+})
+
+const ChevronDown = styled(ChevronUp)({
+  marginLeft: theme.spacing.xxs,
+  transform: 'rotate(-180deg)',
 })
 
 const EpisodesHalf = styled.div({
@@ -182,8 +197,8 @@ const EpisodesHalf = styled.div({
   padding: `${theme.Header.link.padding.top} 1.33em 0`,
 })
 
-const EpisodeUnknown = styled.div({
-  gridColumn: '1 / span 2',
+const EpisodeCenter = styled.div({
+  gridColumnEnd: 'span 2',
   display: 'flex',
   justifyContent: 'center',
   padding: `0 0.67em ${theme.Header.link.padding.top}`,

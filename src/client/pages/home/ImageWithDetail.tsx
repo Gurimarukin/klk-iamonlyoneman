@@ -191,15 +191,15 @@ const EditButton = styled.button({
   alignItems: 'center',
   padding: 0,
   position: 'absolute',
-  top: theme.spacing.extraSmall,
-  right: theme.spacing.extraSmall,
+  top: theme.spacing.xs,
+  right: theme.spacing.xs,
   filter: `drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
   transition: 'all 0.3s',
 })
 
 const StyledForm = styled(PostEditForm)({
   position: 'absolute',
-  top: `calc(1.32em + 2 * ${theme.spacing.extraSmall}px)`,
+  top: `calc(1.32em + 2 * ${theme.spacing.xs}px)`,
   left: 0,
   width: '100%',
   transition: 'all 0.3s',

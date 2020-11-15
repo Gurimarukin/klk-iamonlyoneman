@@ -37,24 +37,15 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          <NavSection>
-            {homeLink({}, 'new')}
-            <Separator />
-            <EpisodePicker homeLink={homeLink} />
-            <Separator />
-            <SearchInput />
-          </NavSection>
-          <NavSection>
-            <StyledLink to={routes.about}>about</StyledLink>
-            {isAdmin ? (
-              <>
-                <Separator />
-                <StyledButton onClick={logout}>
-                  <Logout />
-                </StyledButton>
-              </>
-            ) : null}
-          </NavSection>
+          {homeLink({}, 'new')}
+          <EpisodePicker homeLink={homeLink} />
+          <SearchInput />
+          <StyledLink to={routes.about}>about</StyledLink>
+          {isAdmin ? (
+            <LogoutButton onClick={logout}>
+              <Logout />
+            </LogoutButton>
+          ) : null}
         </StyledNav>
       </StyledHeader>
     )
@@ -75,46 +66,16 @@ const StyledHeader = styled.header({
 const StyledNav = styled.nav({
   width: '100%',
   maxWidth: 1200,
-  display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
-})
-
-const NavSection = styled.nav({
-  display: 'flex',
+  display: 'grid',
+  alignItems: 'center',
   [theme.mediaQueries.desktop]: {
-    alignItems: 'center',
+    gridTemplateColumns: 'auto auto 1fr auto auto',
+    columnGap: theme.spacing.m,
   },
   [theme.mediaQueries.mobile]: {
-    alignItems: 'flex-start',
-    flexDirection: 'column',
-  },
-})
-
-const Separator = styled.span({
-  alignSelf: 'stretch',
-  margin: `0 ${theme.spacing.extraSmall}px`,
-  position: 'relative',
-  [theme.mediaQueries.mobile]: {
-    display: 'none',
-  },
-
-  '&::before': {
-    content: `''`,
-    position: 'absolute',
-    left: -1,
-    top: -1,
-    height: '100%',
-    borderLeft: `1px solid ${theme.colors.ocre}`,
-  },
-
-  '&::after': {
-    content: `''`,
-    position: 'absolute',
-    left: 1,
-    top: 1,
-    height: '100%',
-    borderLeft: `1px solid ${theme.colors.white}`,
+    gridTemplateColumns: 'auto 1fr auto',
+    rowGap: theme.spacing.s,
+    justifyItems: 'start',
   },
 })
 
@@ -153,7 +114,7 @@ const StyledLink = styled(Link)({
   },
 })
 
-const StyledButton = styled.button({
+const LogoutButton = styled.button({
   border: 'none',
   background: 'none',
   color: 'inherit',
@@ -166,6 +127,10 @@ const StyledButton = styled.button({
   alignItems: 'center',
   padding: 0,
   filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+  [theme.mediaQueries.mobile]: {
+    gridColumnStart: 3,
+    justifySelf: 'end',
+  },
 
   '&::after': {
     content: `''`,

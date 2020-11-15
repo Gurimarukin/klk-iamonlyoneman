@@ -122,22 +122,22 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
 
 const StyledForm = styled.form({
   backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  padding: theme.spacing.extraSmall,
+  padding: theme.spacing.xs,
 })
 
 const StyledLabel = styled.label({
   display: 'flex',
   alignItems: 'center',
-  marginBottom: theme.spacing.extraSmall,
+  marginBottom: theme.spacing.xs,
 
   '& + &': {
-    marginTop: theme.spacing.extraSmall,
+    marginTop: theme.spacing.xs,
   },
 
   '& > span': {
     flexBasis: 0,
     flexGrow: 1,
-    marginRight: theme.spacing.extraSmall,
+    marginRight: theme.spacing.xs,
   },
 
   '& > input': {
@@ -152,13 +152,13 @@ const Size = styled.div({
   flexWrap: 'wrap',
 
   '& > *': {
-    marginTop: theme.spacing.extraSmall,
+    marginTop: theme.spacing.xs,
     flexBasis: 0,
     flexGrow: 1,
   },
 
   '& > * + *': {
-    marginLeft: theme.spacing.extraSmall,
+    marginLeft: theme.spacing.xs,
   },
 })
 
@@ -167,7 +167,7 @@ const Active = styled.label({
   alignItems: 'center',
 
   '& > span': {
-    marginRight: theme.spacing.extraSmall,
+    marginRight: theme.spacing.xs,
   },
 })
 
@@ -175,9 +175,9 @@ const SubmitContainer = styled.div({
   display: 'flex',
   justifyContent: 'flex-end',
   alignItems: 'center',
-  marginTop: theme.spacing.extraSmall,
+  marginTop: theme.spacing.xs,
 
   '& > button': {
-    marginLeft: theme.spacing.extraSmall,
+    marginLeft: theme.spacing.xs,
   },
 })

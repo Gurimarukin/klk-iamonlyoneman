@@ -96,12 +96,12 @@ const Container = styled.div({
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
-  paddingTop: theme.spacing.extraLarge,
+  paddingTop: theme.spacing.xl,
   height: '100%',
 
   '&::after': {
     content: `''`,
     width: '100%',
-    height: theme.spacing.extraLarge,
+    height: theme.spacing.xl,
   },
 })

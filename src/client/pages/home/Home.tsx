@@ -128,15 +128,15 @@ const Container = styled(GradientContainer)({
 })
 
 const LoadingOrError = styled.div({
-  paddingTop: theme.spacing.large,
+  paddingTop: theme.spacing.l,
   textAlign: 'center',
   width: '100%',
 })
 
 const ScrollToTop = styled.button({
   position: 'fixed',
-  right: theme.spacing.large,
-  bottom: theme.spacing.small,
+  right: theme.spacing.l,
+  bottom: theme.spacing.s,
   width: '1.3em',
   height: '1.3em',
   border: 'none',

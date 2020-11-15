@@ -96,12 +96,12 @@ const StyledLabel = styled.label({
   alignItems: 'center',
 
   '& + &': {
-    marginTop: theme.spacing.extraSmall,
+    marginTop: theme.spacing.xs,
   },
 
   '& > span': {
     flexGrow: 1,
-    marginRight: theme.spacing.small,
+    marginRight: theme.spacing.s,
   },
 })
 
@@ -109,9 +109,9 @@ const SubmitContainer = styled.div({
   display: 'flex',
   justifyContent: 'flex-end',
   alignItems: 'center',
-  marginTop: theme.spacing.extraSmall,
+  marginTop: theme.spacing.xs,
 
   '& > button': {
-    marginLeft: theme.spacing.extraSmall,
+    marginLeft: theme.spacing.xs,
   },
 })

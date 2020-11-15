@@ -1,9 +1,10 @@
 const spacing = {
-  extraSmall: 8,
-  small: 16,
-  medium: 26,
-  large: 38,
-  extraLarge: 52,
+  xxs: 6,
+  xs: 8,
+  s: 16,
+  m: 26,
+  l: 38,
+  xl: 52,
 }
 
 const colors = {
@@ -42,7 +43,7 @@ export const theme = {
 
   Gallery: {
     smallestSide: 500,
-    margin: spacing.extraSmall,
+    margin: spacing.xs,
     maxHeight: 0.9, // * 100vh
   },
 
