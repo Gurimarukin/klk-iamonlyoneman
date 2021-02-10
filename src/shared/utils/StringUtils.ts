@@ -65,5 +65,5 @@ export namespace StringUtils {
       ),
     )
 
-  export const pad10 = (n: number): string => s`${n}`.padStart(2, '0')
+  export const pad10 = (n: number): string => (n < 10 ? `0${n}` : `${n}`)
 }
