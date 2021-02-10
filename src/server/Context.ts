@@ -1,3 +1,5 @@
+import { Collection, MongoClient } from 'mongodb'
+
 import { Do, Future, pipe } from '../shared/utils/fp'
 import { Config } from './config/Config'
 import { KlkPostController } from './controllers/KlkPostController'
@@ -14,14 +16,19 @@ import { KlkPostService } from './services/KlkPostService'
 import { PartialLogger } from './services/Logger'
 import { UserService } from './services/UserService'
 import { FutureUtils } from './utils/FutureUtils'
-import { MongoPoolParty } from './utils/MongoPoolParty'
 import { startWebServer } from './Webserver'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function Context(Logger: PartialLogger, config: Config, mongo: MongoPoolParty) {
+export function Context(Logger: PartialLogger, config: Config) {
   const logger = Logger('Context')
 
-  const { mongoCollection } = mongo
+  const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
+  const mongoClient = new MongoClient(url, { useUnifiedTopology: true })
+  const mongoCollection = (coll: string) => <A>(f: (coll: Collection) => Promise<A>): Future<A> =>
+    pipe(
+      Future.apply(() => mongoClient.connect()),
+      Future.chain(client => Future.apply(() => f(client.db(config.db.dbName).collection(coll)))),
+    )
 
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
   const userPersistence = UserPersistence(Logger, mongoCollection)
@@ -72,7 +79,6 @@ export namespace Context {
     return Do(Future.taskEitherSeq)
       .bind('config', pipe(Config.load(), Future.fromIOEither, Future.map(configModifier)))
       .letL('Logger', ({ config }) => PartialLogger(config.logLevel))
-      .bindL('mongo', ({ config, Logger }) => MongoPoolParty(Logger, config))
-      .return(({ config, Logger, mongo }) => Context(Logger, config, mongo))
+      .return(({ config, Logger }) => Context(Logger, config))
   }
 }
