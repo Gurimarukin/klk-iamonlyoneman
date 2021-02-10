@@ -27,7 +27,7 @@ jobs:
     - name: npm/yarn/pnpm install
       uses: Jaid/action-npm-install@v1.2.4
       with: 
-        packageManager: pnpm
+        packageManager: yarn
     - run: echo "API_HOST=http://localhost:8676" > conf/client/.env
     - run: npm run server-build
     - run: npm run client-build
