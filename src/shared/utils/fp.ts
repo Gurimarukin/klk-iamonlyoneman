@@ -18,7 +18,7 @@ import * as E_ from 'io-ts/Encoder'
 import { MsDuration } from '../../server/models/MsDuration'
 
 export const unknownToError = (e: unknown): Error =>
-  e instanceof Error ? e : new Error('unknown error')
+  e instanceof Error ? e : Error('unknown error')
 
 export const todo = (...[]: List<unknown>): never => {
   // eslint-disable-next-line functional/no-throw-statement

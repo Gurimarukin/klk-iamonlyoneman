@@ -1,10 +1,11 @@
+import { eq } from 'fp-ts'
 import { Predicate, pipe } from 'fp-ts/function'
 import { Lens as MonocleLens } from 'monocle-ts'
 
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
-import { Future, IO, List, Maybe } from '../../shared/utils/fp'
-import { StringUtils } from '../../shared/utils/StringUtils'
+import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { StringUtils, s } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { KlkPost } from '../models/KlkPost'
@@ -65,7 +66,7 @@ const delayBetweenPolls = MsDuration.seconds(1)
 const redditDotCom = 'https://reddit.com'
 // const userAgent = 'browser:klk-iamonlyoneman:v1.0.0 (by /u/Grimalkin8675)'
 const postHints = [undefined, 'image', 'link'] // for Link.post_hint
-const iamonlyoneman = 'iamonlyoneman' // for Link.author
+const iamonlyoneman: NonEmptyArray<string> = ['iamonlyoneman', 'iamonlyoneman_'] // for Link.author
 const rKillLaKill = 'r/KillLaKill' // for Link.subreddit_name_prefixed
 const searchLimit = 100
 const defaultSort: RedditSort = 'new'
@@ -144,7 +145,7 @@ export function KlkPostService(
       ),
       Future.chain(res =>
         Future.fromIOEither(
-          logger.info(`Added missing sizes: ${res.filter(s => s).length}/${res.length}`),
+          logger.info(s`Added missing sizes: ${res.filter(b => b).length}/${res.length}`),
         ),
       ),
     )
@@ -172,7 +173,7 @@ export function KlkPostService(
       Future.chain(({ requestsCount, accumulator: c }) =>
         Future.fromIOEither(
           logger.info(
-            `End polling - requests: ${requestsCount}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
+            s`End polling - requests: ${requestsCount}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
           ),
         ),
       ),
@@ -188,13 +189,12 @@ export function KlkPostService(
     return reduce(
       { fullPoll },
       {
-        url: `${redditDotCom}/${rKillLaKill}.json`,
-        params: {
-          sort: defaultSort,
-          limit: searchLimit.toString(),
-        },
+        url: s`${redditDotCom}/${rKillLaKill}.json`,
+        params: { sort: defaultSort, limit: searchLimit.toString() },
       },
-      l => postHints.includes(l.data.post_hint) && l.data.author === iamonlyoneman,
+      l =>
+        postHints.includes(l.data.post_hint) &&
+        List.elem(eq.eqString)(l.data.author, iamonlyoneman),
     )
   }
 
@@ -204,16 +204,20 @@ export function KlkPostService(
   }: FullPoll & AllSort): Future<ReducerAccumulator<Counter>> {
     const reduce = allSort ? reduceForAllSorts : reduceOneListing
 
-    return reduce(
-      { fullPoll },
-      {
-        url: `${redditDotCom}/user/${iamonlyoneman}/submitted.json`,
-        params: {
-          sort: defaultSort,
-          limit: searchLimit.toString(),
-        },
-      },
-      l => postHints.includes(l.data.post_hint) && l.data.subreddit_name_prefixed === rKillLaKill,
+    return pipe(
+      iamonlyoneman,
+      List.map(author =>
+        reduce(
+          { fullPoll },
+          {
+            url: s`${redditDotCom}/user/${author}/submitted.json`,
+            params: { sort: defaultSort, limit: searchLimit.toString() },
+          },
+          l =>
+            postHints.includes(l.data.post_hint) && l.data.subreddit_name_prefixed === rKillLaKill,
+        ),
+      ),
+      reduceMultipleListing,
     )
   }
 
@@ -222,27 +226,30 @@ export function KlkPostService(
     allSort,
   }: FullPoll & AllSort): Future<ReducerAccumulator<Counter>> {
     return pipe(
-      [
-        // sizes
-        pipe(
-          List.range(1, 9),
-          List.map(n => rKillLaKillSearchEpisode({ fullPoll, allSort }, `${n}`)),
-        ),
-        // episodes
-        pipe(
-          List.range(1, 25),
-          List.map(n =>
-            rKillLaKillSearchEpisode({ fullPoll, allSort: false }, StringUtils.pad10(n)),
+      iamonlyoneman,
+      List.chain(author =>
+        List.concat(
+          // integers
+          pipe(
+            List.range(1, 9),
+            List.map(n => rKillLaKillSearchEpisode({ fullPoll, allSort }, author, s`${n}`)),
+          ),
+          // episodes
+          pipe(
+            List.range(1, 25),
+            List.map(n =>
+              rKillLaKillSearchEpisode({ fullPoll, allSort: false }, author, StringUtils.pad10(n)),
+            ),
           ),
         ),
-      ],
-      List.flatten,
+      ),
       reduceMultipleListing,
     )
   }
 
   function rKillLaKillSearchEpisode(
     { fullPoll, allSort }: FullPoll & AllSort,
+    author: string,
     episode: string,
   ): Future<ReducerAccumulator<Counter>> {
     const reduce = allSort ? reduceForAllSorts : reduceOneListing
@@ -250,9 +257,9 @@ export function KlkPostService(
     return reduce(
       { fullPoll },
       {
-        url: `${redditDotCom}/${rKillLaKill}/search.json`,
+        url: s`${redditDotCom}/${rKillLaKill}/search.json`,
         params: {
-          q: `author:${iamonlyoneman} episode ${episode}`,
+          q: s`author:${author} episode ${episode}`,
           t: 'all',
           show: 'all',
           include_over_18: 'on',
@@ -414,5 +421,5 @@ function printLinkIds(links: List<Link>): string {
     links.map(_ => KlkPostId.unwrap(_.data.id)),
     StringUtils.mkString(','),
   )
-  return `(${links.length}) ${res}`
+  return s`(${links.length}) ${res}`
 }

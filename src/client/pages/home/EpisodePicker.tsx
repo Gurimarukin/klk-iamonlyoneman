@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
 import { List } from '../../../shared/utils/fp'
-import { StringUtils } from '../../../shared/utils/StringUtils'
+import { StringUtils, s } from '../../../shared/utils/StringUtils'
 import { ClickOutside } from '../../components/ClickOutside'
 import { ChevronUp } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
@@ -63,7 +63,7 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
           </span>
           <ChevronDown />
         </Visible>
-        <div className={`${EPISODES}${isOpened ? ` ${OPENED}` : ''}`}>
+        <div className={s`${EPISODES}${isOpened ? s` ${OPENED}` : ''}`}>
           <EpisodesHalf>
             {List.range(1, 12).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
           </EpisodesHalf>
@@ -86,7 +86,7 @@ const Container = styled.button({
   alignItems: 'center',
   border: 'none',
   borderRadius: 2,
-  padding: `0 ${theme.Header.link.padding.left}`,
+  padding: s`0 ${theme.Header.link.padding.left}`,
   color: 'inherit',
   backgroundColor: 'transparent',
   lineHeight: 'inherit',
@@ -98,63 +98,63 @@ const Container = styled.button({
     justifySelf: 'end',
   },
 
-  [`& .${EPISODE_TITLE}`]: {
+  [s`& .${EPISODE_TITLE}`]: {
     marginRight: theme.spacing.xxs,
     textDecoration: 'underline',
     position: 'relative',
   },
 
-  [`& .${EPISODE_TITLE}::after`]: {
-    content: `''`,
+  [s`& .${EPISODE_TITLE}::after`]: {
+    content: "''",
     position: 'absolute',
     width: '100%',
-    borderBottom: `2px solid ${theme.colors.lime}`,
+    borderBottom: s`2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: -1,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+    filter: s`drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
     transition: 'all 0.3s',
   },
 
-  [`&:hover .${EPISODE_TITLE}::after`]: {
+  [s`&:hover .${EPISODE_TITLE}::after`]: {
     opacity: 1,
   },
 
-  [`& .${EPISODE_NUMBER}`]: {
+  [s`& .${EPISODE_NUMBER}`]: {
     borderRadius: 2,
-    padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
+    padding: s`${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
     position: 'relative',
     transition: 'all 0.3s',
   },
 
-  [`&.${SELECTED} .${EPISODE_NUMBER}`]: {
+  [s`&.${SELECTED} .${EPISODE_NUMBER}`]: {
     textDecoration: 'underline',
     textShadow: theme.textShadow(theme.colors.darkgrey),
     backgroundColor: theme.colors.lime,
     boxShadow: theme.boxShadowLight,
   },
 
-  [`& .${EPISODE_NUMBER}::after`]: {
-    content: `''`,
+  [s`& .${EPISODE_NUMBER}::after`]: {
+    content: "''",
     position: 'absolute',
-    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
+    width: s`calc(100% - 2 * ${theme.Header.link.padding.left})`,
     left: theme.Header.link.padding.left,
-    bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+    bottom: s`calc(${theme.Header.link.padding.top} - 1px)`,
+    filter: s`drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
     transition: 'all 0.3s',
   },
 
-  [`&.${SELECTED} .${EPISODE_NUMBER}::after`]: {
-    borderBottom: `2px solid ${theme.colors.white}`,
+  [s`&.${SELECTED} .${EPISODE_NUMBER}::after`]: {
+    borderBottom: s`2px solid ${theme.colors.white}`,
     filter: 'none',
   },
 
-  [`&:hover .${EPISODE_NUMBER}::after`]: {
+  [s`&:hover .${EPISODE_NUMBER}::after`]: {
     opacity: 1,
   },
 
-  [`& .${EPISODES}`]: {
+  [s`& .${EPISODES}`]: {
     position: 'absolute',
     top: 'calc(100% + 0.33em)',
     zIndex: theme.zIndexes.episodes,
@@ -174,7 +174,7 @@ const Container = styled.button({
     },
   },
 
-  [`&:hover .${EPISODES}, & .${EPISODES}.${OPENED}`]: {
+  [s`&:hover .${EPISODES}, & .${EPISODES}.${OPENED}`]: {
     opacity: 1,
     filter: 'blur(0)',
     visibility: 'visible',
@@ -195,12 +195,12 @@ const EpisodesHalf = styled.div({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  padding: `${theme.Header.link.padding.top} 1.33em 0`,
+  padding: s`${theme.Header.link.padding.top} 1.33em 0`,
 })
 
 const EpisodeCenter = styled.div({
   gridColumnEnd: 'span 2',
   display: 'flex',
   justifyContent: 'center',
-  padding: `0 0.67em ${theme.Header.link.padding.top}`,
+  padding: s`0 0.67em ${theme.Header.link.padding.top}`,
 })

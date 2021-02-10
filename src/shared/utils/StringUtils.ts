@@ -1,15 +1,26 @@
 import { apply } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
+import { Newtype } from 'newtype-ts'
 
 import { List, Maybe, Tuple, Tuple3 } from './fp'
 
-const margin = /^[^\n\S]*\|/gm
+type NiceStringDefault = string | number | boolean | undefined | null
+type NiceString = NiceStringDefault | Newtype<unknown, NiceStringDefault>
+
+// interpolates.length is always strings.length - 1
+export const s = (strings: TemplateStringsArray, ...interpolates: List<NiceString>): string =>
+  pipe(
+    strings,
+    List.zip(List.snoc(interpolates, '')),
+    List.reduce('', (acc, [a, b]) => `${acc}${a}${b}`),
+  )
 
 export namespace StringUtils {
   export const isEmpty = (str: string): boolean => str === ''
 
   export const isString = (u: unknown): u is string => typeof u === 'string'
 
+  const margin = /^[^\n\S]*\|/gm
   export const stripMargins = (str: string): string => str.replace(margin, '')
 
   export function mkString(sep: string): (list: List<string>) => string
@@ -21,12 +32,12 @@ export namespace StringUtils {
   ): (list: List<string>) => string {
     return list =>
       sep !== undefined && end !== undefined
-        ? `${startOrSep}${list.join(sep)}${end}`
+        ? s`${startOrSep}${list.join(sep)}${end}`
         : list.join(startOrSep)
   }
 
   export const ellipse = (take: number) => (str: string): string =>
-    str.length > take ? `${str.substring(0, take)}...` : str
+    str.length > take ? s`${str.substring(0, take)}...` : str
 
   const matcher = <A>(regex: RegExp, f: (arr: RegExpMatchArray) => Maybe<A>) => (
     str: string,
@@ -54,5 +65,5 @@ export namespace StringUtils {
       ),
     )
 
-  export const pad10 = (n: number): string => (n < 10 ? `0${n}` : `${n}`)
+  export const pad10 = (n: number): string => s`${n}`.padStart(2, '0')
 }

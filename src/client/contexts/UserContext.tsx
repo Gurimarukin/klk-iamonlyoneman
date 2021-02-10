@@ -71,7 +71,7 @@ export const useUser = (): UserContext => {
   const context = useContext(UserContext)
   if (context === undefined) {
     // eslint-disable-next-line functional/no-throw-statement
-    throw new Error('useUser must be used within a UserContextProvider')
+    throw Error('useUser must be used within a UserContextProvider')
   }
   return context
 }

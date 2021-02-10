@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import React from 'react'
 
+import { s } from '../../shared/utils/StringUtils'
 import { GradientContainer } from '../components/GradientContainer'
 import { Link } from '../components/Link'
 import { routes } from '../Router'
@@ -35,10 +36,10 @@ const StyledLink = styled(Link)({
   transition: 'all 0.3s',
 
   '&::after': {
-    content: `''`,
+    content: "''",
     position: 'absolute',
-    width: `100%`,
-    borderBottom: `2px solid ${theme.colors.lime}`,
+    width: '100%',
+    borderBottom: s`2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: -2,
     transition: 'all 0.3s',

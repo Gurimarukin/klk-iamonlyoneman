@@ -1,3 +1,5 @@
+import { s } from '../../shared/utils/StringUtils'
+
 const spacing = {
   xxs: 6,
   xs: 8,
@@ -27,8 +29,8 @@ const colors = {
 
 const mobileLimit = '664px'
 const mediaQueries = {
-  mobile: `@media (max-width: ${mobileLimit})`,
-  desktop: `@media (min-width: ${mobileLimit})`,
+  mobile: s`@media (max-width: ${mobileLimit})`,
+  desktop: s`@media (min-width: ${mobileLimit})`,
 }
 
 export const theme = {
@@ -39,7 +41,7 @@ export const theme = {
   boxShadow: '0 0 8px black',
   boxShadowLight: '0 0 4px black',
   textOutline: '-1px -1px 1px black, 1px -1px 1px black, -1px 1px 1px black, 1px 1px 1px black',
-  textShadow: (color: string): string => `1px 1px 0 ${color}`,
+  textShadow: (color: string): string => s`1px 1px 0 ${color}`,
 
   Gallery: {
     smallestSide: 500,
@@ -48,7 +50,7 @@ export const theme = {
   },
 
   Header: {
-    gradient: `linear-gradient(135deg, ${colors.darklila} 0%, ${colors.lila} 100%)`,
+    gradient: s`linear-gradient(135deg, ${colors.darklila} 0%, ${colors.lila} 100%)`,
     link: {
       padding: {
         top: '0.4em',

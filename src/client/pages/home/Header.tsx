@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import React, { forwardRef, useCallback } from 'react'
 
 import { PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
+import { s } from '../../../shared/utils/StringUtils'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
@@ -81,14 +82,14 @@ const StyledNav = styled.nav({
 })
 
 const StyledLink = styled(Link)({
-  padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
+  padding: s`${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
   color: 'inherit',
   textShadow: theme.textShadow(theme.colors.darkgrey),
   borderRadius: 2,
   position: 'relative',
   transition: 'all 0.3s',
 
-  [`&.${SELECTED}`]: {
+  [s`&.${SELECTED}`]: {
     backgroundColor: theme.colors.lime,
     boxShadow: theme.boxShadowLight,
 
@@ -99,13 +100,13 @@ const StyledLink = styled(Link)({
   },
 
   '&::after': {
-    content: `''`,
+    content: "''",
     position: 'absolute',
-    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
-    borderBottom: `2px solid ${theme.colors.lime}`,
+    width: s`calc(100% - 2 * ${theme.Header.link.padding.left})`,
+    borderBottom: s`2px solid ${theme.colors.lime}`,
     left: theme.Header.link.padding.left,
-    bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+    bottom: s`calc(${theme.Header.link.padding.top} - 1px)`,
+    filter: s`drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
     opacity: 0,
     transition: 'all 0.3s',
   },
@@ -127,17 +128,17 @@ const LogoutButton = styled.button({
   justifyContent: 'center',
   alignItems: 'center',
   padding: 0,
-  filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+  filter: s`drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
   [theme.mediaQueries.mobile]: {
     gridColumnStart: 3,
     justifySelf: 'end',
   },
 
   '&::after': {
-    content: `''`,
+    content: "''",
     position: 'absolute',
     width: '100%',
-    borderBottom: `2px solid ${theme.colors.lime}`,
+    borderBottom: s`2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: -1,
     transition: 'all 0.3s',

@@ -24,7 +24,7 @@ export const useKlkPosts = (): KlkPostsContext => {
   const context = useContext(KlkPostsContext)
   if (context === undefined) {
     // eslint-disable-next-line functional/no-throw-statement
-    throw new Error('useKlkPosts must be used within a KlkPostsContextProvider')
+    throw Error('useKlkPosts must be used within a KlkPostsContextProvider')
   }
   return context
 }

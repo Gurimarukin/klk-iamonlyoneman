@@ -26,7 +26,7 @@ export const useKlkPostsQuery = (): PartialKlkPostQuery => {
   const context = useContext(KlkPostsQueryContext)
   if (context === undefined) {
     // eslint-disable-next-line functional/no-throw-statement
-    throw new Error('useKlkPostsQuery must be used within a KlkPostsQueryContextProvider')
+    throw Error('useKlkPostsQuery must be used within a KlkPostsQueryContextProvider')
   }
   return context
 }

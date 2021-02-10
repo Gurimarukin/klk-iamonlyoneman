@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import { Collection, MongoClient } from 'mongodb'
 
 import { Future, List } from '../shared/utils/fp'
+import { s } from '../shared/utils/StringUtils'
 import { Config } from './config/Config'
 import { KlkPostController } from './controllers/KlkPostController'
 import { RateLimiter } from './controllers/RateLimiter'
@@ -23,7 +24,7 @@ import { startWebServer } from './Webserver'
 export function Context(Logger: PartialLogger, config: Config) {
   const logger = Logger('Context')
 
-  const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
+  const url = s`mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
   const mongoCollection = (coll: string) => <A>(f: (c: Collection) => Promise<A>): Future<A> =>
     pipe(
       Future.tryCatch(() => MongoClient.connect(url, { useUnifiedTopology: true })),

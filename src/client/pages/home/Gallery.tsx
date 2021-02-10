@@ -102,7 +102,7 @@ const Container = styled.div({
   height: '100%',
 
   '&::after': {
-    content: `''`,
+    content: "''",
     width: '100%',
     height: theme.spacing.xl,
   },

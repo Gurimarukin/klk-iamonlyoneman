@@ -3,6 +3,7 @@ import util from 'util'
 import fmt from 'dateformat'
 
 import { Future, IO, List } from '../../shared/utils/fp'
+import { s } from '../../shared/utils/StringUtils'
 import { LogLevel, LogLevelOrOff } from '../models/LogLevel'
 
 export type Logger = Record<LogLevel, (arg: unknown, ...args: List<unknown>) => IO<void>>
@@ -36,14 +37,14 @@ function shouldLog(setLevel: LogLevelOrOff, level: LogLevel): boolean {
 }
 
 function formatConsole(name: string, level: LogLevel, msg: string): string {
-  const withName = `${name} - ${msg}`
-  const withTimestamp = `${color(fmt('yyyy/mm/dd HH:MM:ss'), '30;1')} ${withName}`
+  const withName = s`${name} - ${msg}`
+  const withTimestamp = s`${color(fmt('yyyy/mm/dd HH:MM:ss'), '30;1')} ${withName}`
   const c = LogLevel.color[level]
   return level === 'info' || level === 'warn'
-    ? `[${color(level.toUpperCase(), c)}]  ${withTimestamp}`
-    : `[${color(level.toUpperCase(), c)}] ${withTimestamp}`
+    ? s`[${color(level.toUpperCase(), c)}]  ${withTimestamp}`
+    : s`[${color(level.toUpperCase(), c)}] ${withTimestamp}`
 }
 
-function color(s: string, c: string): string {
-  return process.stdout.isTTY ? `\x1B[${c}m${s}\x1B[0m` : s
+function color(str: string, c: string): string {
+  return process.stdout.isTTY ? s`\x1B[${c}m${str}\x1B[0m` : str
 }

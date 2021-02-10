@@ -4,6 +4,7 @@ import { pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 
 import { List, Maybe, Tuple } from '../../shared/utils/fp'
+import { s } from '../../shared/utils/StringUtils'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { MsDuration } from '../models/MsDuration'
 import { PartialLogger } from '../services/Logger'
@@ -38,7 +39,7 @@ export function RateLimiter(Logger: PartialLogger, withIp: WithIp, lifeTime: MsD
 
             if (cleaned.length >= limit) {
               const res = pipe(
-                logger.warn(`Too many request on route "${path}" with ip "${ip}"`),
+                logger.warn(s`Too many request on route "${path}" with ip "${ip}"`),
                 H.fromIOEither,
                 H.ichain(() => EndedMiddleware.text(H.Status.Unauthorized)('Too many requests')),
               )

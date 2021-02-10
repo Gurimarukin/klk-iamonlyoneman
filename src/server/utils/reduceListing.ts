@@ -5,7 +5,7 @@ import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { Dict, Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
-import { StringUtils } from '../../shared/utils/StringUtils'
+import { StringUtils, s } from '../../shared/utils/StringUtils'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { AxiRes } from '../models/AxiRes'
 import { Listing, UnknownListing } from '../models/Listing'
@@ -139,7 +139,7 @@ export function reduceListing<A, B>(
           Either.fold(
             e =>
               pipe(
-                logger.error(`Couldn't parse Listing:\n${D.draw(e)}`),
+                logger.error(s`Couldn't parse Listing:\n${D.draw(e)}`),
                 IO.map(() => Maybe.none),
               ),
             flow(decodeChildren, IO.map(Maybe.some)),
@@ -166,7 +166,7 @@ export function reduceListing<A, B>(
               Either.fold(
                 e =>
                   pipe(
-                    logger.warn(`Couldn't parse child with index ${i}:\n${D.draw(e)}`),
+                    logger.warn(s`Couldn't parse child with index ${i}:\n${D.draw(e)}`),
                     IO.map(() => acc),
                   ),
                 a => IO.right(List.snoc(acc, a)),
@@ -186,22 +186,22 @@ function printResponse<A>(res: AxiRes<A>): string {
     config: { method, url },
   } = res
   const params = querystring.stringify(res.config.params)
-  return `${method?.toUpperCase()} ${url}?${params} ${status}`
+  return s`${method?.toUpperCase()} ${url}?${params} ${status}`
 }
 
 function printDetailedResponse<A>(res: AxiRes<A>): string {
   const { status, statusText } = res
   const headers = pipe(
     res.headers as Dict<string, string>,
-    Dict.collect((key, val) => `${key}: ${val}`),
+    Dict.collect((key, val) => s`${key}: ${val}`),
     StringUtils.mkString('\n'),
   )
   const data = JSON.stringify(res.data, null, 2)
 
   return StringUtils.stripMargins(
-    `${status} ${statusText}
-    |${headers}
-    |
-    |${data}`,
+    s`${status} ${statusText}
+     |${headers}
+     |
+     |${data}`,
   )
 }

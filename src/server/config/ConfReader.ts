@@ -3,6 +3,7 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { Either, IO, List, Maybe, NonEmptyArray, unknownToError } from '../../shared/utils/fp'
+import { s } from '../../shared/utils/StringUtils'
 import { FileUtils } from '../utils/FileUtils'
 
 export type Validated<A> = Either<string, A>
@@ -53,7 +54,7 @@ export namespace ConfReader {
         return pipe(
           codec.decode(val),
           Either.bimap(
-            e => NonEmptyArray.of(`key ${allPaths.join('.')}:\n${D.draw(e)}`),
+            e => NonEmptyArray.of(s`key ${allPaths.join('.')}:\n${D.draw(e)}`),
             Maybe.some,
           ),
         )
@@ -68,7 +69,7 @@ export namespace ConfReader {
         readOpt(codec)(path, ...paths),
         Either.chain(
           Either.fromOption(() =>
-            NonEmptyArray.of(`key ${[path, ...paths].join('.')}: missing key`),
+            NonEmptyArray.of(s`key ${[path, ...paths].join('.')}: missing key`),
           ),
         ),
       )
