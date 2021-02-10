@@ -14,13 +14,14 @@ import { SearchInput } from './SearchInput'
 const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
-  (_, ref): JSX.Element => {
+  (_1, ref): JSX.Element => {
     const { isAdmin, logout } = useUser()
     const query = useKlkPostsQuery()
 
     const homeLink = useCallback(
       (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => {
-        const { episode: _, ...withoutEpisode } = query
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { episode: _2, ...withoutEpisode } = query
         return (
           <StyledLink
             key={key}

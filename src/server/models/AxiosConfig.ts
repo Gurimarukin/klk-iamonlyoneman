@@ -1,54 +1,47 @@
-import {
-  AxiosAdapter,
-  AxiosBasicCredentials,
-  AxiosProxyConfig,
-  AxiosTransformer,
-  CancelToken,
-  Method,
-  ResponseType,
-} from 'axios'
+import * as axios from 'axios'
 
-import { Dict } from '../../shared/utils/fp'
-
+import { Dict, List } from '../../shared/utils/fp'
 import { RedditSort } from '../models/RedditSort'
 
 // copy-pasta from AxiosRequestConfig
-export type AxiosConfig = Readonly<{
-  url?: string
-  method?: Method
-  baseURL?: string
-  transformRequest?: AxiosTransformer | AxiosTransformer[]
-  transformResponse?: AxiosTransformer | AxiosTransformer[]
-  headers?: Dict<string>
-  params?: Dict<string>
-  paramsSerializer?: (params: unknown) => string
-  data?: unknown
-  timeout?: number
-  timeoutErrorMessage?: string
-  withCredentials?: boolean
-  adapter?: AxiosAdapter
-  auth?: AxiosBasicCredentials
-  responseType?: ResponseType
-  xsrfCookieName?: string
-  xsrfHeaderName?: string
-  onUploadProgress?: (progressEvent: unknown) => void
-  onDownloadProgress?: (progressEvent: unknown) => void
-  maxContentLength?: number
-  validateStatus?: (status: number) => boolean
-  maxRedirects?: number
-  socketPath?: string | null
-  httpAgent?: unknown
-  httpsAgent?: unknown
-  proxy?: AxiosProxyConfig | false
-  cancelToken?: CancelToken
-}>
+export type AxiosConfig = {
+  readonly url?: string
+  readonly method?: axios.Method
+  readonly baseURL?: string
+  readonly transformRequest?: axios.AxiosTransformer | List<axios.AxiosTransformer>
+  readonly transformResponse?: axios.AxiosTransformer | List<axios.AxiosTransformer>
+  readonly headers?: Dict<string, string>
+  readonly params?: Dict<string, string>
+  readonly paramsSerializer?: (params: unknown) => string
+  readonly data?: unknown
+  readonly timeout?: number
+  readonly timeoutErrorMessage?: string
+  readonly withCredentials?: boolean
+  readonly adapter?: axios.AxiosAdapter
+  readonly auth?: axios.AxiosBasicCredentials
+  readonly responseType?: ResponseType
+  readonly xsrfCookieName?: string
+  readonly xsrfHeaderName?: string
+  /* eslint-disable functional/no-return-void */
+  readonly onUploadProgress?: (progressEvent: unknown) => void
+  readonly onDownloadProgress?: (progressEvent: unknown) => void
+  /* eslint-enable functional/no-return-void */
+  readonly maxContentLength?: number
+  readonly validateStatus?: (status: number) => boolean
+  readonly maxRedirects?: number
+  readonly socketPath?: string | null
+  readonly httpAgent?: unknown
+  readonly httpsAgent?: unknown
+  readonly proxy?: axios.AxiosProxyConfig | false
+  readonly cancelToken?: axios.CancelToken
+}
 
 export namespace AxiosConfig {
-  export function setParamSort(value: RedditSort): (c: AxiosConfig) => AxiosConfig {
-    return setParam('sort', value)
-  }
+  export const setParamSort = (value: RedditSort): ((c: AxiosConfig) => AxiosConfig) =>
+    setParam('sort', value)
 
-  export function setParam(key: string, value: string): (c: AxiosConfig) => AxiosConfig {
-    return c => ({ ...c, params: { ...c.params, [key]: value } })
-  }
+  export const setParam = (key: string, value: string) => (c: AxiosConfig): AxiosConfig => ({
+    ...c,
+    params: { ...c.params, [key]: value },
+  })
 }

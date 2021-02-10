@@ -7,7 +7,7 @@ import { Config } from './Config'
 
 export const apiRoutes = {
   klkPosts: (query: PartialKlkPostQuery, page: number | undefined): string => {
-    const params: Partial<Dict<string>> = {
+    const params: Partial<Dict<string, string>> = {
       page: `${page}`,
       ...PartialKlkPostQuery.encoder.encode(query),
     }

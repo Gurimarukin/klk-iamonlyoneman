@@ -1,22 +1,23 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
-import { Either, Maybe, pipe } from '../../utils/fp'
+import { Either, Maybe } from '../../utils/fp'
 import { NonEmptyString } from '../NonEmptyString'
 import { NumberFromString } from '../NumberFromString'
 import { EpisodeNumber } from '../PartialKlkPostQuery'
 
 const emptyString: D.Decoder<unknown, ''> = pipe(
   D.string,
-  D.parse(str => (str.trim() === '' ? D.success('') : D.failure(str, 'empty string'))),
+  D.parse(str => (str.trim() === '' ? D.success('') : D.failure(str, 'EmptyString'))),
 )
 
 namespace OrEmpty {
-  export const decoder = <A>(decoder: D.Decoder<unknown, A>): D.Decoder<unknown, A | ''> =>
-    D.union(decoder, emptyString)
-  export const codec = <A>(codec: C.Codec<unknown, string, A>): C.Codec<unknown, string, A | ''> =>
-    C.make(decoder(codec), { encode: String })
+  export const decoder = <A>(codec: D.Decoder<unknown, A>): D.Decoder<unknown, A | ''> =>
+    D.union(codec, emptyString)
+  export const codec = <A>(c: C.Codec<unknown, string, A>): C.Codec<unknown, string, A | ''> =>
+    C.make(decoder(c), { encode: String })
 }
 
 export namespace KlkPostEditPayload {
@@ -24,7 +25,7 @@ export namespace KlkPostEditPayload {
     D.type({
       title: NonEmptyString.codec,
       url: NonEmptyString.codec,
-      episode: OrEmpty.decoder(EpisodeNumber.Number.codec),
+      episode: OrEmpty.decoder(EpisodeNumber.Numb.codec),
       width: OrEmpty.decoder(NumberFromString.decoder),
       height: OrEmpty.decoder(NumberFromString.decoder),
       active: D.boolean,
@@ -70,11 +71,11 @@ export namespace KlkPostEditPayload {
 }
 
 export type KlkPostEditPayload = D.TypeOf<typeof KlkPostEditPayload.decoder>
-type Out = Readonly<{
-  title: string
-  url: string
-  episode: string
-  width: string
-  height: string
-  active: boolean
-}>
+type Out = {
+  readonly title: string
+  readonly url: string
+  readonly episode: string
+  readonly width: string
+  readonly height: string
+  readonly active: boolean
+}

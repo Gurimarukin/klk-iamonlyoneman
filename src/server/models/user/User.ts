@@ -1,6 +1,7 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
-import { IO, Maybe, pipe } from '../../../shared/utils/fp'
+import { IO, Maybe } from '../../../shared/utils/fp'
 import { UuidUtils } from '../../utils/UuidUtils'
 import { HashedPassword } from '../HashedPassword'
 import { UserId } from './UserId'
@@ -21,6 +22,7 @@ export namespace User {
       IO.map(id => ({ id: UserId.wrap(id), user, password, token: Maybe.none })),
     )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export const canEditPost = (_user: User): boolean => true
 }
 

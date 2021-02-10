@@ -1,6 +1,7 @@
+import { pipe } from 'fp-ts/function'
 import { Collection, MongoClient } from 'mongodb'
 
-import { Do, Future, pipe } from '../shared/utils/fp'
+import { Future, List } from '../shared/utils/fp'
 import { Config } from './config/Config'
 import { KlkPostController } from './controllers/KlkPostController'
 import { RateLimiter } from './controllers/RateLimiter'
@@ -18,16 +19,17 @@ import { UserService } from './services/UserService'
 import { FutureUtils } from './utils/FutureUtils'
 import { startWebServer } from './Webserver'
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function Context(Logger: PartialLogger, config: Config) {
   const logger = Logger('Context')
 
   const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
-  const mongoClient = new MongoClient(url, { useUnifiedTopology: true })
-  const mongoCollection = (coll: string) => <A>(f: (coll: Collection) => Promise<A>): Future<A> =>
+  const mongoCollection = (coll: string) => <A>(f: (c: Collection) => Promise<A>): Future<A> =>
     pipe(
-      Future.apply(() => mongoClient.connect()),
-      Future.chain(client => Future.apply(() => f(client.db(config.db.dbName).collection(coll)))),
+      Future.tryCatch(() => MongoClient.connect(url, { useUnifiedTopology: true })),
+      Future.chain(client =>
+        Future.tryCatch(() => f(client.db(config.db.dbName).collection(coll))),
+      ),
     )
 
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
@@ -37,37 +39,30 @@ export function Context(Logger: PartialLogger, config: Config) {
   const userService = UserService(Logger, userPersistence)
 
   const withIp = WithIp(Logger, config)
-  const withAuth = WithAuth(Logger, userService)
+  const withAuth = WithAuth(userService)
   const klkPostController = KlkPostController(Logger, withAuth, klkPostService)
-  const userController = UserController(Logger, userService)
+  const userController = UserController(userService)
 
   const rateLimiter = RateLimiter(Logger, withIp, MsDuration.days(1))
-  const routes: Route[] = Routes(rateLimiter, klkPostController, userController)
+  const routes: List<Route> = Routes(rateLimiter, klkPostController, userController)
 
   return {
     Logger,
-
     ensureIndexes: (): Future<void> =>
       pipe(
         [klkPostPersistence.ensureIndexes(), userPersistence.ensureIndexes()],
-        Future.parallel,
-        Future.map(_ => {}),
+        Future.sequenceArray,
+        Future.map(() => {}),
         FutureUtils.retryIfFailed(MsDuration.minutes(5), {
           onFailure: e => logger.error('Failed to ensure indexes:\n', e),
-          onSuccess: _ => logger.info('Ensured indexes'),
+          onSuccess: () => logger.info('Ensured indexes'),
         }),
       ),
-
     initDbIfEmpty: klkPostService.initDbIfEmpty,
-
     scheduleRedditPolling: klkPostService.scheduleRedditPolling,
-
     fullPoll: klkPostService.fullPoll,
-
     addMissingSize: klkPostService.addMissingSize,
-
     createUser: userService.createUser,
-
     startWebServer: () => startWebServer(Logger, config, routes),
   }
 }
@@ -76,9 +71,13 @@ type Context = ReturnType<typeof Context>
 
 export namespace Context {
   export function load(configModifier: (c: Config) => Config = c => c): Future<Context> {
-    return Do(Future.taskEitherSeq)
-      .bind('config', pipe(Config.load(), Future.fromIOEither, Future.map(configModifier)))
-      .letL('Logger', ({ config }) => PartialLogger(config.logLevel))
-      .return(({ config, Logger }) => Context(Logger, config))
+    return pipe(
+      Future.Do,
+      Future.bind('config', () =>
+        pipe(Config.load(), Future.fromIOEither, Future.map(configModifier)),
+      ),
+      Future.bind('Logger', ({ config }) => Future.right(PartialLogger(config.logLevel))),
+      Future.map(({ config, Logger }) => Context(Logger, config)),
+    )
   }
 }

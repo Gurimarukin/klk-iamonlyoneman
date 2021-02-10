@@ -1,9 +1,9 @@
-import { Predicate } from 'fp-ts/function'
+import { Predicate, pipe } from 'fp-ts/function'
 import { Lens as MonocleLens } from 'monocle-ts'
 
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
-import { Future, IO, List, Maybe, pipe } from '../../shared/utils/fp'
+import { Future, IO, List, Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
@@ -20,20 +20,20 @@ import { PartialLogger } from './Logger'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
-type FullPoll = Readonly<{
-  fullPoll: boolean
-}>
+type FullPoll = {
+  readonly fullPoll: boolean
+}
 
-type AllSort = Readonly<{
-  allSort: boolean
-}>
+type AllSort = {
+  readonly allSort: boolean
+}
 
-type Counter = Readonly<{
-  searches: number
-  postsFound: number
-  postsAlreadyInDb: number
-  postsInserted: number
-}>
+type Counter = {
+  readonly searches: number
+  readonly postsFound: number
+  readonly postsAlreadyInDb: number
+  readonly postsInserted: number
+}
 
 namespace Counter {
   export const empty: Counter = {
@@ -70,7 +70,7 @@ const rKillLaKill = 'r/KillLaKill' // for Link.subreddit_name_prefixed
 const searchLimit = 100
 const defaultSort: RedditSort = 'new'
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function KlkPostService(
   Logger: PartialLogger,
   config: Config,
@@ -79,7 +79,7 @@ export function KlkPostService(
   const logger = Logger('KlkPostService')
 
   return {
-    fullPoll,
+    fullPoll: fullPoll_,
 
     addMissingSize,
 
@@ -87,17 +87,17 @@ export function KlkPostService(
       pipe(
         klkPostPersistence.count(),
         Future.chain(_ =>
-          _ === 0 ? fullPoll() : Future.fromIOEither(logger.info('Nothing to poll')),
+          _ === 0 ? fullPoll_() : Future.fromIOEither(logger.info('Nothing to poll')),
         ),
       ),
 
     scheduleRedditPolling: (): Future<void> =>
       pipe(
         config.pollOnStart ? dailyPoll() : Future.unit,
-        Future.chain(_ => Future.fromIOEither(setRefreshActivityInterval())),
+        Future.chain(() => Future.fromIOEither(setRefreshActivityInterval())),
       ),
 
-    findAll: (query: KlkPostsQuery, page: number): Future<KlkPost[]> =>
+    findAll: (query: KlkPostsQuery, page: number): Future<List<KlkPost>> =>
       klkPostPersistence.findAll(query, page),
 
     updatePostAndGetUpdated: (id: KlkPostId, payload: KlkPostEditPayload): Future<Maybe<KlkPost>> =>
@@ -109,14 +109,14 @@ export function KlkPostService(
 
   function setRefreshActivityInterval(): IO<void> {
     return pipe(
-      IO.apply(() =>
+      IO.tryCatch(() =>
         setInterval(
           () => pipe(dailyPoll(), Future.runUnsafe),
           MsDuration.unwrap(config.pollEveryHours),
         ),
       ),
       Future.fromIOEither,
-      Future.chain(_ => dailyPoll()),
+      Future.chain(() => dailyPoll()),
       Future.delay(config.pollEveryHours),
       IO.runFuture,
     )
@@ -139,7 +139,7 @@ export function KlkPostService(
               ),
             ),
           ),
-          List.array.sequence(Future.taskEitherSeq),
+          Future.sequenceSeqArray,
         ),
       ),
       Future.chain(res =>
@@ -154,7 +154,7 @@ export function KlkPostService(
     return logPoll(uIamonlyonemanPoll({ fullPoll: false, allSort: false }))
   }
 
-  function fullPoll(): Future<void> {
+  function fullPoll_(): Future<void> {
     const opts = { fullPoll: true, allSort: true }
     return logPoll(
       reduceMultipleListing([
@@ -168,7 +168,7 @@ export function KlkPostService(
   function logPoll(f: Future<ReducerAccumulator<Counter>>): Future<void> {
     return pipe(
       Future.fromIOEither(logger.info('Start polling')),
-      Future.chain(_ => f),
+      Future.chain(() => f),
       Future.chain(({ requestsCount, accumulator: c }) =>
         Future.fromIOEither(
           logger.info(
@@ -267,18 +267,18 @@ export function KlkPostService(
 
   function reduceForAllSorts(
     fullPoll: FullPoll,
-    config: AxiosConfig,
+    config_: AxiosConfig,
     filter: Predicate<Link>,
   ): Future<ReducerAccumulator<Counter>> {
     return reduceMultipleListing(
       RedditSort.values.map(sort =>
-        reduceOneListing(fullPoll, AxiosConfig.setParamSort(sort)(config), filter),
+        reduceOneListing(fullPoll, AxiosConfig.setParamSort(sort)(config_), filter),
       ),
     )
   }
 
   function reduceMultipleListing(
-    futures: Future<ReducerAccumulator<Counter>>[],
+    futures: List<Future<ReducerAccumulator<Counter>>>,
   ): Future<ReducerAccumulator<Counter>> {
     return pipe(
       futures,
@@ -299,10 +299,10 @@ export function KlkPostService(
 
   function reduceOneListing(
     fullPoll: FullPoll,
-    config: AxiosConfig,
+    config_: AxiosConfig,
     filter: Predicate<Link>,
   ): Future<ReducerAccumulator<Counter>> {
-    return reduceListing(logger, config, Link.decoder, Counter.empty, (listing, { accumulator }) =>
+    return reduceListing(logger, config_, Link.decoder, Counter.empty, (listing, { accumulator }) =>
       syncListing(fullPoll, listing, accumulator, filter),
     )
   }
@@ -322,7 +322,7 @@ export function KlkPostService(
           List.partition(link =>
             pipe(
               inDb,
-              List.exists(_ => _ === link.data.id),
+              List.some(_ => _ === link.data.id),
             ),
           ),
         )
@@ -333,9 +333,9 @@ export function KlkPostService(
         )
         return pipe(
           logger.debug('alreadyInDb:', printLinkIds(alreadyInDb)),
-          IO.chain(_ => logger.debug('    notInDb:', printLinkIds(notInDb))),
+          IO.chain(() => logger.debug('    notInDb:', printLinkIds(notInDb))),
           Future.fromIOEither,
-          Future.chain(_ => probeSizeAndAddToDb(notInDb, newCounter)),
+          Future.chain(() => probeSizeAndAddToDb(notInDb, newCounter)),
           Future.chain(newAcc => {
             const shouldContinue = fullPoll || List.isEmpty(alreadyInDb)
             return pipe(
@@ -348,7 +348,7 @@ export function KlkPostService(
     )
   }
 
-  function probeSizeAndAddToDb(links: Link[], counter: Counter): Future<Counter> {
+  function probeSizeAndAddToDb(links: List<Link>, counter: Counter): Future<Counter> {
     if (List.isEmpty(links)) return Future.right(counter)
 
     return pipe(
@@ -368,36 +368,33 @@ export function KlkPostService(
                   ),
                 ),
               ),
-            _ => Future.right(post),
+            () => Future.right(post),
           ),
         )
       }),
-      List.sequence(Future.taskEitherSeq),
+      Future.sequenceSeqArray,
       Future.chain(posts => addToDb(posts, counter)),
     )
   }
 
-  function addToDb(posts: KlkPost[], counter: Counter): Future<Counter> {
+  function addToDb(posts: List<KlkPost>, counter: Counter): Future<Counter> {
     return pipe(
-      List.sequence(IO.ioEither)(
+      posts,
+      List.chain(p =>
         pipe(
-          posts,
-          List.chain(p =>
-            pipe(
-              [
-                Maybe.isNone(p.episode) || Maybe.isNone(p.size)
-                  ? logger.warn('Title:', JSON.stringify(p.title))
-                  : null,
-                Maybe.isNone(p.episode) ? logger.warn('  - empty episode') : null,
-                Maybe.isNone(p.size) ? logger.warn('  - empty size') : null,
-              ],
-              List.filter((l: IO<void> | null): l is IO<void> => l !== null),
-            ),
-          ),
+          [
+            Maybe.isNone(p.episode) || Maybe.isNone(p.size)
+              ? logger.warn('Title:', JSON.stringify(p.title))
+              : null,
+            Maybe.isNone(p.episode) ? logger.warn('  - empty episode') : null,
+            Maybe.isNone(p.size) ? logger.warn('  - empty size') : null,
+          ],
+          List.filter((l: IO<void> | null): l is IO<void> => l !== null),
         ),
       ),
+      IO.sequenceSeqArray,
       Future.fromIOEither,
-      Future.chain(_ => klkPostPersistence.insertMany(posts)),
+      Future.chain(() => klkPostPersistence.insertMany(posts)),
       Future.chain(res =>
         pipe(
           res.insertedCount === posts.length
@@ -405,14 +402,14 @@ export function KlkPostService(
             : Future.fromIOEither(
                 logger.error('insertMany: insertedCount was different than inserted length'),
               ),
-          Future.map(_ => Counter.Lens.postsInserted.modify(_ => _ + res.insertedCount)(counter)),
+          Future.map(() => Counter.Lens.postsInserted.modify(_ => _ + res.insertedCount)(counter)),
         ),
       ),
     )
   }
 }
 
-function printLinkIds(links: Link[]): string {
+function printLinkIds(links: List<Link>): string {
   const res = pipe(
     links.map(_ => KlkPostId.unwrap(_.data.id)),
     StringUtils.mkString(','),

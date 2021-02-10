@@ -1,22 +1,23 @@
-import { sequenceT } from 'fp-ts/Apply'
+import { apply } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import { Lens as MLens } from 'monocle-ts'
 
-import { Either, IO, Maybe, NonEmptyArray, pipe } from '../../shared/utils/fp'
+import { Either, IO, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { LogLevelOrOff } from '../models/LogLevel'
 import { MsDuration } from '../models/MsDuration'
 import { ConfReader, ValidatedNea } from './ConfReader'
 
 // Config
 
-export interface Config {
-  logLevel: LogLevelOrOff
-  isDev: boolean
-  pollOnStart: boolean
-  pollEveryHours: MsDuration
-  port: number
-  allowedOrigins: Maybe<NonEmptyArray<string>>
-  db: DbConfig
+export type Config = {
+  readonly logLevel: LogLevelOrOff
+  readonly isDev: boolean
+  readonly pollOnStart: boolean
+  readonly pollEveryHours: MsDuration
+  readonly port: number
+  readonly allowedOrigins: Maybe<NonEmptyArray<string>>
+  readonly db: DbConfig
 }
 
 export function Config(
@@ -52,7 +53,7 @@ export namespace Config {
 
 function readConfig(reader: ConfReader): ValidatedNea<Config> {
   return pipe(
-    sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
+    apply.sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
       reader.read(LogLevelOrOff.decoder)('logLevel'),
       reader.read(D.boolean)('isDev'),
       reader.read(D.boolean)('pollOnStart'),
@@ -77,11 +78,11 @@ function readConfig(reader: ConfReader): ValidatedNea<Config> {
 
 // DbConfig
 
-interface DbConfig {
-  host: string
-  dbName: string
-  user: string
-  password: string
+type DbConfig = {
+  readonly host: string
+  readonly dbName: string
+  readonly user: string
+  readonly password: string
 }
 
 export function DbConfig(host: string, dbName: string, user: string, password: string): DbConfig {
@@ -91,7 +92,7 @@ export function DbConfig(host: string, dbName: string, user: string, password: s
 export namespace DbConfig {
   export const read = (reader: ConfReader): ValidatedNea<DbConfig> =>
     pipe(
-      sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
+      apply.sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
         reader.read(D.string)('db', 'host'),
         reader.read(D.string)('db', 'dbName'),
         reader.read(D.string)('db', 'user'),

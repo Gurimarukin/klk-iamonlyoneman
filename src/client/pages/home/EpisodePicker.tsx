@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -9,8 +10,8 @@ import { ChevronUp } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
 
-interface Props {
-  homeLink: HomeLink
+type Props = {
+  readonly homeLink: HomeLink
 }
 
 export type HomeLink = (
@@ -35,7 +36,7 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
   const close = useCallback(() => setIsOpened(false), [])
 
   useEffect(() => {
-    function onKeyUp(e: KeyboardEvent) {
+    function onKeyUp(e: KeyboardEvent): void {
       if (e.key === 'Escape') close()
     }
     window.addEventListener('keyup', onKeyUp)

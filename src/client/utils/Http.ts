@@ -1,7 +1,8 @@
+import { flow } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { Token } from '../../shared/models/Token'
-import { Either, Future, Try, flow } from '../../shared/utils/fp'
+import { Either, Future, Try } from '../../shared/utils/fp'
 
 export namespace Http {
   export const withToken = (token: Token): RequestInit => ({
@@ -14,24 +15,28 @@ export namespace Http {
     config: RequestInit = {},
   ): Promise<A> {
     const headers = {}
-    return fetch(url, {
-      method: 'GET',
-      ...config,
-      headers: {
-        ...headers,
-        ...config.headers,
-      },
-    })
-      .then<unknown>(res => (res.ok ? res.json() : Promise.reject(res)))
-      .then<A>(
-        flow(
-          decode,
-          Either.fold(
-            e => Promise.reject(D.draw(e)),
-            a => Promise.resolve(a),
+    return (
+      fetch(url, {
+        method: 'GET',
+        ...config,
+        headers: {
+          ...headers,
+          ...config.headers,
+        },
+      })
+        // eslint-disable-next-line functional/no-promise-reject
+        .then<unknown>(res => (res.ok ? res.json() : Promise.reject(res)))
+        .then<A>(
+          flow(
+            decode,
+            Either.fold(
+              // eslint-disable-next-line functional/no-promise-reject
+              e => Promise.reject(D.draw(e)),
+              a => Promise.resolve(a),
+            ),
           ),
-        ),
-      )
+        )
+    )
   }
 
   export function post<A, O, B>(
@@ -54,11 +59,13 @@ export namespace Http {
         },
         body: JSON.stringify(encode(data)),
       })
+        // eslint-disable-next-line functional/no-promise-reject
         .then<unknown>(res => (res.ok ? res.json() : Promise.reject(res)))
         .then<Try<B>>(
           flow(
             decode,
             Either.fold(
+              // eslint-disable-next-line functional/no-promise-reject
               e => Promise.reject(D.draw(e)),
               a => Promise.resolve(Either.right(a)),
             ),

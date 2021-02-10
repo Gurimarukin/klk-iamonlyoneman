@@ -1,8 +1,10 @@
+/* eslint-disable functional/no-expression-statement */
+import { pipe } from 'fp-ts/function'
 import qs from 'qs'
 import React, { ReactElement, useEffect } from 'react'
 
 import { PartialKlkPostQuery } from '../shared/models/PartialKlkPostQuery'
-import { Dict, Maybe, pipe } from '../shared/utils/fp'
+import { Dict, Maybe, Tuple } from '../shared/utils/fp'
 import { About } from './pages/About'
 import { Home } from './pages/home/Home'
 import { Login } from './pages/Login'
@@ -21,28 +23,31 @@ export const routes = {
   about: '/about',
 }
 
+type RouteElem = Tuple<Maybe<string>, ReactElement>
+
 /* eslint-disable react/jsx-key */
-function route(path: string): [Maybe<string>, ReactElement] {
+function route(path: string): RouteElem {
   return pipe(
-    Dict.lookup<[Maybe<string>, ReactElement]>(path, {
+    Dict.lookup<RouteElem>(path, {
       '/': [Maybe.none, <Home />],
       '/about': [Maybe.some('About'), <About />],
       '/login': [Maybe.none, <Login />],
     }),
-    Maybe.getOrElse(() => [Maybe.some('Not found'), <NotFound />]),
+    Maybe.getOrElse<RouteElem>(() => [Maybe.some('Not found'), <NotFound />]),
   )
 }
 /* eslint-enable react/jsx-key */
 
-type Props = Readonly<{
-  path: string
-}>
+type Props = {
+  readonly path: string
+}
 
 export const Router = ({ path }: Props): JSX.Element => {
   const [subTitle, node] = route(path)
   const title = ['/r/KillLaKill - /u/iamonlyoneman', ...Maybe.toArray(subTitle)].join(' | ')
 
   useEffect(() => {
+    // eslint-disable-next-line functional/immutable-data
     document.title = title
   }, [title])
 

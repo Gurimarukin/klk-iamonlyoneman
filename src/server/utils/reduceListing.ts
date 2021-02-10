@@ -1,20 +1,21 @@
 import querystring from 'querystring'
 
-import Axios from 'axios'
+import Axios, { AxiosRequestConfig } from 'axios'
+import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
-import { Dict, Either, Future, IO, List, Maybe, flow, pipe } from '../../shared/utils/fp'
+import { Dict, Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { AxiRes } from '../models/AxiRes'
 import { Listing, UnknownListing } from '../models/Listing'
 import { Logger } from '../services/Logger'
 
-export type ReducerAccumulator<A> = Readonly<{
-  requestsCount: number
-  distCount: number
-  accumulator: A
-}>
+export type ReducerAccumulator<A> = {
+  readonly requestsCount: number
+  readonly distCount: number
+  readonly accumulator: A
+}
 
 export namespace ReducerAccumulator {
   export function empty<A>(accumulator: A): ReducerAccumulator<A> {
@@ -41,10 +42,10 @@ export namespace ReducerAccumulator {
   }
 }
 
-export type ReducerReturn<A> = Readonly<{
-  shouldContinue: boolean
-  accumulator: A
-}>
+export type ReducerReturn<A> = {
+  readonly shouldContinue: boolean
+  readonly accumulator: A
+}
 
 // config.params.after and config.params.count will be overriden
 export function reduceListing<A, B>(
@@ -101,7 +102,7 @@ export function reduceListing<A, B>(
   ): Future<ReducerAccumulator<B>> {
     const newReducerAcc = pipe(
       reducerAcc,
-      ReducerAccumulator.modify('accumulator', _ => newAcc),
+      ReducerAccumulator.modify('accumulator', () => newAcc),
     )
     return shouldContinue
       ? pipe(
@@ -120,11 +121,11 @@ export function reduceListing<A, B>(
       AxiosConfig.setParam('count', count.toString()),
     )
     return pipe(
-      Future.apply(() => Axios.request<unknown>(newConfig)),
+      Future.tryCatch(() => Axios.request<unknown>(newConfig as AxiosRequestConfig)),
       Future.chain(res =>
         pipe(
           Future.fromIOEither(logger.debug(printResponse(res))),
-          Future.map(_ => res),
+          Future.map(() => res),
         ),
       ),
       Future.chain(decodeResIfOk),
@@ -139,7 +140,7 @@ export function reduceListing<A, B>(
             e =>
               pipe(
                 logger.error(`Couldn't parse Listing:\n${D.draw(e)}`),
-                IO.map(_ => Maybe.none),
+                IO.map(() => Maybe.none),
               ),
             flow(decodeChildren, IO.map(Maybe.some)),
           ),
@@ -147,8 +148,8 @@ export function reduceListing<A, B>(
         )
       : pipe(
           logger.warn('Non 200 status:'),
-          IO.chain(_ => logger.warn(printDetailedResponse(res))),
-          IO.map(_ => Maybe.none),
+          IO.chain(() => logger.warn(printDetailedResponse(res))),
+          IO.map(() => Maybe.none),
           Future.fromIOEither,
         )
   }
@@ -156,7 +157,7 @@ export function reduceListing<A, B>(
   function decodeChildren(listing: UnknownListing): IO<Listing<A>> {
     return pipe(
       listing.data.children,
-      List.reduceWithIndex<unknown, IO<A[]>>(IO.right([]), (i, ioAcc, child) =>
+      List.reduceWithIndex<unknown, IO<List<A>>>(IO.right([]), (i, ioAcc, child) =>
         pipe(
           ioAcc,
           IO.chain(acc =>
@@ -166,7 +167,7 @@ export function reduceListing<A, B>(
                 e =>
                   pipe(
                     logger.warn(`Couldn't parse child with index ${i}:\n${D.draw(e)}`),
-                    IO.map(_ => acc),
+                    IO.map(() => acc),
                   ),
                 a => IO.right(List.snoc(acc, a)),
               ),
@@ -191,7 +192,7 @@ function printResponse<A>(res: AxiRes<A>): string {
 function printDetailedResponse<A>(res: AxiRes<A>): string {
   const { status, statusText } = res
   const headers = pipe(
-    res.headers as Dict<string>,
+    res.headers as Dict<string, string>,
     Dict.collect((key, val) => `${key}: ${val}`),
     StringUtils.mkString('\n'),
   )

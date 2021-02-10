@@ -4,5 +4,5 @@ import { IO } from '../../shared/utils/fp'
 
 export namespace FileUtils {
   export const readFileSync = (path: string): IO<string> =>
-    IO.apply(() => fs.readFileSync(path, 'utf8'))
+    IO.tryCatch(() => fs.readFileSync(path, 'utf8'))
 }

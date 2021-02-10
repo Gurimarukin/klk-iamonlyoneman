@@ -1,25 +1,27 @@
+/* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ScrollPosition } from 'react-lazy-load-image-component'
 
-import { KlkPostDAOs } from '../../../shared/models/klkPost/KlkPostDAO'
+import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { Maybe, pipe } from '../../../shared/utils/fp'
+import { List, Maybe, Tuple } from '../../../shared/utils/fp'
 import { useMaybeRef } from '../../hooks/useMaybeRef'
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 
-type Props = Readonly<{
-  klkPosts: KlkPostDAOs
-  scrollPosition: ScrollPosition
-}>
+type Props = {
+  readonly klkPosts: List<KlkPostDAO>
+  readonly scrollPosition: ScrollPosition
+}
 
 export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {
   const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
 
   const getMaxDimension = useCallback(
-    (): [number, number] =>
+    (): Tuple<number, number> =>
       pipe(
         ref.current,
         Maybe.fold(
@@ -33,7 +35,7 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
     [ref],
   )
 
-  const [[maxWidth, maxHeight], setMaxDimensions] = useState<[number, number]>(getMaxDimension)
+  const [[maxWidth, maxHeight], setMaxDimensions] = useState<Tuple<number, number>>(getMaxDimension)
   const onResize = useCallback((): void => setMaxDimensions(getMaxDimension()), [getMaxDimension])
 
   const onMount = useCallback(
@@ -70,12 +72,12 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
 
   return (
     <Container ref={onMount}>
-      {klkPosts.map(_ => (
+      {klkPosts.map(p => (
         <ImageWithDetail
-          key={KlkPostId.unwrap(_.id)}
+          key={KlkPostId.unwrap(p.id)}
           scrollPosition={scrollPosition}
           resizeImg={resizeImg}
-          post={_}
+          post={p}
         />
       ))}
       {children}

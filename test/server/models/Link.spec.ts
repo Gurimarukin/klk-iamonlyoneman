@@ -1,4 +1,4 @@
-import { Right } from 'fp-ts/lib/Either'
+import { Right } from 'fp-ts/Either'
 
 import { KlkPost } from '../../../src/server/models/KlkPost'
 import { Link } from '../../../src/server/models/Link'

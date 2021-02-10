@@ -1,10 +1,11 @@
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import React, { useCallback, useState } from 'react'
 import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { Maybe, pipe } from '../../../shared/utils/fp'
+import { Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
@@ -13,11 +14,11 @@ import { useUser } from '../../contexts/UserContext'
 import { theme } from '../../utils/theme'
 import { PostEditForm } from './PostEditForm'
 
-type Props = Readonly<{
-  scrollPosition: ScrollPosition
-  resizeImg: (size: Size) => Size
-  post: KlkPostDAO
-}>
+type Props = {
+  readonly scrollPosition: ScrollPosition
+  readonly resizeImg: (size: Size) => Size
+  readonly post: KlkPostDAO
+}
 
 const PLACEHOLDER = 'placeholder'
 const DETAIL = 'detail'

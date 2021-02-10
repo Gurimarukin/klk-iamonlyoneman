@@ -1,7 +1,8 @@
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
 import { KlkPostId } from '../shared/models/klkPost/KlkPostId'
-import { pipe } from '../shared/utils/fp'
+import { List } from '../shared/utils/fp'
 import { KlkPostController } from './controllers/KlkPostController'
 import { RateLimiter } from './controllers/RateLimiter'
 import { UserController } from './controllers/UserController'
@@ -20,7 +21,7 @@ export const Routes = (
   rateLimiter: RateLimiter,
   klkPostController: KlkPostController,
   userController: UserController,
-): Route[] => [
+): List<Route> => [
   ['get', '/api/klk-posts', klkPostController.klkPosts],
   ['post', '/api/klk-posts/:id', withParams(postId)(klkPostController.klkPostEdit)],
   ['post', '/api/login', rateLimiter(2, MsDuration.minutes(1))(userController.login)],

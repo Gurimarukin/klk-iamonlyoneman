@@ -11,9 +11,9 @@ export namespace KlkPostsQuery {
   }
 }
 
-export type KlkPostsQuery = Readonly<{
-  episode: Maybe<EpisodeNumber>
-  search: Maybe<string>
-  sortNew: boolean
-  active: boolean
-}>
+export type KlkPostsQuery = {
+  readonly episode: Maybe<EpisodeNumber>
+  readonly search: Maybe<string>
+  readonly sortNew: boolean
+  readonly active: boolean
+}

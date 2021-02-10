@@ -1,10 +1,12 @@
-import { Either, Future, IO, Task, pipe } from '../../shared/utils/fp'
+import { pipe } from 'fp-ts/function'
+
+import { Either, Future, IO, Task } from '../../shared/utils/fp'
 import { MsDuration } from '../models/MsDuration'
 
-type OnComplete<A> = Readonly<{
-  onFailure: (e: Error) => IO<void>
-  onSuccess: (a: A) => IO<void>
-}>
+type OnComplete<A> = {
+  readonly onFailure: (e: Error) => IO<void>
+  readonly onSuccess: (a: A) => IO<void>
+}
 
 export namespace FutureUtils {
   export function retryIfFailed<A>(
@@ -30,13 +32,13 @@ function retryIfFailedRec<A>(
           pipe(
             firstTime ? onFailure(e) : IO.unit,
             Future.fromIOEither,
-            Future.chain(_ => retryIfFailedRec(f, delay, onComplete, false)),
+            Future.chain(() => retryIfFailedRec(f, delay, onComplete, false)),
             Future.delay(delay),
           ),
         a =>
           pipe(
             Future.fromIOEither(onSuccess(a)),
-            Future.map(_ => a),
+            Future.map(() => a),
           ),
       ),
     ),

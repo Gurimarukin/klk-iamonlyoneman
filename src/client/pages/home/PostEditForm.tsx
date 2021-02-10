@@ -1,4 +1,6 @@
+/* eslint-disable functional/no-expression-statement */
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import * as E from 'io-ts/Encoder'
 import { Lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -6,16 +8,16 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
 import { Token } from '../../../shared/models/Token'
-import { Either, Future, pipe } from '../../../shared/utils/fp'
+import { Either, Future } from '../../../shared/utils/fp'
 import { useKlkPosts } from '../../contexts/KlkPostsContext'
 import { theme } from '../../utils/theme'
 import { postKlkPostEditForm } from './klkPostsApi'
 
-type Props = Readonly<{
-  token: Token
-  post: KlkPostDAO
-  className?: string
-}>
+type Props = {
+  readonly token: Token
+  readonly post: KlkPostDAO
+  readonly className?: string
+}
 
 type State = E.OutputOf<typeof KlkPostEditPayload.codec>
 
@@ -66,7 +68,7 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
               updateById(post.id, newPost)
               setStatus(Status.done)
             }),
-            Future.recover<unknown>(_ => Future.right(setStatus(Status.error))),
+            Future.recover<unknown>(() => Future.right(setStatus(Status.error))),
             Future.runUnsafe,
           )
         }),

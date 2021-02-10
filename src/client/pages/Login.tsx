@@ -1,19 +1,21 @@
+/* eslint-disable functional/no-expression-statement */
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import { Lens as MLens } from 'monocle-ts'
 import React, { useCallback, useState } from 'react'
 
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
-import { Either, Maybe, pipe } from '../../shared/utils/fp'
+import { Either, Maybe } from '../../shared/utils/fp'
 import { GradientContainer } from '../components/GradientContainer'
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
 import { routes } from '../Router'
 import { theme } from '../utils/theme'
 
-type State = Readonly<{
-  user: string
-  password: string
-}>
+type State = {
+  readonly user: string
+  readonly password: string
+}
 
 namespace State {
   export const empty: State = { user: '', password: '' }
@@ -51,7 +53,7 @@ export const Login = (): JSX.Element => {
           login(payload).then(
             Maybe.fold(
               () => setError('error'),
-              _ => navigate(routes.home()),
+              () => navigate(routes.home()),
             ),
           ),
         ),

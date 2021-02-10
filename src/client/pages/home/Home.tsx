@@ -1,12 +1,14 @@
+/* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo } from 'react'
-import { trackWindowScroll } from 'react-lazy-load-image-component'
+import { LazyComponentProps, trackWindowScroll } from 'react-lazy-load-image-component'
 import { useSWRInfinite } from 'swr'
 
 import { config } from '../../../shared/config'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
-import { List, Maybe, pipe } from '../../../shared/utils/fp'
+import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { GradientContainer } from '../../components/GradientContainer'
 import { ChevronUp } from '../../components/svgs'
 import { KlkPostsContextProvider } from '../../contexts/KlkPostsContext'
@@ -23,7 +25,7 @@ const ERROR = 'error'
 const NO_RESULT = 'no result.'
 const NBSP = ' '
 
-export const Home = trackWindowScroll(
+export const Home: React.ComponentType<Pick<LazyComponentProps, never>> = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
     const query = useKlkPostsQuery()
 
@@ -31,7 +33,7 @@ export const Home = trackWindowScroll(
     // its return value will be accepted by `fetcher`.
     // If `null` is returned, the request of that page won't start.
     const getKey = useCallback(
-      (pageIndex: number, previousPageData: KlkPostDAO[] | null): string | null => {
+      (pageIndex: number, previousPageData: List<KlkPostDAO> | null): string | null => {
         if (previousPageData !== null && previousPageData.length === 0) return null // reached the end
         return apiRoutes.klkPosts(query, pageIndex) // SWR key
       },
@@ -45,31 +47,46 @@ export const Home = trackWindowScroll(
     const updateById = useCallback(
       (id: KlkPostId, post: KlkPostDAO): void => {
         mutate(
-          List.map(
-            List.filterMap(p =>
-              p.id === id
-                ? pipe(Maybe.some(post), Maybe.filter(KlkPostDAO.matchesQuery(query)))
-                : Maybe.some(p),
-            ),
-          ),
+          prev =>
+            prev === undefined
+              ? undefined
+              : (pipe(
+                  prev,
+                  List.map(
+                    List.filterMap(p =>
+                      p.id === id
+                        ? pipe(Maybe.some(post), Maybe.filter(KlkPostDAO.matchesQuery(query)))
+                        : Maybe.some(p),
+                    ),
+                  ),
+                  // eslint-disable-next-line functional/prefer-readonly-type
+                ) as KlkPostDAO[][]),
           false,
         )
       },
       [mutate, query],
     )
 
-    const { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd } = useMemo(() => {
-      const klkPosts = data === undefined ? [] : List.flatten(data)
-      const isLoadingInitialData = data === undefined && error === undefined
-      const isLoadingMore =
+    const klkPosts = useMemo(() => (data === undefined ? [] : List.flatten(data)), [data])
+    const isLoadingInitialData = useMemo(() => data === undefined && error === undefined, [
+      data,
+      error,
+    ])
+    const isLoadingMore = useMemo(
+      () =>
         isLoadingInitialData ||
-        (size > 0 && data !== undefined && pipe(data, List.lookup(size - 1), Maybe.isNone))
-      const isReachingEnd =
+        (size > 0 && data !== undefined && pipe(data, List.lookup(size - 1), Maybe.isNone)),
+      [data, isLoadingInitialData, size],
+    )
+    const isReachingEnd = useMemo(
+      () =>
         List.isEmpty(klkPosts) ||
-        (data !== undefined && data[data.length - 1].length < config.pageSize)
-      // const isRefreshing = isValidating && data !== undefined && data.length === size
-      return { klkPosts, isLoadingInitialData, isLoadingMore, isReachingEnd }
-    }, [data, error, size])
+        (data !== undefined &&
+          List.isNonEmpty(data) &&
+          NonEmptyArray.last(data).length < config.pageSize),
+      [data, klkPosts],
+    )
+    // const isRefreshing = isValidating && data !== undefined && data.length === size
 
     const onScroll = useCallback(
       (e: React.UIEvent<HTMLDivElement, UIEvent>) => {

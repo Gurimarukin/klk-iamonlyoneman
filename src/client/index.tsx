@@ -9,6 +9,7 @@ import { HistoryContextProvider } from './contexts/HistoryContext'
 import { KlkPostsQueryContextProvider } from './contexts/KlkPostsQueryContext'
 import { UserContextProvider } from './contexts/UserContext'
 
+// eslint-disable-next-line functional/no-expression-statement
 ReactDOM.render(
   <HistoryContextProvider>
     <KlkPostsQueryContextProvider>

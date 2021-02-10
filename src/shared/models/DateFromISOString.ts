@@ -1,8 +1,7 @@
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
-
-import { pipe } from '../utils/fp'
 
 export namespace DateFromISOString {
   export const decoder: D.Decoder<unknown, Date> = pipe(

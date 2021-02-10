@@ -3,9 +3,9 @@ import React, { FunctionComponent } from 'react'
 
 type SVGComponent = FunctionComponent<Props>
 
-interface Props {
-  className?: string
-}
+type Props = {
+  readonly className?: string
+};
 
 export const BullseyePointer: SVGComponent = ({ className }) => (
   <StyledSvg

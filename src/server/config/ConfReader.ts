@@ -1,29 +1,24 @@
+import { apply } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 
-import {
-  Do,
-  Either,
-  IO,
-  List,
-  Maybe,
-  NonEmptyArray,
-  pipe,
-  unknownToError,
-} from '../../shared/utils/fp'
+import { Either, IO, List, Maybe, NonEmptyArray, unknownToError } from '../../shared/utils/fp'
 import { FileUtils } from '../utils/FileUtils'
 
 export type Validated<A> = Either<string, A>
 export type ValidatedNea<A> = Either<NonEmptyArray<string>, A>
 
-export interface ConfReader {
-  read: <A>(codec: D.Decoder<unknown, A>) => (path: string, ...paths: string[]) => ValidatedNea<A>
-  readOpt: <A>(
+export type ConfReader = {
+  readonly read: <A>(
     codec: D.Decoder<unknown, A>,
-  ) => (path: string, ...paths: string[]) => ValidatedNea<Maybe<A>>
+  ) => (path: string, ...paths: List<string>) => ValidatedNea<A>
+  readonly readOpt: <A>(
+    codec: D.Decoder<unknown, A>,
+  ) => (path: string, ...paths: List<string>) => ValidatedNea<Maybe<A>>
 }
 
 export namespace ConfReader {
-  export function fromFiles(path: string, ...paths: string[]): IO<ConfReader> {
+  export function fromFiles(path: string, ...paths: List<string>): IO<ConfReader> {
     return pipe(
       parseJsonFiles(path, ...paths),
       IO.map<NonEmptyArray<unknown>, ConfReader>(jsons =>
@@ -32,19 +27,19 @@ export namespace ConfReader {
     )
   }
 
-  export function fromJsons(json: unknown, ...jsons: unknown[]): ConfReader {
+  export function fromJsons(json: unknown, ...jsons: List<unknown>): ConfReader {
     const readOpt = <A>(codec: D.Decoder<unknown, A>) => (
       path: string,
-      ...paths: string[]
+      ...paths: List<string>
     ): ValidatedNea<Maybe<A>> => {
       const allPaths: NonEmptyArray<string> = [path, ...paths]
 
       const valueForPath = pipe(
         jsons,
-        List.reduce(readPath(allPaths, json), (acc, json) =>
+        List.reduce(readPath(allPaths, json), (acc, json_) =>
           pipe(
             acc,
-            Maybe.alt(() => readPath(allPaths, json)),
+            Maybe.alt(() => readPath(allPaths, json_)),
           ),
         ),
       )
@@ -67,7 +62,7 @@ export namespace ConfReader {
 
     const read = <A>(codec: D.Decoder<unknown, A>) => (
       path: string,
-      ...paths: string[]
+      ...paths: List<string>
     ): ValidatedNea<A> =>
       pipe(
         readOpt(codec)(path, ...paths),
@@ -82,13 +77,13 @@ export namespace ConfReader {
   }
 }
 
-function parseJsonFiles(path: string, ...paths: string[]): IO<NonEmptyArray<unknown>> {
+function parseJsonFiles(path: string, ...paths: List<string>): IO<NonEmptyArray<unknown>> {
   return paths.reduce(
-    (acc, path) =>
-      Do(IO.ioEither)
-        .bindL('acc', () => acc)
-        .bindL('newConf', () => loadConfigFile(path))
-        .return(({ acc, newConf }) => NonEmptyArray.snoc(acc, newConf)),
+    (acc, path_) =>
+      pipe(
+        apply.sequenceT(IO.ioEither)(acc, loadConfigFile(path_)),
+        IO.map(([acc_, newConf]) => NonEmptyArray.snoc(acc_, newConf)),
+      ),
     pipe(loadConfigFile(path), IO.map(NonEmptyArray.of)),
   )
 }
@@ -100,13 +95,14 @@ function loadConfigFile(path: string): IO<unknown> {
   )
 }
 
-function readPath(paths: string[], val: unknown): Maybe<unknown> {
+function readPath(paths: List<string>, val: unknown): Maybe<unknown> {
   if (List.isEmpty(paths)) return Maybe.some(val)
 
   const [head, ...tail] = paths
   return pipe(
+    Maybe.fromNullable(head),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Maybe.tryCatch(() => (val as any)[head]),
+    Maybe.chain(h => Maybe.tryCatch<unknown>(() => (val as any)[h])),
     Maybe.filter(_ => _ !== undefined),
     Maybe.chain(newVal => readPath(tail, newVal)),
   )

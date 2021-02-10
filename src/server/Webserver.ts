@@ -1,22 +1,11 @@
 import { Server } from 'http'
 
 import express, { ErrorRequestHandler } from 'express'
+import { flow, pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 import { Action, ExpressConnection, toArray, toRequestHandler } from 'hyper-ts/lib/express'
 
-import {
-  Dict,
-  Do,
-  Either,
-  Future,
-  IO,
-  List,
-  Maybe,
-  NonEmptyArray,
-  Task,
-  flow,
-  pipe,
-} from '../shared/utils/fp'
+import { Dict, Either, Future, IO, List, Maybe, NonEmptyArray, Task } from '../shared/utils/fp'
 import { Config } from './config/Config'
 import { EndedMiddleware } from './models/EndedMiddleware'
 import { Route } from './models/Route'
@@ -25,21 +14,21 @@ import { Logger, PartialLogger } from './services/Logger'
 const allowedHeaders = ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 
 export const startWebServer = (
-  Logger: PartialLogger,
+  Logger_: PartialLogger,
   config: Config,
-  routes: Route[],
+  routes: List<Route>,
 ): IO<Server> => {
-  const logger = Logger('WebServer')
+  const logger = Logger_('WebServer')
 
   const withCors = pipe(
-    IO.apply(() => express()),
+    IO.tryCatch(() => express()),
     IO.chain(app =>
       pipe(
         config.allowedOrigins,
         Maybe.fold(
-          () => IO.apply(() => app),
+          () => IO.tryCatch(() => app),
           allowedOrigins =>
-            IO.apply(() =>
+            IO.tryCatch(() =>
               app.use((req, res, next) =>
                 pipe(
                   Dict.lookup('origin', req.headers),
@@ -47,10 +36,12 @@ export const startWebServer = (
                   Maybe.fold(
                     () => next(),
                     origin => {
+                      /* eslint-disable functional/no-expression-statement */
                       res.append('Access-Control-Allow-Origin', origin)
                       res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '))
                       if (req.method === 'OPTIONS') res.send()
                       else next()
+                      /* eslint-enable functional/no-expression-statement */
                     },
                   ),
                 ),
@@ -67,41 +58,47 @@ export const startWebServer = (
       pipe(
         ioApp,
         IO.chain(app =>
-          IO.apply(() => app[method](path, pipe(middleware, withTry, withLog, toRequestHandler))),
+          IO.tryCatch(() =>
+            app[method](path, pipe(middleware, withTry, withLog, toRequestHandler)),
+          ),
         ),
       ),
     ),
     IO.chain(_ =>
-      IO.apply(() =>
+      IO.tryCatch(() =>
         _.use(pipe(EndedMiddleware.text(H.Status.NotFound)(), withLog, toRequestHandler)),
       ),
     ),
-    IO.chain(_ => IO.apply(() => _.use(errorHandler(onError)))),
+    IO.chain(_ => IO.tryCatch(() => _.use(errorHandler(onError)))),
     IO.chain(_ =>
-      IO.apply(() => _.listen(config.port, logger.info(`Server listening on port ${config.port}`))),
+      IO.tryCatch(() =>
+        _.listen(config.port, logger.info(`Server listening on port ${config.port}`)),
+      ),
     ),
   )
 
   function withLog(middleware: EndedMiddleware): EndedMiddleware {
     return conn =>
-      Do(Task.task)
-        .bind('res', middleware(conn))
-        .doL(({ res }) =>
+      pipe(
+        Task.Do,
+        Task.bind('res', () => middleware(conn)),
+        Task.chain(({ res }) =>
           pipe(
             res,
             Either.fold(
-              _ => Task.of(undefined),
+              () => Task.of(undefined),
               ([, _]) => logConnection(logger, _ as ExpressConnection<H.ResponseEnded>),
             ),
+            Task.map(() => res),
           ),
-        )
-        .return(({ res }) => res)
+        ),
+      )
   }
 
   function withTry(middleware: EndedMiddleware): EndedMiddleware {
     return conn =>
       pipe(
-        Future.apply(() => middleware(conn)()),
+        Future.tryCatch(() => middleware(conn)()),
         Task.chain(_ =>
           pipe(
             _,
@@ -109,7 +106,7 @@ export const startWebServer = (
               flow(
                 onError,
                 Task.fromIO,
-                Task.chain(_ => EndedMiddleware.text(H.Status.InternalServerError)()(conn)),
+                Task.chain(() => EndedMiddleware.text(H.Status.InternalServerError)()(conn)),
               ),
               Task.of,
             ),
@@ -128,7 +125,7 @@ function containedIn<A>(allowedOrigins: NonEmptyArray<A>): <B>(elem: A | B) => e
   return (elem): elem is A =>
     pipe(
       allowedOrigins,
-      List.exists(_ => _ === elem),
+      List.some(_ => _ === elem),
     )
 }
 
@@ -154,13 +151,15 @@ function getStatus(conn: ExpressConnection<H.ResponseEnded>): Maybe<H.Status> {
   )
 }
 
-function isStatus(a: Action): a is { type: 'setStatus'; status: H.Status } {
+function isStatus(a: Action): a is { readonly type: 'setStatus'; readonly status: H.Status } {
   return a.type === 'setStatus'
 }
 
 function errorHandler(onError: (error: unknown) => IO<unknown>): ErrorRequestHandler {
-  return (err, _req, res, _next) => {
+  return (err, _req, res) => {
+    /* eslint-disable functional/no-expression-statement */
     onError(err)()
     res.status(500).end()
+    /* eslint-enable functional/no-expression-statement */
   }
 }

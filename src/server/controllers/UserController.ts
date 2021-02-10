@@ -1,18 +1,18 @@
+import { flow, pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { TokenDAO } from '../../shared/models/login/TokenDAO'
-import { Maybe, flow, pipe } from '../../shared/utils/fp'
+import { Maybe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
-import { PartialLogger } from '../services/Logger'
 import { UserService } from '../services/UserService'
 import { ControllerUtils } from '../utils/ControllerUtils'
 
 export type UserController = ReturnType<typeof UserController>
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function UserController(Logger: PartialLogger, userService: UserService) {
-  const _logger = Logger('UserController')
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function UserController(userService: UserService) {
+  // const logger = Logger('UserController')
 
   const login: EndedMiddleware = ControllerUtils.withJsonBody(
     LoginPayload.codec.decode,

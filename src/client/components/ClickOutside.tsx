@@ -1,15 +1,18 @@
+/* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import React, { cloneElement, createRef, useCallback, useEffect } from 'react'
 
-type Props = Readonly<{
-  onClickOutside: (e: MouseEvent) => void
-}>
+import { List } from '../../shared/utils/fp'
+
+type Props = {
+  readonly onClickOutside: (e: MouseEvent) => void
+}
 
 export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {
-  const refs = React.Children.map(children, _ => createRef<Node>())
+  const refs = React.Children.map(children, () => createRef<Node>())
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
-      const isOutside = (refs as React.RefObject<Node>[]).every(
+      const isOutside = (refs as List<React.RefObject<Node>>).every(
         ref => ref.current !== null && !ref.current.contains(e.target as Node),
       )
       if (isOutside) onClickOutside(e)
@@ -23,6 +26,8 @@ export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {
   }, [handleClick])
 
   return (React.Children.map(children, (elt, idx) =>
-    cloneElement(elt as React.ReactElement, { ref: (refs as React.RefObject<Node>[])[idx] }),
+    cloneElement(elt as React.ReactElement, {
+      ref: (refs as List<React.RefObject<Node>>)[idx],
+    }),
   ) as unknown) as React.ReactElement
 }

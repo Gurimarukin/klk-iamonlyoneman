@@ -1,17 +1,20 @@
-import { Future, pipe } from '../shared/utils/fp'
+import { pipe } from 'fp-ts/function'
+
+import { Future } from '../shared/utils/fp'
 import { Config } from './config/Config'
 import { Context } from './Context'
 
+// eslint-disable-next-line functional/no-expression-statement
 pipe(
   Context.load(Config.Lens.logLevel.set('debug')),
   Future.chain(({ Logger, ensureIndexes, fullPoll }) => {
     const logger = Logger('Application')
     return pipe(
       Future.right(undefined),
-      Future.chain(_ => ensureIndexes()),
-      Future.chain(_ => fullPoll()),
+      Future.chain(() => ensureIndexes()),
+      Future.chain(() => fullPoll()),
       Future.recover(e => Future.fromIOEither(logger.error(e))),
-      Future.chain(_ => Future.fromIOEither(logger.info('Done'))),
+      Future.chain(() => Future.fromIOEither(logger.info('Done'))),
     )
   }),
   f => Future.runUnsafe<void>(f),

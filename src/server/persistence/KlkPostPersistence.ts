@@ -1,3 +1,4 @@
+import { flow, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { Collection, Cursor, FilterQuery } from 'mongodb'
 
@@ -6,7 +7,7 @@ import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPaylo
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 import { EpisodeNumber } from '../../shared/models/PartialKlkPostQuery'
-import { Either, Future, List, Maybe, Task, flow, pipe } from '../../shared/utils/fp'
+import { Either, Future, List, Maybe, Task } from '../../shared/utils/fp'
 import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { PartialLogger } from '../services/Logger'
@@ -14,7 +15,7 @@ import { FpCollection, decodeError } from './FpCollection'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function KlkPostPersistence(
   Logger: PartialLogger,
   mongoCollection: (collName: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
@@ -39,17 +40,17 @@ export function KlkPostPersistence(
 
     count: (): Future<number> => collection.count({}),
 
-    findAll: (query: KlkPostsQuery, page: number): Future<KlkPost[]> =>
+    findAll: (query: KlkPostsQuery, page: number): Future<List<KlkPost>> =>
       pipe(
         collection.collection(coll =>
           cursorFromQueryParams(coll, query, page)
             .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
-        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
+        Future.chain(flow(Either.sequenceArray, Task.of)),
       ),
 
-    findWithEmptySize: (): Future<OnlyWithIdAndUrlKlkPost[]> =>
+    findWithEmptySize: (): Future<List<OnlyWithIdAndUrlKlkPost>> =>
       pipe(
         collection.collection(coll =>
           coll
@@ -57,10 +58,10 @@ export function KlkPostPersistence(
             .map(flow(KlkPost.onlyWithIdAndUrlCodec.decode, Either.mapLeft(decodeError)))
             .toArray(),
         ),
-        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
+        Future.chain(flow(Either.sequenceArray, Task.of)),
       ),
 
-    findByIds: (ids: KlkPostId[]): Future<KlkPostId[]> =>
+    findByIds: (ids: List<KlkPostId>): Future<List<KlkPostId>> =>
       pipe(
         collection.collection(coll =>
           coll
@@ -73,7 +74,7 @@ export function KlkPostPersistence(
             )
             .toArray(),
         ),
-        Future.chain(flow(List.array.sequence(Either.either), Task.of)),
+        Future.chain(flow(Either.sequenceArray, Task.of)),
       ),
 
     findById: (id: KlkPostId): Future<Maybe<KlkPost>> =>
@@ -98,7 +99,7 @@ export function KlkPostPersistence(
         Future.map(r => r.matchedCount === 1),
       ),
 
-    insertMany: (posts: KlkPost[]) => collection.insertMany(posts),
+    insertMany: (posts: List<KlkPost>) => collection.insertMany(posts),
 
     upsert: (id: KlkPostId, post: KlkPost): Future<boolean> =>
       pipe(
@@ -122,7 +123,7 @@ export function KlkPostPersistence(
     return sorted.skip(page * config.pageSize).limit(config.pageSize)
   }
 
-  function foldRecord<A, B>(
+  function foldRecord<A>(
     maybe: Maybe<A>,
     f: (a: A) => FilterQuery<OutputType>,
   ): FilterQuery<OutputType> {

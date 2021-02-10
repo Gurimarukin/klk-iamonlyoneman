@@ -1,6 +1,9 @@
-import { Future, pipe } from '../shared/utils/fp'
+import { pipe } from 'fp-ts/function'
+
+import { Future } from '../shared/utils/fp'
 import { Context } from './Context'
 
+// eslint-disable-next-line functional/no-expression-statement
 pipe(
   Context.load(),
   Future.chain(
@@ -8,12 +11,12 @@ pipe(
       const logger = Logger('Application')
       return pipe(
         Future.right(undefined),
-        Future.chain(_ => ensureIndexes()),
-        Future.chain(_ => initDbIfEmpty()),
-        Future.chain(_ => scheduleRedditPolling()),
+        Future.chain(() => ensureIndexes()),
+        Future.chain(() => initDbIfEmpty()),
+        Future.chain(() => scheduleRedditPolling()),
         Future.recover(e => Future.fromIOEither(logger.error(e))),
-        Future.chain(_ => Future.fromIOEither(startWebServer())),
-        Future.chain(_ => Future.fromIOEither(logger.info('Started'))),
+        Future.chain(() => Future.fromIOEither(startWebServer())),
+        Future.chain(() => Future.fromIOEither(logger.info('Started'))),
       )
     },
   ),

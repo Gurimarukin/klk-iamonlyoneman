@@ -7,9 +7,12 @@ module.exports = {
       jsx: true,
     },
   },
+  plugins: ['functional', 'fp-ts'],
   extends: [
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:functional/recommended',
+    'plugin:fp-ts/all',
     'prettier/@typescript-eslint',
     'plugin:prettier/recommended',
     'plugin:react-hooks/recommended',
@@ -21,19 +24,23 @@ module.exports = {
   },
   reportUnusedDisableDirectives: true,
   rules: {
-    '@typescript-eslint/array-type': ['warn', { default: 'array', readonly: 'array' }],
-    '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-namespace': 'off',
-    '@typescript-eslint/no-unnecessary-condition': 'warn',
-    '@typescript-eslint/no-unused-vars': [
+    '@typescript-eslint/array-type': ['warn', { default: 'array', readonly: 'generic' }],
+    '@typescript-eslint/consistent-type-definitions': 'off', // use functional/prefer-type-literal, it's better
+    '@typescript-eslint/explicit-function-return-type': [
       'warn',
-      { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+      {
+        allowExpressions: true,
+        allowTypedFunctionExpressions: true,
+        allowHigherOrderFunctions: true,
+      },
     ],
-    '@typescript-eslint/no-var-requires': 'off',
-    '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false }],
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-unnecessary-condition': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/strict-boolean-expressions': [
       'warn',
       {
@@ -42,6 +49,7 @@ module.exports = {
         allowNullableObject: false,
       },
     ],
+    'arrow-parens': ['warn', 'as-needed'],
     'arrow-body-style': ['warn', 'as-needed'],
     'array-callback-return': 'off',
     'comma-dangle': [
@@ -54,6 +62,31 @@ module.exports = {
         functions: 'always-multiline',
       },
     ],
+    'fp-ts/no-module-imports': ['warn', { allowTypes: true }],
+    'functional/functional-parameters': [
+      'error',
+      {
+        allowRestParameter: true,
+        enforceParameterCount: false,
+      },
+    ],
+    'functional/no-conditional-statement': 'off', // switch aren't bad :/
+    'functional/no-expression-statement': [
+      'error',
+      {
+        ignorePattern: [
+          '^afterEach\\(',
+          '^beforeEach\\(',
+          '^console\\.',
+          '^describe\\(',
+          '^expect\\(',
+          '^it\\(',
+          '^useEffect\\(',
+        ],
+      },
+    ],
+    'functional/no-mixed-type': 'off',
+    'functional/no-promise-reject': 'error',
     'max-len': [
       'warn',
       {
@@ -70,9 +103,10 @@ module.exports = {
     'no-multiple-empty-lines': ['warn', { max: 1 }],
     'no-multi-spaces': 'warn',
     'no-redeclare': 'off',
-    'no-shadow': 'off',
+    'no-shadow': ['warn', { builtinGlobals: true, hoist: 'functions' }],
     'no-undef': 'off',
     'no-unneeded-ternary': 'warn',
+    'no-use-before-define': 'off',
     'no-useless-computed-key': 'warn',
     'no-useless-rename': 'warn',
     'object-shorthand': 'warn',

@@ -1,26 +1,24 @@
-import { Location, createBrowserHistory } from 'history'
+/* eslint-disable functional/no-return-void */
+import * as history from 'history'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-type HistoryContext = Readonly<{
+type HistoryContext = {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  location: Location<object | null>
-  navigate: (to: string) => void
-  query: qs.ParsedQs
-}>
+  readonly location: history.Location<object | null>
+  readonly navigate: (to: string) => void
+  readonly query: qs.ParsedQs
+}
 
 const HistoryContext = createContext<HistoryContext | undefined>(undefined)
 
 export const HistoryContextProvider: React.FC = ({ children }) => {
-  const history = useMemo(() => createBrowserHistory(), [])
+  const h = useMemo(() => history.createBrowserHistory(), [])
 
-  const [location, setLocation] = useState(history.location)
-  useEffect(() => history.listen(location => setLocation(location.location)), [history])
+  const [location, setLocation] = useState(h.location)
+  useEffect(() => h.listen(l => setLocation(l.location)), [h])
 
-  const navigate = useCallback(
-    (to: string) => history.push({ pathname: to, search: '', hash: '' }),
-    [history],
-  )
+  const navigate = useCallback((to: string) => h.push({ pathname: to, search: '', hash: '' }), [h])
 
   const query = useMemo(() => qs.parse(location.search.slice(1)), [location.search])
 
@@ -32,6 +30,7 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
 export const useHistory = (): HistoryContext => {
   const context = useContext(HistoryContext)
   if (context === undefined) {
+    // eslint-disable-next-line functional/no-throw-statement
     throw new Error('useHistory must be used within a HistoryContextProvider')
   }
   return context

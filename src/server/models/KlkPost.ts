@@ -1,3 +1,5 @@
+import { apply } from 'fp-ts'
+import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import * as E from 'io-ts/Encoder'
 import { Lens as MLens } from 'monocle-ts'
@@ -6,7 +8,7 @@ import { DateFromISOString } from '../../shared/models/DateFromISOString'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Do, Maybe, pipe } from '../../shared/utils/fp'
+import { Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Link } from './Link'
 
@@ -80,10 +82,10 @@ export type KlkPost = C.TypeOf<typeof KlkPost.codec>
 
 export type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof KlkPost.onlyWithIdAndUrlCodec>
 
-type Metadata = Readonly<{
-  episode: Maybe<number>
-  size: Maybe<Size>
-}>
+type Metadata = {
+  readonly episode: Maybe<number>
+  readonly size: Maybe<Size>
+}
 
 const Regex = {
   episode: /eps?is?ode\s+([0-9]+)/i,
@@ -97,10 +99,7 @@ export function metadataFromTitle(title: string): Metadata {
     title,
     StringUtils.matcher2(Regex.size),
     Maybe.chain(([width, height]) =>
-      Do(Maybe.option)
-        .bindL('width', () => toNumber(width))
-        .bindL('height', () => toNumber(height))
-        .done(),
+      apply.sequenceS(Maybe.option)({ width: toNumber(width), height: toNumber(height) }),
     ),
   )
   return { episode, size }
@@ -125,11 +124,10 @@ export type KlkPosts = C.TypeOf<typeof KlkPosts.codec>
 
 // KlkPostEditPayload
 
-type Out = Readonly<
-  {
-    [K in keyof KlkPostEditPayload]: KlkPost.Output[K]
-  }
->
+type Out = {
+  readonly [K in keyof KlkPostEditPayload]: KlkPost.Output[K]
+}
+
 export const klkPostEditPayloadEncoder: E.Encoder<Out, KlkPostEditPayload> = {
   encode: ({ episode, size, title, url, active }) => ({
     episode: episodeCodec.encode(episode),

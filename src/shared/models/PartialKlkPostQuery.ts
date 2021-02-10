@@ -1,12 +1,13 @@
+import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
-import { Dict, List, pipe } from '../../shared/utils/fp'
+import { Dict, List } from '../../shared/utils/fp'
 import { NumberFromString } from './NumberFromString'
 
 export namespace EpisodeNumber {
-  export type Number = number
-  export namespace Number {
+  export type Numb = number
+  export namespace Numb {
     export const codec = NumberFromString.Bounded.codec(1, 25)
   }
 
@@ -14,14 +15,14 @@ export namespace EpisodeNumber {
   export const unknown: Unknown = 'unknown'
 
   export const decoder: D.Decoder<unknown, EpisodeNumber> = D.union(
-    Number.codec,
+    Numb.codec,
     D.literal('unknown'),
   )
 
   export const toNullable = (e: EpisodeNumber): number | null => (e === 'unknown' ? null : e)
 }
 
-export type EpisodeNumber = EpisodeNumber.Number | EpisodeNumber.Unknown
+export type EpisodeNumber = EpisodeNumber.Numb | EpisodeNumber.Unknown
 
 export namespace PostsSort {
   export const decoder = D.union(D.literal('new'), D.literal('old'))
@@ -47,7 +48,7 @@ export namespace PartialKlkPostQuery {
   export const encoder: E.Encoder<Out, PartialKlkPostQuery> = {
     encode: query =>
       pipe(
-        Dict.toArray(query as Required<PartialKlkPostQuery>),
+        Dict.toReadonlyArray(query as Required<PartialKlkPostQuery>),
         List.reduce({} as Out, (acc, [key, value]) => ({ ...acc, [key]: String(value) })),
       ),
   }

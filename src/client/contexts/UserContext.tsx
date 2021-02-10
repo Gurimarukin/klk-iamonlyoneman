@@ -1,18 +1,20 @@
+/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+import { pipe } from 'fp-ts/function'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { TokenDAO } from '../../shared/models/login/TokenDAO'
 import { Token } from '../../shared/models/Token'
-import { Future, Maybe, pipe } from '../../shared/utils/fp'
+import { Future, Maybe } from '../../shared/utils/fp'
 import { apiRoutes } from '../utils/apiRoutes'
 import { Http } from '../utils/Http'
 
-type UserContext = Readonly<{
-  token: Maybe<Token>
-  isAdmin: boolean
-  login: (payload: LoginPayload) => Promise<Maybe<Token>>
-  logout: () => void
-}>
+type UserContext = {
+  readonly token: Maybe<Token>
+  readonly isAdmin: boolean
+  readonly login: (payload: LoginPayload) => Promise<Maybe<Token>>
+  readonly logout: () => void
+}
 
 const UserContext = createContext<UserContext | undefined>(undefined)
 
@@ -25,15 +27,15 @@ export const UserContextProvider: React.FC = ({ children }) => {
 
   const isAdmin = Maybe.isSome(token)
 
-  const updateToken = useCallback((token: Maybe<Token>) => {
+  const updateToken = useCallback((token_: Maybe<Token>) => {
     pipe(
-      token,
+      token_,
       Maybe.fold(
         () => localStorage.removeItem(USER_TOKEN),
         t => localStorage.setItem(USER_TOKEN, Token.unwrap(t)),
       ),
     )
-    setToken(token)
+    setToken(token_)
   }, [])
 
   const login = useCallback(
@@ -41,11 +43,11 @@ export const UserContextProvider: React.FC = ({ children }) => {
       pipe(
         Http.post(apiRoutes.login, payload, LoginPayload.codec.encode, TokenDAO.codec.decode),
         Future.map(Maybe.some),
-        Future.recover<Maybe<TokenDAO>>(_ => Future.right(Maybe.none)),
+        Future.recover<Maybe<TokenDAO>>(() => Future.right(Maybe.none)),
         Future.map(
-          Maybe.map(({ token }) => {
-            updateToken(Maybe.some(token))
-            return token
+          Maybe.map(d => {
+            updateToken(Maybe.some(d.token))
+            return d.token
           }),
         ),
         Future.runUnsafe,
@@ -68,6 +70,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
 export const useUser = (): UserContext => {
   const context = useContext(UserContext)
   if (context === undefined) {
+    // eslint-disable-next-line functional/no-throw-statement
     throw new Error('useUser must be used within a UserContextProvider')
   }
   return context

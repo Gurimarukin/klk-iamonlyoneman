@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-expression-statement */
 import styled from '@emotion/styled'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -25,8 +26,8 @@ export const SearchInput = (): JSX.Element => {
   const navigateSearch = useCallback(
     (rawSearch: string | undefined) => {
       const trimed = rawSearch?.trim()
-      const search = trimed === '' ? undefined : trimed
-      if (search !== query.search) navigate(routes.home({ ...query, search }))
+      const search_ = trimed === '' ? undefined : trimed
+      if (search_ !== query.search) navigate(routes.home({ ...query, search: search_ }))
     },
     [navigate, query],
   )

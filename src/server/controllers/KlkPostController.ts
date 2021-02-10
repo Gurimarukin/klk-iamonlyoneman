@@ -1,3 +1,4 @@
+import { flow, pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
 
@@ -6,7 +7,7 @@ import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPaylo
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { NumberFromString } from '../../shared/models/NumberFromString'
 import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
-import { Maybe, flow, pipe } from '../../shared/utils/fp'
+import { Maybe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { User } from '../models/user/User'
@@ -27,7 +28,7 @@ const klkPostsQuery = pipe(
 
 export type KlkPostController = ReturnType<typeof KlkPostController>
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function KlkPostController(
   Logger: PartialLogger,
   withAuth: WithAuth,

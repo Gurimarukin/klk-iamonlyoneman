@@ -1,24 +1,29 @@
-import express, { Request } from 'express'
+import express from 'express'
+import { flow, pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 import { ExpressConnection, fromRequestHandler } from 'hyper-ts/lib/express'
 import * as D from 'io-ts/Decoder'
 
-import { Either, Future, IO, flow, pipe } from '../../shared/utils/fp'
+import { Either, Future, IO } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 
 export namespace ControllerUtils {
   const stringBody: express.RequestHandler = (req, _res, next) => {
+    // eslint-disable-next-line functional/no-let
     let body = ''
+    /* eslint-disable functional/no-expression-statement */
     req.on('data', chunk => (body += chunk.toString()))
     req.on('end', () => {
+      // eslint-disable-next-line functional/immutable-data
       req.body = body
       next()
     })
+    /* eslint-enable functional/no-expression-statement */
   }
 
   export const withJsonBody = <E, A>(decode: (i: unknown) => Either<E, A>) => (
     onRight: (a: A) => EndedMiddleware,
-    onLeft: (e: E) => IO<void> = _ => IO.unit,
+    onLeft: (e: E) => IO<void> = () => IO.unit,
   ): EndedMiddleware =>
     pipe(
       fromRequestHandler(stringBody, req => req.body as string),
@@ -27,9 +32,9 @@ export namespace ControllerUtils {
           H.decodeHeader('Content-Type', D.string.decode),
           H.filterOrElse<unknown, string>(
             contentType => contentType === 'application/json',
-            _ => undefined,
+            () => undefined,
           ),
-          H.ichain(_ => H.fromEither(Either.parseJSON<unknown>(body, _ => undefined))),
+          H.ichain(() => H.fromEither(Either.parseJSON<unknown>(body, () => undefined))),
         ),
       ),
       H.ichain(
@@ -39,23 +44,23 @@ export namespace ControllerUtils {
             e =>
               pipe(
                 H.fromIOEither(onLeft(e)),
-                H.ichain(_ => H.left(undefined as unknown)),
+                H.ichain(() => H.left(undefined as unknown)),
               ),
             a => H.right(a),
           ),
         ),
       ),
       H.ichain(onRight),
-      H.orElse(_ => EndedMiddleware.text(H.Status.BadRequest)()),
+      H.orElse(() => EndedMiddleware.text(H.Status.BadRequest)()),
     )
 
-  export const withRequest: H.Middleware<H.StatusOpen, H.StatusOpen, unknown, Request> = (
+  export const withRequest: H.Middleware<H.StatusOpen, H.StatusOpen, unknown, express.Request> = (
     conn: H.Connection<H.StatusOpen>,
   ) => Future.right([(conn as ExpressConnection<H.StatusOpen>).req, conn])
 
   export const withQuery = <E, A>(decode: (i: unknown) => Either<E, A>) => (
     onRight: (a: A) => EndedMiddleware,
-    onLeft: (e: E) => IO<void> = _ => IO.unit,
+    onLeft: (e: E) => IO<void> = () => IO.unit,
   ): EndedMiddleware =>
     pipe(
       H.decodeQuery(decode),
@@ -63,7 +68,7 @@ export namespace ControllerUtils {
       H.orElse(e =>
         pipe(
           H.fromIOEither(onLeft(e as E)),
-          H.ichain(_ => EndedMiddleware.text(H.Status.BadRequest)()),
+          H.ichain(() => EndedMiddleware.text(H.Status.BadRequest)()),
         ),
       ),
     )
@@ -74,7 +79,7 @@ export namespace ControllerUtils {
     pipe(
       H.decodeParams(decoder.decode),
       H.ichain(a => f(a)),
-      H.orElse(_ => EndedMiddleware.text(H.Status.BadRequest)()),
+      H.orElse(() => EndedMiddleware.text(H.Status.BadRequest)()),
     )
 
   export const notImplementedYet = EndedMiddleware.text(H.Status.InternalServerError)(

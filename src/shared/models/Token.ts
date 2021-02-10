@@ -1,8 +1,9 @@
+import { flow, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import { Newtype, iso } from 'newtype-ts'
 
 import { UuidUtils } from '../../server/utils/UuidUtils'
-import { IO, List, flow, pipe } from '../utils/fp'
+import { IO, List } from '../utils/fp'
 import { fromNewtype } from '../utils/fromNewtype'
 import { StringUtils } from '../utils/StringUtils'
 
@@ -17,8 +18,8 @@ export namespace Token {
 
   export const generate = (): IO<Token> =>
     pipe(
-      List.makeBy(2, _ => UuidUtils.uuidV4),
-      List.sequence(IO.ioEither),
+      List.makeBy(2, () => UuidUtils.uuidV4),
+      IO.sequenceArray,
       IO.map(flow(StringUtils.mkString('-'), wrap)),
     )
 }
