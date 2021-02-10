@@ -36,6 +36,7 @@ const StyledH2 = styled.h2({
   width: '100%',
   wordBreak: 'break-word',
   fontSize: '2.8em',
+  textAlign: 'center',
 })
 
 const StyledH3 = styled.h3({
