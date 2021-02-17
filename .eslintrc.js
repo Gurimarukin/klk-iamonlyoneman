@@ -35,10 +35,20 @@ module.exports = {
       },
     ],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-base-to-string': 'warn',
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'error',
+    '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
     '@typescript-eslint/no-unnecessary-condition': 'warn',
     '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/prefer-nullish-coalescing': [
+      'error',
+      {
+        ignoreConditionalTests: false,
+        ignoreMixedLogicalExpressions: false,
+      },
+    ],
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/strict-boolean-expressions': [

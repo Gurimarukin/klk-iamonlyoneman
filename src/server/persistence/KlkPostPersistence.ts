@@ -10,16 +10,14 @@ import { EpisodeNumber } from '../../shared/models/PartialKlkPostQuery'
 import { Either, Future, List, Maybe, Task } from '../../shared/utils/fp'
 import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
 import { KlkPostsQuery } from '../models/KlkPostsQuery'
+import { MongoCollection } from '../models/MongoCollection'
 import { PartialLogger } from '../services/Logger'
 import { FpCollection, decodeError } from './FpCollection'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function KlkPostPersistence(
-  Logger: PartialLogger,
-  mongoCollection: (collName: string) => <A>(f: (coll: Collection) => Promise<A>) => Future<A>,
-) {
+export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: MongoCollection) {
   const logger = Logger('KlkPostPersistence')
   const collection = FpCollection<KlkPost, KlkPost.Output>(
     logger,
