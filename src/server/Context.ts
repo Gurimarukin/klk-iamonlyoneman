@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import { Collection, Db, MongoClient } from 'mongodb'
 
-import { Future, List } from '../shared/utils/fp'
+import { Future, List, Task } from '../shared/utils/fp'
 import { s } from '../shared/utils/StringUtils'
 import { Config } from './config/Config'
 import { HealthCheckController } from './controllers/HealthCheckController'
@@ -32,7 +32,20 @@ export function Context(Logger: PartialLogger, config: Config) {
   const withDb = <A>(f: (db: Db) => Promise<A>): Future<A> =>
     pipe(
       Future.tryCatch(() => MongoClient.connect(url, { useUnifiedTopology: true })),
-      Future.chain(client => Future.tryCatch(() => f(client.db(config.db.dbName)))),
+      Future.chain(client =>
+        pipe(
+          Future.tryCatch(() => f(client.db(config.db.dbName))),
+          Task.chain(either =>
+            pipe(
+              Future.tryCatch(() => client.close()),
+              Future.recover(e =>
+                Future.fromIOEither(logger.error('Failed to close client:\n', e)),
+              ),
+              Task.map(() => either),
+            ),
+          ),
+        ),
+      ),
     )
   const mongoCollection: MongoCollection = (collName: string) => <A>(
     f: (c: Collection) => Promise<A>,
