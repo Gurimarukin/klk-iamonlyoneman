@@ -1,4 +1,5 @@
 import { s } from '../../shared/utils/StringUtils'
+import { ThumbnailSuffix } from './thumbnailUrl'
 
 const spacing = {
   xxs: 6,
@@ -33,6 +34,9 @@ const mediaQueries = {
   desktop: s`@media (min-width: ${mobileLimit})`,
 }
 
+const galleryThumnailSuffix: ThumbnailSuffix = 'h'
+const galleryThumnailMaxSize = ThumbnailSuffix.maxSizes[galleryThumnailSuffix]
+
 export const theme = {
   colors,
 
@@ -45,6 +49,10 @@ export const theme = {
 
   Gallery: {
     smallestSide: 500,
+    thumbnail: {
+      suffix: galleryThumnailSuffix,
+      maxSize: galleryThumnailMaxSize,
+    },
     margin: spacing.xs,
     maxHeight: 0.9, // * 100vh
   },

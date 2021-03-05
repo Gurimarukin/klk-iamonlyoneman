@@ -12,6 +12,7 @@ import { ClickOutside } from '../../components/ClickOutside'
 import { Pencil } from '../../components/svgs'
 import { useUser } from '../../contexts/UserContext'
 import { theme } from '../../utils/theme'
+import { thumbnailUrl } from '../../utils/thumbnailUrl'
 import { PostEditForm } from './PostEditForm'
 
 type Props = {
@@ -44,7 +45,7 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
         <ABlank href={post.url}>
           <StyledImage
             alt={post.title}
-            src={post.url}
+            src={thumbnailUrl(post.url, theme.Gallery.thumbnail.suffix)}
             scrollPosition={scrollPosition}
             effect='blur'
             wrapperClassName={PLACEHOLDER}

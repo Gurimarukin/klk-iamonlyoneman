@@ -24,12 +24,16 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
     (): Tuple<number, number> =>
       pipe(
         ref.current,
-        Maybe.fold(
+        Maybe.fold<HTMLDivElement, Tuple<number, number>>(
           () => [
             window.innerWidth - 2 * theme.Gallery.margin,
             window.innerHeight * theme.Gallery.maxHeight,
           ],
-          _ => [_.clientWidth - 2 * theme.Gallery.margin, _.clientHeight * theme.Gallery.maxHeight],
+          e => [e.clientWidth - 2 * theme.Gallery.margin, e.clientHeight * theme.Gallery.maxHeight],
+        ),
+        Tuple.bimap(
+          w => Math.min(w, theme.Gallery.thumbnail.maxSize),
+          h => Math.min(h, theme.Gallery.thumbnail.maxSize),
         ),
       ),
     [ref],
