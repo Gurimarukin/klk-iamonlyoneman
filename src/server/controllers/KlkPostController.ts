@@ -5,11 +5,11 @@ import * as D from 'io-ts/Decoder'
 import { KlkPostDAO, KlkPostDAOs } from '../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { NumberFromString } from '../../shared/models/NumberFromString'
-import { PartialKlkPostQuery } from '../../shared/models/PartialKlkPostQuery'
+import { PartialKlkPostsQuery } from '../../shared/models/PartialKlkPostsQuery'
 import { Maybe } from '../../shared/utils/fp'
 import { EndedMiddleware } from '../models/EndedMiddleware'
-import { KlkPostsQuery } from '../models/KlkPostsQuery'
 import { User } from '../models/user/User'
 import { KlkPostService } from '../services/KlkPostService'
 import { PartialLogger } from '../services/Logger'
@@ -17,7 +17,7 @@ import { ControllerUtils } from '../utils/ControllerUtils'
 import { WithAuth } from './WithAuth'
 
 const klkPostsQuery = pipe(
-  PartialKlkPostQuery.decoder,
+  PartialKlkPostsQuery.decoder,
   D.map(KlkPostsQuery.fromPartial),
   D.intersect(
     D.partial({

@@ -1,11 +1,16 @@
+import { eq } from 'fp-ts'
+import { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
 import { List, Maybe } from '../../utils/fp'
 import { DateFromISOString } from '../DateFromISOString'
-import { PartialKlkPostQuery } from '../PartialKlkPostQuery'
+import { KlkPostsQuery } from '../KlkPostsQuery'
+import { EpisodeNumber } from '../PartialKlkPostsQuery'
 import { KlkPostId } from './KlkPostId'
 import { Size } from './Size'
+
+const maybeNumberEq: Eq<Maybe<number>> = Maybe.getEq(eq.eqNumber)
 
 // KlkPostDAO
 
@@ -21,18 +26,16 @@ export namespace KlkPostDAO {
     active: C.boolean,
   })
 
-  export const matchesQuery = (query: PartialKlkPostQuery) => (post: KlkPostDAO): boolean => {
-    const matchesEpisode =
-      query.episode === undefined || query.episode === 'unknown'
-        ? Maybe.isNone(post.episode)
-        : pipe(
-            post.episode,
-            Maybe.exists(e => e === query.episode),
-          )
+  export const matchesQuery = (query: KlkPostsQuery) => (post: KlkPostDAO): boolean => {
+    const matchesEpisode = maybeNumberEq.equals(
+      post.episode,
+      pipe(query.episode, Maybe.filter(EpisodeNumber.isNumb)),
+    )
     const matchesSearch =
-      query.search === undefined ||
-      post.title.toLowerCase().match(query.search.toLowerCase()) !== null
-    const matchesActive = post.active === (query.active !== 'false')
+      Maybe.isNone(query.search) ||
+      post.title.toLowerCase().match(query.search.value.toLowerCase()) !== null
+
+    const matchesActive = eq.eqBoolean.equals(post.active, query.active)
 
     return matchesEpisode && matchesSearch && matchesActive
   }

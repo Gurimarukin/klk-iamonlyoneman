@@ -8,6 +8,7 @@ import { useSWRInfinite } from 'swr'
 import { config } from '../../../shared/config'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
+import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 import { GradientContainer } from '../../components/GradientContainer'
 import { ChevronUp } from '../../components/svgs'
@@ -35,7 +36,7 @@ export const Home: React.ComponentType<Pick<LazyComponentProps, never>> = trackW
     const getKey = useCallback(
       (pageIndex: number, previousPageData: List<KlkPostDAO> | null): string | null => {
         if (previousPageData !== null && previousPageData.length === 0) return null // reached the end
-        return apiRoutes.klkPosts(query, pageIndex) // SWR key
+        return apiRoutes.klkPosts(KlkPostsQuery.toPartial(query), pageIndex) // SWR key
       },
       [query],
     )

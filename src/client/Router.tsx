@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/function'
 import qs from 'qs'
 import React, { ReactElement, useEffect } from 'react'
 
-import { PartialKlkPostQuery } from '../shared/models/PartialKlkPostQuery'
+import { PartialKlkPostsQuery } from '../shared/models/PartialKlkPostsQuery'
 import { Dict, Maybe, Tuple } from '../shared/utils/fp'
 import { s } from '../shared/utils/StringUtils'
 import { About } from './pages/About'
@@ -12,14 +12,14 @@ import { Login } from './pages/Login'
 import { NotFound } from './pages/NotFound'
 
 export const routes = {
-  home: (query: PartialKlkPostQuery = {}): string => {
+  home: (query: PartialKlkPostsQuery = {}): string => {
     const str = pipe(
       query,
       Dict.filter(isDefined),
-      PartialKlkPostQuery.encoder.encode,
+      PartialKlkPostsQuery.encoder.encode,
       qs.stringify,
     )
-    return s`/${str === '' ? '' : '?'}${str}`
+    return s`/${str === '' ? '' : `?${str}`}`
   },
   about: '/about',
 }

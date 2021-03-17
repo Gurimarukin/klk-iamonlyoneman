@@ -1,7 +1,9 @@
 import styled from '@emotion/styled'
 import React, { forwardRef, useCallback } from 'react'
 
-import { PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
+import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
+import { PartialKlkPostsQuery } from '../../../shared/models/PartialKlkPostsQuery'
+import { Maybe } from '../../../shared/utils/fp'
 import { s } from '../../../shared/utils/StringUtils'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
@@ -20,14 +22,14 @@ export const Header = forwardRef<HTMLElement>(
     const query = useKlkPostsQuery()
 
     const homeLink = useCallback(
-      (toQuery: PartialKlkPostQuery, label: string, key?: string | number): JSX.Element => {
+      (toQuery: PartialKlkPostsQuery, label: string, key?: string | number): JSX.Element => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { episode: _2, ...withoutEpisode } = query
+        const { episode: _, ...withoutEpisode } = KlkPostsQuery.toPartial(query)
         return (
           <StyledLink
             key={key}
             to={routes.home({ ...withoutEpisode, ...toQuery })}
-            className={toQuery.episode === query.episode ? SELECTED : undefined}
+            className={toQuery.episode === Maybe.toUndefined(query.episode) ? SELECTED : undefined}
           >
             {label}
           </StyledLink>
@@ -39,9 +41,10 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          {homeLink({}, 'new')}
+          {homeLink({}, 'all')}
           <EpisodePicker homeLink={homeLink} />
           <SearchInput />
+          <SortedBy>sorted by {query.sortNew ? 'new' : 'old'}</SortedBy>
           <StyledLink to={routes.about}>about</StyledLink>
           {isAdmin ? (
             <LogoutButton onClick={logout}>
@@ -71,7 +74,7 @@ const StyledNav = styled.nav({
   display: 'grid',
   alignItems: 'center',
   [theme.mediaQueries.desktop]: {
-    gridTemplateColumns: 'auto auto 1fr auto auto',
+    gridTemplateColumns: 'auto auto 1fr auto auto auto',
     columnGap: theme.spacing.m,
   },
   [theme.mediaQueries.mobile]: {
@@ -114,6 +117,11 @@ const StyledLink = styled(Link)({
   '&:hover::after': {
     opacity: 1,
   },
+})
+
+const SortedBy = styled.div({
+  fontWeight: 'normal',
+  fontStyle: 'italic',
 })
 
 const LogoutButton = styled.button({

@@ -2,7 +2,7 @@ import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
-import { Dict, List } from '../../shared/utils/fp'
+import { Dict, List } from '../utils/fp'
 import { NumberFromString } from './NumberFromString'
 
 export namespace EpisodeNumber {
@@ -13,6 +13,8 @@ export namespace EpisodeNumber {
 
   export type Unknown = 'unknown'
   export const unknown: Unknown = 'unknown'
+
+  export const isNumb = (episode: EpisodeNumber): episode is Numb => typeof episode === 'number'
 
   export const decoder: D.Decoder<unknown, EpisodeNumber> = D.union(
     Numb.codec,
@@ -36,7 +38,7 @@ export namespace PostActive {
 
 export type PostActive = D.TypeOf<typeof PostActive.decoder>
 
-export namespace PartialKlkPostQuery {
+export namespace PartialKlkPostsQuery {
   export const decoder = D.partial({
     episode: EpisodeNumber.decoder,
     search: D.string,
@@ -44,14 +46,14 @@ export namespace PartialKlkPostQuery {
     active: PostActive.decoder,
   })
 
-  type Out = Partial<Record<keyof PartialKlkPostQuery, string>>
-  export const encoder: E.Encoder<Out, PartialKlkPostQuery> = {
+  type Out = Partial<Record<keyof PartialKlkPostsQuery, string>>
+  export const encoder: E.Encoder<Out, PartialKlkPostsQuery> = {
     encode: query =>
       pipe(
-        Dict.toReadonlyArray(query as Required<PartialKlkPostQuery>),
+        Dict.toReadonlyArray(query as Required<PartialKlkPostsQuery>),
         List.reduce({} as Out, (acc, [key, value]) => ({ ...acc, [key]: String(value) })),
       ),
   }
 }
 
-export type PartialKlkPostQuery = D.TypeOf<typeof PartialKlkPostQuery.decoder>
+export type PartialKlkPostsQuery = D.TypeOf<typeof PartialKlkPostsQuery.decoder>

@@ -1,7 +1,12 @@
 /* eslint-disable functional/no-expression-statement */
 import styled from '@emotion/styled'
-import React, { useCallback, useEffect, useState } from 'react'
+import { eq } from 'fp-ts'
+import { Eq } from 'fp-ts/Eq'
+import { pipe } from 'fp-ts/function'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
+import { Maybe } from '../../../shared/utils/fp'
 import { s } from '../../../shared/utils/StringUtils'
 import { Search, Times } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
@@ -9,11 +14,21 @@ import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 
+const maybeStringEq: Eq<Maybe<string>> = Maybe.getEq(eq.eqString)
+
 export const SearchInput = (): JSX.Element => {
   const { navigate } = useHistory()
   const query = useKlkPostsQuery()
 
-  const defaultSearch = query.search ?? ''
+  const defaultSearch = useMemo(
+    () =>
+      pipe(
+        query.search,
+        Maybe.getOrElse(() => ''),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   const [search, setSearch] = useState(defaultSearch)
   const handleChange = useCallback(
@@ -21,14 +36,17 @@ export const SearchInput = (): JSX.Element => {
     [],
   )
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setSearch(defaultSearch), [query])
+  useEffect(() => setSearch(defaultSearch), [defaultSearch, query])
 
   const navigateSearch = useCallback(
     (rawSearch: string | undefined) => {
-      const trimed = rawSearch?.trim()
-      const search_ = trimed === '' ? undefined : trimed
-      if (search_ !== query.search) navigate(routes.home({ ...query, search: search_ }))
+      const newSearch = pipe(
+        Maybe.fromNullable(rawSearch?.trim()),
+        Maybe.filter(str => str !== ''),
+      )
+      if (!maybeStringEq.equals(newSearch, query.search)) {
+        pipe({ ...query, search: newSearch }, KlkPostsQuery.toPartial, routes.home, navigate)
+      }
     },
     [navigate, query],
   )

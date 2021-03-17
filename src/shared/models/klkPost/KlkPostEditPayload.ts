@@ -7,7 +7,7 @@ import { Either, Maybe } from '../../utils/fp'
 import { s } from '../../utils/StringUtils'
 import { NonEmptyString } from '../NonEmptyString'
 import { NumberFromString } from '../NumberFromString'
-import { EpisodeNumber } from '../PartialKlkPostQuery'
+import { EpisodeNumber } from '../PartialKlkPostsQuery'
 
 const emptyString: D.Decoder<unknown, ''> = pipe(
   D.string,

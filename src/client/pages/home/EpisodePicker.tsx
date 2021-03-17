@@ -1,9 +1,10 @@
 /* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
+import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { EpisodeNumber, PartialKlkPostQuery } from '../../../shared/models/PartialKlkPostQuery'
-import { List } from '../../../shared/utils/fp'
+import { EpisodeNumber, PartialKlkPostsQuery } from '../../../shared/models/PartialKlkPostsQuery'
+import { List, Maybe } from '../../../shared/utils/fp'
 import { StringUtils, s } from '../../../shared/utils/StringUtils'
 import { ClickOutside } from '../../components/ClickOutside'
 import { ChevronUp } from '../../components/svgs'
@@ -15,7 +16,7 @@ type Props = {
 }
 
 export type HomeLink = (
-  toQuery: PartialKlkPostQuery,
+  toQuery: PartialKlkPostsQuery,
   label: string,
   key?: string | number | undefined,
 ) => JSX.Element
@@ -50,16 +51,20 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
     <ClickOutside onClickOutside={close}>
       <Container
         onClick={toggleOpen}
-        className={query.episode !== undefined ? SELECTED : undefined}
+        className={pipe(
+          query.episode,
+          Maybe.map(() => SELECTED),
+          Maybe.toUndefined,
+        )}
       >
         <Visible>
           <span className={EPISODE_TITLE}>episode:</span>
           <span className={EPISODE_NUMBER}>
-            {query.episode === undefined
-              ? '–'
-              : query.episode === 'unknown'
-              ? unknownLabel
-              : StringUtils.pad10(query.episode)}
+            {pipe(
+              query.episode,
+              Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
+              Maybe.getOrElse(() => '–'),
+            )}
           </span>
           <ChevronDown />
         </Visible>
