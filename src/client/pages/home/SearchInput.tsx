@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
-import { s } from '../../../shared/utils/StringUtils'
 import { Search, Times } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
@@ -90,21 +89,21 @@ const Container = styled.div({
 const UnstyledButton = styled.button({
   border: 'none',
   borderRadius: 2,
-  padding: s`${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
+  padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
   background: 'none',
   color: 'inherit',
   font: 'inherit',
   display: 'flex',
-  filter: s`drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+  filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
   cursor: 'pointer',
 
   '&::after': {
     content: "''",
     position: 'absolute',
-    width: s`calc(100% - 2 * ${theme.Header.link.padding.left})`,
-    borderBottom: s`2px solid ${theme.colors.lime}`,
+    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
     left: theme.Header.link.padding.left,
-    bottom: s`calc(${theme.Header.link.padding.top} - 4px)`,
+    bottom: `calc(${theme.Header.link.padding.top} - 4px)`,
     opacity: 0,
     transition: 'all 0.3s',
   },
@@ -130,25 +129,25 @@ const InputContainer = styled.div({
 
   '&::after': {
     content: "''",
-    width: s`calc(100% - 2 * ${theme.Header.link.padding.left})`,
+    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
     position: 'absolute',
     left: theme.Header.link.padding.left,
     bottom: theme.Header.link.padding.top,
-    borderBottom: s`1px solid ${theme.colors.white}`,
+    borderBottom: `1px solid ${theme.colors.white}`,
   },
 })
 
 const StyledInput = styled.input({
   width: 200,
   border: 'none',
-  padding: s`0 ${theme.Header.link.padding.left}`,
+  padding: `0 ${theme.Header.link.padding.left}`,
   background: 'none',
   font: 'inherit',
   fontWeight: 'normal',
   color: 'inherit',
 
   '&:focus': {
-    outline: s`1px dashed ${theme.colors.lime}`,
+    outline: `1px dashed ${theme.colors.lime}`,
   },
 })
 

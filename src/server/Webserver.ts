@@ -6,7 +6,6 @@ import * as H from 'hyper-ts'
 import { Action, ExpressConnection, toArray, toRequestHandler } from 'hyper-ts/lib/express'
 
 import { Dict, Either, Future, IO, List, Maybe, NonEmptyArray, Task } from '../shared/utils/fp'
-import { s } from '../shared/utils/StringUtils'
 import { Config } from './config/Config'
 import { EndedMiddleware } from './models/EndedMiddleware'
 import { Route } from './models/Route'
@@ -73,7 +72,7 @@ export const startWebServer = (
     IO.chain(_ => IO.tryCatch(() => _.use(errorHandler(onError)))),
     IO.chain(_ =>
       IO.tryCatch(() =>
-        _.listen(config.port, logger.info(s`Server listening on port ${config.port}`)),
+        _.listen(config.port, logger.info(`Server listening on port ${config.port}`)),
       ),
     ),
   )

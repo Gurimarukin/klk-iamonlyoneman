@@ -5,7 +5,6 @@ import React, { ReactElement, useEffect } from 'react'
 
 import { PartialKlkPostsQuery } from '../shared/models/PartialKlkPostsQuery'
 import { Dict, Maybe, Tuple } from '../shared/utils/fp'
-import { s } from '../shared/utils/StringUtils'
 import { About } from './pages/About'
 import { Home } from './pages/home/Home'
 import { Login } from './pages/Login'
@@ -19,7 +18,7 @@ export const routes = {
       PartialKlkPostsQuery.encoder.encode,
       qs.stringify,
     )
-    return s`/${str === '' ? '' : `?${str}`}`
+    return `/${str === '' ? '' : `?${str}`}`
   },
   about: '/about',
 }

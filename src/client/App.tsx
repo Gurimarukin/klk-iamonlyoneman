@@ -1,7 +1,6 @@
 import styled from '@emotion/styled'
 import React from 'react'
 
-import { s } from '../shared/utils/StringUtils'
 import { useHistory } from './contexts/HistoryContext'
 import baloopaaji2BoldTTF from './fonts/baloopaaji2-bold.ttf'
 import baloopaaji2TTF from './fonts/baloopaaji2.ttf'
@@ -25,14 +24,14 @@ const Container = styled.div(
   {
     '@font-face': {
       fontFamily: fontFamily.baloopaaji2,
-      src: s`url('${baloopaaji2TTF}')`,
+      src: `url('${baloopaaji2TTF}')`,
       fontWeight: 'normal',
     },
   },
   {
     '@font-face': {
       fontFamily: fontFamily.baloopaaji2,
-      src: s`url('${baloopaaji2BoldTTF}')`,
+      src: `url('${baloopaaji2BoldTTF}')`,
       fontWeight: 'bold',
     },
   },

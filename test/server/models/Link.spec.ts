@@ -4,9 +4,8 @@ import { KlkPost } from '../../../src/server/models/KlkPost'
 import { Link } from '../../../src/server/models/Link'
 import { KlkPostId } from '../../../src/shared/models/klkPost/KlkPostId'
 import { Either, Maybe } from '../../../src/shared/utils/fp'
-import { s } from '../../../src/shared/utils/StringUtils'
 
-const image = s`{
+const image = `{
   "kind": "t3",
   "data": {
     "approved_at_utc": null,
@@ -164,7 +163,7 @@ const image = s`{
   }
 }`
 
-const link = s`{
+const link = `{
   "kind": "t3",
   "data": {
     "approved_at_utc": null,

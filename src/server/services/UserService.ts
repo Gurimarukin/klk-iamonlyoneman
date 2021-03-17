@@ -8,7 +8,6 @@ import { ClearPassword } from '../../shared/models/ClearPassword'
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Token } from '../../shared/models/Token'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
-import { s } from '../../shared/utils/StringUtils'
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
@@ -104,7 +103,7 @@ function decodeFuture<A>(
   return i =>
     pipe(
       decode(i),
-      Either.mapLeft(e => Error(s`Couldn't decode answer:\n${D.draw(e)}`)),
+      Either.mapLeft(e => Error(`Couldn't decode answer:\n${D.draw(e)}`)),
       Future.fromEither,
     )
 }

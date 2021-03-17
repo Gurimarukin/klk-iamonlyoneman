@@ -9,7 +9,7 @@ import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPaylo
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
 import { Maybe } from '../../shared/utils/fp'
-import { StringUtils, s } from '../../shared/utils/StringUtils'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import { Link } from './Link'
 
 // KlkPost
@@ -65,7 +65,7 @@ export namespace KlkPost {
               imgurId(l.data.url),
               Maybe.fold(
                 () => l.data.url,
-                id => s`https://i.imgur.com/${id}.jpg`,
+                id => `https://i.imgur.com/${id}.jpg`,
               ),
             )
           : l.data.url,

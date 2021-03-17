@@ -2,7 +2,6 @@ import { pipe } from 'fp-ts/function'
 import { Collection, Db, MongoClient } from 'mongodb'
 
 import { Future, List, Task } from '../shared/utils/fp'
-import { s } from '../shared/utils/StringUtils'
 import { Config } from './config/Config'
 import { HealthCheckController } from './controllers/HealthCheckController'
 import { KlkPostController } from './controllers/KlkPostController'
@@ -28,7 +27,7 @@ import { startWebServer } from './Webserver'
 export function Context(Logger: PartialLogger, config: Config) {
   const logger = Logger('Context')
 
-  const url = s`mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
+  const url = `mongodb://${config.db.user}:${config.db.password}@${config.db.host}`
   const withDb = <A>(f: (db: Db) => Promise<A>): Future<A> =>
     pipe(
       Future.tryCatch(() => MongoClient.connect(url, { useUnifiedTopology: true })),

@@ -6,7 +6,7 @@ import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPaylo
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
-import { StringUtils, s } from '../../shared/utils/StringUtils'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { KlkPost } from '../models/KlkPost'
@@ -145,7 +145,7 @@ export function KlkPostService(
       ),
       Future.chain(res =>
         Future.fromIOEither(
-          logger.info(s`Added missing sizes: ${res.filter(b => b).length}/${res.length}`),
+          logger.info(`Added missing sizes: ${res.filter(b => b).length}/${res.length}`),
         ),
       ),
     )
@@ -173,7 +173,7 @@ export function KlkPostService(
       Future.chain(({ requestsCount, accumulator: c }) =>
         Future.fromIOEither(
           logger.info(
-            s`End polling - requests: ${requestsCount}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
+            `End polling - requests: ${requestsCount}, posts found: ${c.postsFound}, posts already in db: ${c.postsAlreadyInDb}, posts inserted: ${c.postsInserted}`,
           ),
         ),
       ),
@@ -189,7 +189,7 @@ export function KlkPostService(
     return reduce(
       { fullPoll },
       {
-        url: s`${redditDotCom}/${rKillLaKill}.json`,
+        url: `${redditDotCom}/${rKillLaKill}.json`,
         params: { sort: defaultSort, limit: searchLimit.toString() },
       },
       l =>
@@ -210,7 +210,7 @@ export function KlkPostService(
         reduce(
           { fullPoll },
           {
-            url: s`${redditDotCom}/user/${author}/submitted.json`,
+            url: `${redditDotCom}/user/${author}/submitted.json`,
             params: { sort: defaultSort, limit: searchLimit.toString() },
           },
           l =>
@@ -232,7 +232,7 @@ export function KlkPostService(
           // integers
           pipe(
             List.range(1, 9),
-            List.map(n => rKillLaKillSearchEpisode({ fullPoll, allSort }, author, s`${n}`)),
+            List.map(n => rKillLaKillSearchEpisode({ fullPoll, allSort }, author, `${n}`)),
           ),
           // episodes
           pipe(
@@ -257,9 +257,9 @@ export function KlkPostService(
     return reduce(
       { fullPoll },
       {
-        url: s`${redditDotCom}/${rKillLaKill}/search.json`,
+        url: `${redditDotCom}/${rKillLaKill}/search.json`,
         params: {
-          q: s`author:${author} episode ${episode}`,
+          q: `author:${author} episode ${episode}`,
           t: 'all',
           show: 'all',
           include_over_18: 'on',
@@ -421,5 +421,5 @@ function printLinkIds(links: List<Link>): string {
     links.map(_ => KlkPostId.unwrap(_.data.id)),
     StringUtils.mkString(','),
   )
-  return s`(${links.length}) ${res}`
+  return `(${links.length}) ${res}`
 }

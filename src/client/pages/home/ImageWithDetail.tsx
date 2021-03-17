@@ -6,7 +6,7 @@ import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { Maybe } from '../../../shared/utils/fp'
-import { StringUtils, s } from '../../../shared/utils/StringUtils'
+import { StringUtils } from '../../../shared/utils/StringUtils'
 import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
 import { Pencil } from '../../components/svgs'
@@ -37,7 +37,7 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
   const toggleEditing = useCallback(() => setIsEditing(e => !e), [])
   const closeEditing = useCallback(() => setIsEditing(false), [])
 
-  const permalink = s`https://reddit.com${post.permalink}`
+  const permalink = `https://reddit.com${post.permalink}`
 
   return (
     <ClickOutside onClickOutside={closeEditing}>
@@ -90,19 +90,19 @@ function formatDate(date: Date): string {
   const day = pad10(date.getDate())
   const hours = pad10(date.getHours())
   const minutes = pad10(date.getMinutes())
-  return s`${year}/${month}/${day}, ${hours}:${minutes}`
+  return `${year}/${month}/${day}, ${hours}:${minutes}`
 }
 
 const imgBorderRadius = '4px'
 
 const Container = styled.div({
   flexShrink: 0,
-  margin: s`${theme.Gallery.margin}px`,
+  margin: `${theme.Gallery.margin}px`,
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
 
-  [s`& .${PLACEHOLDER}`]: {
+  [`& .${PLACEHOLDER}`]: {
     display: 'flex',
     background: 'linear-gradient(135deg, rgba(253,187,45,1) 0%, rgba(0,0,0,1) 100%)',
     boxShadow: theme.boxShadow,
@@ -110,17 +110,17 @@ const Container = styled.div({
     borderRadius: imgBorderRadius,
   },
 
-  [s`& > .${EDIT_BTN}, & > form`]: {
+  [`& > .${EDIT_BTN}, & > form`]: {
     opacity: 0,
     visibility: 'hidden',
   },
 
-  [s`&:hover > .${EDIT_BTN}, &.${EDITING} > .${EDIT_BTN}, &.${EDITING} > form`]: {
+  [`&:hover > .${EDIT_BTN}, &.${EDITING} > .${EDIT_BTN}, &.${EDITING} > form`]: {
     opacity: 1,
     visibility: 'visible',
   },
 
-  [s`& .${DETAIL}`]: {
+  [`& .${DETAIL}`]: {
     position: 'absolute',
     bottom: '100%',
     display: 'flex',
@@ -131,13 +131,13 @@ const Container = styled.div({
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     textShadow: theme.textShadow(theme.colors.black),
     overflow: 'hidden',
-    borderRadius: s`0 0 ${imgBorderRadius} ${imgBorderRadius}`,
+    borderRadius: `0 0 ${imgBorderRadius} ${imgBorderRadius}`,
     opacity: 0,
     filter: 'blur(10px)',
     transition: 'all 0.3s',
   },
 
-  [s`&:hover .${DETAIL}`]: {
+  [`&:hover .${DETAIL}`]: {
     opacity: 1,
     filter: 'blur(0)',
   },
@@ -195,13 +195,13 @@ const EditButton = styled.button({
   position: 'absolute',
   top: theme.spacing.xs,
   right: theme.spacing.xs,
-  filter: s`drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
+  filter: `drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
   transition: 'all 0.3s',
 })
 
 const StyledForm = styled(PostEditForm)({
   position: 'absolute',
-  top: s`calc(1.32em + 2 * ${theme.spacing.xs}px)`,
+  top: `calc(1.32em + 2 * ${theme.spacing.xs}px)`,
   left: 0,
   width: '100%',
   transition: 'all 0.3s',

@@ -20,7 +20,6 @@ import {
 } from 'mongodb'
 
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
-import { s } from '../../shared/utils/StringUtils'
 import { IndexSpecification, ReadonlyPartial, WithoutProjection } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'
 
@@ -72,7 +71,7 @@ export function FpCollection<A, O extends { readonly [key: string]: unknown }>(
         collection(c => c.insertMany(encoded, options)),
         Future.chain(res =>
           pipe(
-            Future.fromIOEither(logger.debug(s`inserted ${res.insertedCount} documents`)),
+            Future.fromIOEither(logger.debug(`inserted ${res.insertedCount} document`)),
             Future.map(() => res),
           ),
         ),
@@ -154,5 +153,5 @@ export function FpCollection<A, O extends { readonly [key: string]: unknown }>(
 }
 
 export function decodeError(e: D.DecodeError): Error {
-  return Error(s`DecodeError:\n${D.draw(e)}`)
+  return Error(`DecodeError:\n${D.draw(e)}`)
 }

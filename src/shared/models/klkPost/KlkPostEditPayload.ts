@@ -4,7 +4,6 @@ import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
 
 import { Either, Maybe } from '../../utils/fp'
-import { s } from '../../utils/StringUtils'
 import { NonEmptyString } from '../NonEmptyString'
 import { NumberFromString } from '../NumberFromString'
 import { EpisodeNumber } from '../PartialKlkPostsQuery'
@@ -56,14 +55,14 @@ export namespace KlkPostEditPayload {
         size,
         Maybe.fold(
           () => '',
-          ({ width }) => s`${width}`,
+          ({ width }) => `${width}`,
         ),
       ),
       height: pipe(
         size,
         Maybe.fold(
           () => '',
-          ({ height }) => s`${height}`,
+          ({ height }) => `${height}`,
         ),
       ),
     }),

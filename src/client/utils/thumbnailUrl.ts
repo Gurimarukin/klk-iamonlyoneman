@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
 import { Maybe } from '../../shared/utils/fp'
-import { StringUtils, s } from '../../shared/utils/StringUtils'
+import { StringUtils } from '../../shared/utils/StringUtils'
 
 // | Thumbnail Suffix | Thumbnail Name   | Thumbnail Size | Keeps Image Proportions |
 // | ---------------- | ---------------- | -------------- | ----------------------- |
@@ -33,6 +33,6 @@ export const thumbnailUrl = (url: string, suffix: ThumbnailSuffix): string =>
   pipe(
     url,
     StringUtils.matcher2(urlRegex),
-    Maybe.map(([before, extension]) => s`${before}${suffix}${extension}`),
+    Maybe.map(([before, extension]) => `${before}${suffix}${extension}`),
     Maybe.getOrElse(() => url),
   )

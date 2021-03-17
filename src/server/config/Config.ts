@@ -4,7 +4,7 @@ import * as D from 'io-ts/Decoder'
 import { Lens as MLens } from 'monocle-ts'
 
 import { Either, IO, Maybe, NonEmptyArray } from '../../shared/utils/fp'
-import { StringUtils, s } from '../../shared/utils/StringUtils'
+import { StringUtils } from '../../shared/utils/StringUtils'
 import { LogLevelOrOff } from '../models/LogLevel'
 import { MsDuration } from '../models/MsDuration'
 import { ConfReader, ValidatedNea } from './ConfReader'
@@ -41,7 +41,7 @@ export namespace Config {
         pipe(
           readConfig(reader),
           Either.mapLeft(errors =>
-            Error(s`Errors while reading config:\n${pipe(errors, StringUtils.mkString('\n'))}`),
+            Error(`Errors while reading config:\n${pipe(errors, StringUtils.mkString('\n'))}`),
           ),
           IO.fromEither,
         ),

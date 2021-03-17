@@ -1,7 +1,6 @@
 import styled from '@emotion/styled'
 import React from 'react'
 
-import { s } from '../../shared/utils/StringUtils'
 import { ABlank } from '../components/ABlank'
 import { GradientContainer } from '../components/GradientContainer'
 import { Link } from '../components/Link'
@@ -54,7 +53,7 @@ const StyledA = styled(ABlank)({
     content: "''",
     position: 'absolute',
     width: '100%',
-    borderBottom: s`2px solid ${theme.colors.lime}`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: '0.4em',
     transition: 'all 0.3s',
@@ -72,7 +71,7 @@ const GithubA = styled(StyledA)({
   marginTop: '3em',
 
   '&::after': {
-    width: s`calc(100% - ${githubUnderlineMargin})`,
+    width: `calc(100% - ${githubUnderlineMargin})`,
     left: githubUnderlineMargin,
     bottom: -1,
   },
@@ -89,7 +88,7 @@ const HomeLink = styled(Link)({
     content: "''",
     position: 'absolute',
     width: '100%',
-    borderBottom: s`2px solid ${theme.colors.lime}`,
+    borderBottom: `2px solid ${theme.colors.lime}`,
     left: 0,
     bottom: -2,
     transition: 'all 0.3s',

@@ -1,19 +1,7 @@
 import { apply } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
-import { Newtype } from 'newtype-ts'
 
 import { List, Maybe, Tuple, Tuple3 } from './fp'
-
-type NiceStringDefault = string | number | boolean | undefined | null
-type NiceString = NiceStringDefault | Newtype<unknown, NiceStringDefault>
-
-// interpolates.length is always strings.length - 1
-export const s = (strings: TemplateStringsArray, ...interpolates: List<NiceString>): string =>
-  pipe(
-    strings,
-    List.zip(List.snoc(interpolates, '')),
-    List.reduce('', (acc, [a, b]) => `${acc}${a}${b}`),
-  )
 
 export namespace StringUtils {
   export const isEmpty = (str: string): boolean => str === ''
@@ -32,12 +20,12 @@ export namespace StringUtils {
   ): (list: List<string>) => string {
     return list =>
       sep !== undefined && end !== undefined
-        ? s`${startOrSep}${list.join(sep)}${end}`
+        ? `${startOrSep}${list.join(sep)}${end}`
         : list.join(startOrSep)
   }
 
   export const ellipse = (take: number) => (str: string): string =>
-    str.length > take ? s`${str.substring(0, take)}...` : str
+    str.length > take ? `${str.substring(0, take)}...` : str
 
   const matcher = <A>(regex: RegExp, f: (arr: RegExpMatchArray) => Maybe<A>) => (
     str: string,

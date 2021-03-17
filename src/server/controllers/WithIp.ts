@@ -7,7 +7,6 @@ import * as D from 'io-ts/Decoder'
 import { NonEmptyString } from '../../shared/models/NonEmptyString'
 import { Undefined } from '../../shared/models/Undefined'
 import { Maybe } from '../../shared/utils/fp'
-import { s } from '../../shared/utils/StringUtils'
 import { Config } from '../config/Config'
 import { EndedMiddleware } from '../models/EndedMiddleware'
 import { PartialLogger } from '../services/Logger'
@@ -39,7 +38,7 @@ export const WithIp = (Logger: PartialLogger, config: Config): WithIp => {
           Maybe.fold(
             () =>
               pipe(
-                logger.error(s`Request rejected because ip is required for ${cause}`),
+                logger.error(`Request rejected because ip is required for ${cause}`),
                 H.fromIOEither,
                 H.ichain(() => EndedMiddleware.text(H.Status.BadRequest)()),
               ),
