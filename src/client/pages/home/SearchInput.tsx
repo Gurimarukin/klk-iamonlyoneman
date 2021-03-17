@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { eq } from 'fp-ts'
 import { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
@@ -19,23 +19,21 @@ export const SearchInput = (): JSX.Element => {
   const { navigate } = useHistory()
   const query = useKlkPostsQuery()
 
-  const defaultSearch = useMemo(
-    () =>
-      pipe(
-        query.search,
-        Maybe.getOrElse(() => ''),
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
-
-  const [search, setSearch] = useState(defaultSearch)
+  const [search, setSearch] = useState('')
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
     [],
   )
 
-  useEffect(() => setSearch(defaultSearch), [defaultSearch, query])
+  useEffect(
+    () =>
+      pipe(
+        query.search,
+        Maybe.getOrElse(() => ''),
+        setSearch,
+      ),
+    [query],
+  )
 
   const navigateSearch = useCallback(
     (rawSearch: string | undefined) => {
