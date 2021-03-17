@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import React, { forwardRef, useCallback } from 'react'
+import React, { forwardRef } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { PartialKlkPostsQuery } from '../../../shared/models/PartialKlkPostsQuery'
@@ -20,28 +20,11 @@ export const Header = forwardRef<HTMLElement>(
     const { isAdmin, logout } = useUser()
     const query = useKlkPostsQuery()
 
-    const homeLink = useCallback(
-      (toQuery: PartialKlkPostsQuery, label: string, key?: string | number): JSX.Element => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { episode: _, ...withoutEpisode } = KlkPostsQuery.toPartial(query)
-        return (
-          <StyledLink
-            key={key}
-            to={routes.home({ ...withoutEpisode, ...toQuery })}
-            className={toQuery.episode === Maybe.toUndefined(query.episode) ? SELECTED : undefined}
-          >
-            {label}
-          </StyledLink>
-        )
-      },
-      [query],
-    )
-
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          {homeLink({}, 'all')}
-          <EpisodePicker homeLink={homeLink} />
+          <HomeLink to={{}}>all</HomeLink>
+          <EpisodePicker />
           <SearchInput />
           <SortedBy>sorted by {query.sortNew ? 'new' : 'old'}</SortedBy>
           <StyledLink to={routes.about}>about</StyledLink>
@@ -55,6 +38,25 @@ export const Header = forwardRef<HTMLElement>(
     )
   },
 )
+
+type HomeLinkProps = {
+  readonly to: PartialKlkPostsQuery
+}
+
+export const HomeLink: React.FC<HomeLinkProps> = ({ to, children }) => {
+  const query = useKlkPostsQuery()
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { episode: _, ...withoutEpisode } = KlkPostsQuery.toPartial(query)
+  return (
+    <StyledLink
+      to={routes.home({ ...withoutEpisode, ...to })}
+      className={to.episode === Maybe.toUndefined(query.episode) ? SELECTED : undefined}
+    >
+      {children}
+    </StyledLink>
+  )
+}
 
 const StyledHeader = styled.header({
   display: 'flex',

@@ -3,23 +3,14 @@ import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { EpisodeNumber, PartialKlkPostsQuery } from '../../../shared/models/PartialKlkPostsQuery'
+import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
 import { List, Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { ClickOutside } from '../../components/ClickOutside'
 import { ChevronUp } from '../../components/svgs'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
-
-type Props = {
-  readonly homeLink: HomeLink
-}
-
-export type HomeLink = (
-  toQuery: PartialKlkPostsQuery,
-  label: string,
-  key?: string | number | undefined,
-) => JSX.Element
+import { HomeLink } from './Header'
 
 const OPENED = 'is-open'
 const SELECTED = 'selected'
@@ -29,7 +20,7 @@ const EPISODES = 'episodes'
 
 const unknownLabel = 'unknown'
 
-export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
+export const EpisodePicker = (): JSX.Element => {
   const query = useKlkPostsQuery()
 
   const [isOpened, setIsOpened] = useState(false)
@@ -70,14 +61,24 @@ export const EpisodePicker = ({ homeLink }: Props): JSX.Element => {
         </Visible>
         <div className={`${EPISODES}${isOpened ? ` ${OPENED}` : ''}`}>
           <EpisodesHalf>
-            {List.range(1, 12).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
+            {List.range(1, 12).map(n => (
+              <HomeLink key={n} to={{ episode: n }}>
+                {StringUtils.pad10(n)}
+              </HomeLink>
+            ))}
           </EpisodesHalf>
           <EpisodesHalf>
-            {List.range(13, 24).map(n => homeLink({ episode: n }, StringUtils.pad10(n), n))}
+            {List.range(13, 24).map(n => (
+              <HomeLink key={n} to={{ episode: n }}>
+                {StringUtils.pad10(n)}
+              </HomeLink>
+            ))}
           </EpisodesHalf>
-          <EpisodeCenter>{homeLink({ episode: 25 }, StringUtils.pad10(25))}</EpisodeCenter>
           <EpisodeCenter>
-            {homeLink({ episode: EpisodeNumber.unknown }, unknownLabel)}
+            <HomeLink to={{ episode: 25 }}>25</HomeLink>
+          </EpisodeCenter>
+          <EpisodeCenter>
+            <HomeLink to={{ episode: EpisodeNumber.unknown }}>{unknownLabel}</HomeLink>
           </EpisodeCenter>
         </div>
       </Container>
