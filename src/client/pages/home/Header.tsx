@@ -16,7 +16,7 @@ import { SearchInput } from './SearchInput'
 const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
-  (_1, ref): JSX.Element => {
+  ({}, ref): JSX.Element => {
     const { isAdmin, logout } = useUser()
     const query = useKlkPostsQuery()
 

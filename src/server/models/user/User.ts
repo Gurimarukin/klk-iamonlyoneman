@@ -22,8 +22,7 @@ export namespace User {
       IO.map(id => ({ id: UserId.wrap(id), user, password, token: Maybe.none })),
     )
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export const canEditPost = (_user: User): boolean => true
+  export const canEditPost = ({}: User): boolean => true
 }
 
 export type User = C.TypeOf<typeof User.codec>
