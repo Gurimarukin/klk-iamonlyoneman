@@ -67,7 +67,7 @@ export const theme = {
   },
 
   zIndexes: {
-    episodes: 70,
+    pickerContent: 70,
   },
 
   mediaQueries,

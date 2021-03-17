@@ -1,3 +1,5 @@
+import { eq as eq_ } from 'fp-ts'
+import { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import * as E from 'io-ts/Encoder'
@@ -22,6 +24,8 @@ export namespace EpisodeNumber {
   )
 
   export const toNullable = (e: EpisodeNumber): number | null => (e === 'unknown' ? null : e)
+
+  export const eq: Eq<EpisodeNumber> = eq_.eqStrict
 }
 
 export type EpisodeNumber = EpisodeNumber.Numb | EpisodeNumber.Unknown

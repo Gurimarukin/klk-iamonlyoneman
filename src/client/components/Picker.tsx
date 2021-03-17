@@ -1,29 +1,38 @@
 /* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
-import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
-import { List, Maybe } from '../../../shared/utils/fp'
-import { StringUtils } from '../../../shared/utils/StringUtils'
-import { ClickOutside } from '../../components/ClickOutside'
-import { ChevronUp } from '../../components/svgs'
-import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
-import { theme } from '../../utils/theme'
-import { HomeLink } from './Header'
+import { isDefined } from '../../shared/utils/isDefined'
+import { useKlkPostsQuery } from '../contexts/KlkPostsQueryContext'
+import { cssClasses } from '../utils/cssClasses'
+import { theme } from '../utils/theme'
+import { ClickOutside } from './ClickOutside'
+import { ChevronUp } from './svgs'
 
-const OPENED = 'is-open'
+type Props = {
+  readonly labelPrefix?: React.ReactNode
+  readonly labelValue: React.ReactNode
+  readonly valueIsSelected: boolean
+  readonly content: React.ReactNode
+  readonly className?: string
+}
+
+const IS_OPENED = 'is-opened'
 const SELECTED = 'selected'
-const EPISODE_TITLE = 'episode-title'
-const EPISODE_NUMBER = 'episode-number'
-const EPISODES = 'episodes'
+const LABEL_PREFIX = 'label-prefix'
+const LABEL_VALUE = 'label-value'
+const CONTENT = 'content'
 
-const unknownLabel = 'unknown'
-
-export const EpisodePicker = (): JSX.Element => {
+export const Picker = ({
+  labelPrefix,
+  labelValue,
+  valueIsSelected,
+  content,
+  className,
+}: Props): JSX.Element => {
   const query = useKlkPostsQuery()
 
-  const [isOpened, setIsOpened] = useState(false)
+  const [isOpened, setIsOpened] = useState(true)
   const toggleOpen = useCallback(() => setIsOpened(o => !o), [])
   const close = useCallback(() => setIsOpened(false), [])
 
@@ -42,45 +51,14 @@ export const EpisodePicker = (): JSX.Element => {
     <ClickOutside onClickOutside={close}>
       <Container
         onClick={toggleOpen}
-        className={pipe(
-          query.episode,
-          Maybe.map(() => SELECTED),
-          Maybe.toUndefined,
-        )}
+        className={cssClasses([SELECTED, valueIsSelected], [className, true])}
       >
         <Visible>
-          <span className={EPISODE_TITLE}>episode:</span>
-          <span className={EPISODE_NUMBER}>
-            {pipe(
-              query.episode,
-              Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
-              Maybe.getOrElse(() => '–'),
-            )}
-          </span>
+          {isDefined(labelPrefix) ? <span className={LABEL_PREFIX}>{labelPrefix}</span> : null}
+          {isDefined(labelValue) ? <span className={LABEL_VALUE}>{labelValue}</span> : null}
           <ChevronDown />
         </Visible>
-        <div className={`${EPISODES}${isOpened ? ` ${OPENED}` : ''}`}>
-          <EpisodesHalf>
-            {List.range(1, 12).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n) }}>
-                {StringUtils.pad10(n)}
-              </HomeLink>
-            ))}
-          </EpisodesHalf>
-          <EpisodesHalf>
-            {List.range(13, 24).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n) }}>
-                {StringUtils.pad10(n)}
-              </HomeLink>
-            ))}
-          </EpisodesHalf>
-          <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(25) }}>25</HomeLink>
-          </EpisodeCenter>
-          <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(EpisodeNumber.unknown) }}>{unknownLabel}</HomeLink>
-          </EpisodeCenter>
-        </div>
+        <div className={cssClasses([CONTENT, true], [IS_OPENED, isOpened])}>{content}</div>
       </Container>
     </ClickOutside>
   )
@@ -99,18 +77,14 @@ const Container = styled.button({
   font: 'inherit',
   cursor: 'pointer',
   position: 'relative',
-  [theme.mediaQueries.mobile]: {
-    gridColumnEnd: 'span 2',
-    justifySelf: 'end',
-  },
 
-  [`& .${EPISODE_TITLE}`]: {
+  [`& .${LABEL_PREFIX}`]: {
     marginRight: theme.spacing.xxs,
     textDecoration: 'underline',
     position: 'relative',
   },
 
-  [`& .${EPISODE_TITLE}::after`]: {
+  [`& .${LABEL_PREFIX}::after`]: {
     content: "''",
     position: 'absolute',
     width: '100%',
@@ -122,25 +96,25 @@ const Container = styled.button({
     transition: 'all 0.3s',
   },
 
-  [`&:hover .${EPISODE_TITLE}::after`]: {
+  [`&:hover .${LABEL_PREFIX}::after`]: {
     opacity: 1,
   },
 
-  [`& .${EPISODE_NUMBER}`]: {
+  [`& .${LABEL_VALUE}`]: {
     borderRadius: 2,
     padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
     position: 'relative',
     transition: 'all 0.3s',
   },
 
-  [`&.${SELECTED} .${EPISODE_NUMBER}`]: {
+  [`&.${SELECTED} .${LABEL_VALUE}`]: {
     textDecoration: 'underline',
     textShadow: theme.textShadow(theme.colors.darkgrey),
     backgroundColor: theme.colors.lime,
     boxShadow: theme.boxShadowLight,
   },
 
-  [`& .${EPISODE_NUMBER}::after`]: {
+  [`& .${LABEL_VALUE}::after`]: {
     content: "''",
     position: 'absolute',
     width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
@@ -151,21 +125,19 @@ const Container = styled.button({
     transition: 'all 0.3s',
   },
 
-  [`&.${SELECTED} .${EPISODE_NUMBER}::after`]: {
+  [`&.${SELECTED} .${LABEL_VALUE}::after`]: {
     borderBottom: `2px solid ${theme.colors.white}`,
     filter: 'none',
   },
 
-  [`&:hover .${EPISODE_NUMBER}::after`]: {
+  [`&:hover .${LABEL_VALUE}::after`]: {
     opacity: 1,
   },
 
-  [`& .${EPISODES}`]: {
+  [`& .${CONTENT}`]: {
     position: 'absolute',
     top: 'calc(100% + 0.33em)',
     zIndex: theme.zIndexes.pickerContent,
-    display: 'grid',
-    gridTemplateColumns: '50% 50%',
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     boxShadow: theme.boxShadow,
     opacity: 0,
@@ -180,7 +152,7 @@ const Container = styled.button({
     },
   },
 
-  [`&:hover .${EPISODES}, & .${EPISODES}.${OPENED}`]: {
+  [`&:hover .${CONTENT}, & .${CONTENT}.${IS_OPENED}`]: {
     opacity: 1,
     filter: 'blur(0)',
     visibility: 'visible',
@@ -195,18 +167,4 @@ const Visible = styled.span({
 const ChevronDown = styled(ChevronUp)({
   marginLeft: theme.spacing.xxs,
   transform: 'rotate(-180deg)',
-})
-
-const EpisodesHalf = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: `${theme.Header.link.padding.top} 1.33em 0`,
-})
-
-const EpisodeCenter = styled.div({
-  gridColumnEnd: 'span 2',
-  display: 'flex',
-  justifyContent: 'center',
-  padding: `0 0.67em ${theme.Header.link.padding.top}`,
 })

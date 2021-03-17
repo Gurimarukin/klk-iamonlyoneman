@@ -2,7 +2,6 @@ import styled from '@emotion/styled'
 import React, { forwardRef } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
-import { PartialKlkPostsQuery } from '../../../shared/models/PartialKlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
@@ -12,21 +11,21 @@ import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 import { EpisodePicker } from './EpisodePicker'
 import { SearchInput } from './SearchInput'
+import { SortPicker } from './SortPicker'
 
 const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(
   ({}, ref): JSX.Element => {
     const { isAdmin, logout } = useUser()
-    const query = useKlkPostsQuery()
 
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          <HomeLink to={{}}>all</HomeLink>
+          <HomeLink to={{ episode: Maybe.none }}>all</HomeLink>
           <EpisodePicker />
           <SearchInput />
-          <SortedBy>sorted by {query.sortNew ? 'new' : 'old'}</SortedBy>
+          <SortPicker />
           <StyledLink to={routes.about}>about</StyledLink>
           {isAdmin ? (
             <LogoutButton onClick={logout}>
@@ -40,23 +39,31 @@ export const Header = forwardRef<HTMLElement>(
 )
 
 type HomeLinkProps = {
-  readonly to: PartialKlkPostsQuery
+  readonly to: Partial<KlkPostsQuery>
+  readonly compareOnlySort?: boolean
 }
 
-export const HomeLink: React.FC<HomeLinkProps> = ({ to, children }) => {
+export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false, children }) => {
   const query = useKlkPostsQuery()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { episode: _, ...withoutEpisode } = KlkPostsQuery.toPartial(query)
+  const newQuery = { ...query, ...to }
+
+  const isSelected = compareOnlySort
+    ? newQuery.sortNew === query.sortNew
+    : klkPostsQueryWithoutSortNewEquals(newQuery, query)
+
   return (
     <StyledLink
-      to={routes.home({ ...withoutEpisode, ...to })}
-      className={to.episode === Maybe.toUndefined(query.episode) ? SELECTED : undefined}
+      to={routes.home(KlkPostsQuery.toPartial(newQuery))}
+      className={isSelected ? SELECTED : undefined}
     >
       {children}
     </StyledLink>
   )
 }
+
+const klkPostsQueryWithoutSortNewEquals = (a: KlkPostsQuery, b: KlkPostsQuery): boolean =>
+  KlkPostsQuery.eq.equals({ ...a, sortNew: false }, { ...b, sortNew: false })
 
 const StyledHeader = styled.header({
   display: 'flex',
@@ -118,11 +125,6 @@ const StyledLink = styled(Link)({
   '&:hover::after': {
     opacity: 1,
   },
-})
-
-const SortedBy = styled.div({
-  fontWeight: 'normal',
-  fontStyle: 'italic',
 })
 
 const LogoutButton = styled.button({
