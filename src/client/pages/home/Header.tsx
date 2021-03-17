@@ -1,10 +1,12 @@
 import styled from '@emotion/styled'
-import React, { forwardRef } from 'react'
+import { pipe } from 'fp-ts/function'
+import React, { forwardRef, useCallback } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
 import { Link } from '../../components/Link'
 import { Logout } from '../../components/svgs'
+import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useUser } from '../../contexts/UserContext'
 import { routes } from '../../Router'
@@ -28,9 +30,12 @@ export const Header = forwardRef<HTMLElement>(
           <SortPicker />
           <StyledLink to={routes.about}>about</StyledLink>
           {isAdmin ? (
-            <LogoutButton onClick={logout}>
-              <Logout />
-            </LogoutButton>
+            <>
+              <ActiveToggler />
+              <LogoutButton onClick={logout}>
+                <Logout />
+              </LogoutButton>
+            </>
           ) : null}
         </StyledNav>
       </StyledHeader>
@@ -65,6 +70,23 @@ export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false,
 const klkPostsQueryWithoutSortNewEquals = (a: KlkPostsQuery, b: KlkPostsQuery): boolean =>
   KlkPostsQuery.eq.equals({ ...a, sortNew: false }, { ...b, sortNew: false })
 
+const ActiveToggler = (): JSX.Element => {
+  const { navigate } = useHistory()
+  const query = useKlkPostsQuery()
+
+  const toggleActive = useCallback(
+    () => pipe({ ...query, active: !query.active }, KlkPostsQuery.toPartial, routes.home, navigate),
+    [navigate, query],
+  )
+
+  return (
+    <ActiveLabel>
+      <u>active:</u> {' '}
+      <input type='checkbox' checked={query.active} onClick={toggleActive} />
+    </ActiveLabel>
+  )
+}
+
 const StyledHeader = styled.header({
   display: 'flex',
   justifyContent: 'center',
@@ -82,7 +104,7 @@ const StyledNav = styled.nav({
   display: 'grid',
   alignItems: 'center',
   [theme.mediaQueries.desktop]: {
-    gridTemplateColumns: 'auto auto 1fr auto auto auto',
+    gridTemplateColumns: 'auto auto 1fr auto auto auto auto',
     columnGap: theme.spacing.m,
   },
   [theme.mediaQueries.mobile]: {
@@ -124,6 +146,15 @@ const StyledLink = styled(Link)({
 
   '&:hover::after': {
     opacity: 1,
+  },
+})
+
+const ActiveLabel = styled.label({
+  display: 'flex',
+  alignItems: 'center',
+  fontWeight: 'normal',
+  [theme.mediaQueries.mobile]: {
+    justifySelf: 'end',
   },
 })
 
