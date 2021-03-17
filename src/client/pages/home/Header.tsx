@@ -22,7 +22,7 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <StyledNav>
-          <HomeLink to={{ episode: Maybe.none }}>all</HomeLink>
+          <HomeLink to={{ episode: Maybe.none, sortNew: true }}>all</HomeLink>
           <EpisodePicker />
           <SearchInput />
           <SortPicker />

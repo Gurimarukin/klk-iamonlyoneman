@@ -1,200 +1,61 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
 import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
 import { List, Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { ClickOutside } from '../../components/ClickOutside'
-import { ChevronUp } from '../../components/svgs'
+import { Picker } from '../../components/Picker'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
 import { HomeLink } from './Header'
-
-const OPENED = 'is-open'
-const SELECTED = 'selected'
-const EPISODE_TITLE = 'episode-title'
-const EPISODE_NUMBER = 'episode-number'
-const EPISODES = 'episodes'
 
 const unknownLabel = 'unknown'
 
 export const EpisodePicker = (): JSX.Element => {
   const query = useKlkPostsQuery()
-
-  const [isOpened, setIsOpened] = useState(false)
-  const toggleOpen = useCallback(() => setIsOpened(o => !o), [])
-  const close = useCallback(() => setIsOpened(false), [])
-
-  useEffect(() => {
-    function onKeyUp(e: KeyboardEvent): void {
-      if (e.key === 'Escape') close()
-    }
-    window.addEventListener('keyup', onKeyUp)
-    return () => window.removeEventListener('keyup', onKeyUp)
-  }, [close])
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(close, [query])
-
   return (
-    <ClickOutside onClickOutside={close}>
-      <Container
-        onClick={toggleOpen}
-        className={pipe(
-          query.episode,
-          Maybe.map(() => SELECTED),
-          Maybe.toUndefined,
-        )}
-      >
-        <Visible>
-          <span className={EPISODE_TITLE}>episode:</span>
-          <span className={EPISODE_NUMBER}>
-            {pipe(
-              query.episode,
-              Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
-              Maybe.getOrElse(() => '–'),
-            )}
-          </span>
-          <ChevronDown />
-        </Visible>
-        <div className={`${EPISODES}${isOpened ? ` ${OPENED}` : ''}`}>
+    <Picker
+      labelPrefix={'episode:'}
+      labelValue={pipe(
+        query.episode,
+        Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
+        Maybe.getOrElse(() => '–'),
+      )}
+      valueIsSelected={Maybe.isSome(query.episode)}
+      content={
+        <Container>
           <EpisodesHalf>
             {List.range(1, 12).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n) }}>
+              <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
                 {StringUtils.pad10(n)}
               </HomeLink>
             ))}
           </EpisodesHalf>
           <EpisodesHalf>
             {List.range(13, 24).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n) }}>
+              <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
                 {StringUtils.pad10(n)}
               </HomeLink>
             ))}
           </EpisodesHalf>
           <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(25) }}>25</HomeLink>
+            <HomeLink to={{ episode: Maybe.some(25), sortNew: false }}>25</HomeLink>
           </EpisodeCenter>
           <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(EpisodeNumber.unknown) }}>{unknownLabel}</HomeLink>
+            <HomeLink to={{ episode: Maybe.some(EpisodeNumber.unknown), sortNew: false }}>
+              {unknownLabel}
+            </HomeLink>
           </EpisodeCenter>
-        </div>
-      </Container>
-    </ClickOutside>
+        </Container>
+      }
+    />
   )
 }
 
-const Container = styled.button({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  border: 'none',
-  borderRadius: 2,
-  padding: `0 ${theme.Header.link.padding.left}`,
-  color: 'inherit',
-  backgroundColor: 'transparent',
-  lineHeight: 'inherit',
-  font: 'inherit',
-  cursor: 'pointer',
-  position: 'relative',
-  [theme.mediaQueries.mobile]: {
-    gridColumnEnd: 'span 2',
-    justifySelf: 'end',
-  },
-
-  [`& .${EPISODE_TITLE}`]: {
-    marginRight: theme.spacing.xxs,
-    textDecoration: 'underline',
-    position: 'relative',
-  },
-
-  [`& .${EPISODE_TITLE}::after`]: {
-    content: "''",
-    position: 'absolute',
-    width: '100%',
-    borderBottom: `2px solid ${theme.colors.lime}`,
-    left: 0,
-    bottom: -1,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
-    opacity: 0,
-    transition: 'all 0.3s',
-  },
-
-  [`&:hover .${EPISODE_TITLE}::after`]: {
-    opacity: 1,
-  },
-
-  [`& .${EPISODE_NUMBER}`]: {
-    borderRadius: 2,
-    padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
-    position: 'relative',
-    transition: 'all 0.3s',
-  },
-
-  [`&.${SELECTED} .${EPISODE_NUMBER}`]: {
-    textDecoration: 'underline',
-    textShadow: theme.textShadow(theme.colors.darkgrey),
-    backgroundColor: theme.colors.lime,
-    boxShadow: theme.boxShadowLight,
-  },
-
-  [`& .${EPISODE_NUMBER}::after`]: {
-    content: "''",
-    position: 'absolute',
-    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
-    left: theme.Header.link.padding.left,
-    bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
-    opacity: 0,
-    transition: 'all 0.3s',
-  },
-
-  [`&.${SELECTED} .${EPISODE_NUMBER}::after`]: {
-    borderBottom: `2px solid ${theme.colors.white}`,
-    filter: 'none',
-  },
-
-  [`&:hover .${EPISODE_NUMBER}::after`]: {
-    opacity: 1,
-  },
-
-  [`& .${EPISODES}`]: {
-    position: 'absolute',
-    top: 'calc(100% + 0.33em)',
-    zIndex: theme.zIndexes.pickerContent,
-    display: 'grid',
-    gridTemplateColumns: '50% 50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    boxShadow: theme.boxShadow,
-    opacity: 0,
-    filter: 'blur(10px)',
-    visibility: 'hidden',
-    transition: 'all 0.3s',
-    [theme.mediaQueries.desktop]: {
-      // left: 0,
-    },
-    [theme.mediaQueries.mobile]: {
-      right: 0,
-    },
-  },
-
-  [`&:hover .${EPISODES}, & .${EPISODES}.${OPENED}`]: {
-    opacity: 1,
-    filter: 'blur(0)',
-    visibility: 'visible',
-  },
-})
-
-const Visible = styled.span({
-  display: 'flex',
-  alignItems: 'center',
-})
-
-const ChevronDown = styled(ChevronUp)({
-  marginLeft: theme.spacing.xxs,
-  transform: 'rotate(-180deg)',
+const Container = styled.div({
+  display: 'grid',
+  gridTemplateColumns: '50% 50%',
 })
 
 const EpisodesHalf = styled.div({
