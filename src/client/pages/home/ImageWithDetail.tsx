@@ -55,7 +55,14 @@ export const ImageWithDetail = ({ scrollPosition, resizeImg, post }: Props): JSX
         <TitleContainer style={{ width: size.width }}>
           <TitleABlank href={permalink}>{post.title}</TitleABlank>
           <div className={DETAIL}>
-            <span>{formatDate(post.createdAt)}</span>
+            <span>
+              {formatDate(post.createdAt)}
+              {pipe(
+                post.episode,
+                Maybe.map(e => ` • E${StringUtils.pad10(e)}`),
+                Maybe.toNullable,
+              )}
+            </span>
             <Links>
               <ABlankBlue href={post.url}>View image</ABlankBlue>•
               <ABlankRed href={permalink}>Reddit post</ABlankRed>
