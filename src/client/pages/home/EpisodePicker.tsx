@@ -15,7 +15,7 @@ const unknownLabel = 'unknown'
 export const EpisodePicker = (): JSX.Element => {
   const query = useKlkPostsQuery()
   return (
-    <Picker
+    <StyledPicker
       labelPrefix={'episode:'}
       labelValue={pipe(
         query.episode,
@@ -52,6 +52,13 @@ export const EpisodePicker = (): JSX.Element => {
     />
   )
 }
+
+const StyledPicker = styled(Picker)({
+  [theme.mediaQueries.mobile]: {
+    gridColumnEnd: 'span 2',
+    justifySelf: 'end',
+  },
+})
 
 const Container = styled.div({
   display: 'grid',
