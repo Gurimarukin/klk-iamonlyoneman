@@ -44,7 +44,7 @@ type Props = {
 
 export const Router = ({ path }: Props): JSX.Element => {
   const [subTitle, node] = route(path)
-  const title = ['/r/KillLaKill - /u/iamonlyoneman', ...Maybe.toArray(subTitle)].join(' | ')
+  const title = ['r/KillLaKill - u/iamonlyoneman', ...Maybe.toArray(subTitle)].join(' | ')
 
   useEffect(() => {
     // eslint-disable-next-line functional/immutable-data

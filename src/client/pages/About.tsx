@@ -10,8 +10,8 @@ import { theme } from '../utils/theme'
 export const About = (): JSX.Element => (
   <Container>
     <StyledH2>
-      All posts by <StyledA href='https://www.reddit.com/u/iamonlyoneman'>/u/iamonlyoneman</StyledA>{' '}
-      on <StyledA href='https://www.reddit.com/r/KillLaKill'>/r/KillLaKill</StyledA>.
+      All posts by <StyledA href='https://www.reddit.com/u/iamonlyoneman'>u/iamonlyoneman</StyledA>{' '}
+      on <StyledA href='https://www.reddit.com/r/KillLaKill'>r/KillLaKill</StyledA>.
     </StyledH2>
     <StyledH3>
       <StyledA href='https://www.reddit.com/u/Grimalkin8675'>I</StyledA> am really found of{' '}
