@@ -143,6 +143,8 @@ const Container = styled(GradientContainer)({
   overflowX: 'hidden',
   overflowY: 'auto',
   position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
 })
 
 const LoadingOrError = styled.div({
@@ -168,4 +170,7 @@ const ScrollToTop = styled.button({
   justifyContent: 'center',
   alignItems: 'center',
   boxShadow: theme.boxShadow,
+  [theme.mediaQueries.mobile]: {
+    right: theme.spacing.s,
+  },
 })

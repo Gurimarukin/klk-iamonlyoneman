@@ -98,12 +98,12 @@ function heightFromWidth({ width, height }: Size, newWidth: number): number {
 }
 
 const Container = styled.div({
+  flexGrow: 1,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-around',
   flexWrap: 'wrap',
   paddingTop: theme.spacing.xl,
-  height: '100%',
 
   '&::after': {
     content: "''",
