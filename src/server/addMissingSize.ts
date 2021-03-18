@@ -17,5 +17,6 @@ pipe(
       Future.chain(() => Future.fromIOEither(logger.info('Done'))),
     )
   }),
+  Future.map(() => process.exit(0)),
   f => Future.runUnsafe<void>(f),
 )
