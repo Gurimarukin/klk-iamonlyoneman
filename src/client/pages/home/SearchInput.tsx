@@ -37,10 +37,7 @@ export const SearchInput = (): JSX.Element => {
 
   const navigateSearch = useCallback(
     (rawSearch: string | undefined) => {
-      const newSearch = pipe(
-        Maybe.fromNullable(rawSearch?.trim()),
-        Maybe.filter(str => str !== ''),
-      )
+      const { search: newSearch } = KlkPostsQuery.fromPartial({ search: rawSearch })
       if (!maybeStringEq.equals(newSearch, query.search)) {
         pipe({ ...query, search: newSearch }, KlkPostsQuery.toPartial, routes.home, navigate)
       }

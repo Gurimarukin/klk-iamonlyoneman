@@ -8,7 +8,10 @@ import { EpisodeNumber, PartialKlkPostsQuery, PostActive, PostsSort } from './Pa
 export namespace KlkPostsQuery {
   export const fromPartial = (partial: PartialKlkPostsQuery): KlkPostsQuery => {
     const episode = Maybe.fromNullable(partial.episode)
-    const search = Maybe.fromNullable(partial.search)
+    const search = pipe(
+      Maybe.fromNullable(partial.search?.trim()),
+      Maybe.filter(s => s !== ''),
+    )
     const sortNew = getSortNew(episode, partial.sort)
     const active = getActive(partial.active)
     return { episode, search, sortNew, active }

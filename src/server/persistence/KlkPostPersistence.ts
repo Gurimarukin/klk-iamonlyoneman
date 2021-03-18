@@ -114,17 +114,14 @@ export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: Mongo
     const find = coll.find({
       active,
       ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
-      ...foldRecord(search, s => ({ $text: { $search: s } })),
+      ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
     })
     const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
     return sorted.skip(page * config.pageSize).limit(config.pageSize)
   }
 
-  function foldRecord<A>(
-    maybe: Maybe<A>,
-    f: (a: A) => FilterQuery<OutputType>,
-  ): FilterQuery<OutputType> {
+  function foldRecord<A, B>(maybe: Maybe<A>, f: (a: A) => FilterQuery<B>): FilterQuery<B> {
     return pipe(
       maybe,
       Maybe.fold(() => ({}), f),
