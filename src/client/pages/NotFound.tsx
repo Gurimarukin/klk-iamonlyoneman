@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import React from 'react'
 
 import { GradientContainer } from '../components/GradientContainer'
-import { Link } from '../components/Link'
+import { PrettyLink } from '../components/PrettyLink'
 import { routes } from '../Router'
 import { theme } from '../utils/theme'
 
@@ -27,25 +27,7 @@ const StyledH3 = styled.h3({
   fontSize: '1.8em',
 })
 
-const StyledLink = styled(Link)({
-  color: 'inherit',
+const StyledLink = styled(PrettyLink)({
   fontSize: '1.2em',
   marginTop: '3em',
-  position: 'relative',
-  transition: 'all 0.3s',
-
-  '&::after': {
-    content: "''",
-    position: 'absolute',
-    width: '100%',
-    borderBottom: `2px solid ${theme.colors.lime}`,
-    left: 0,
-    bottom: -2,
-    transition: 'all 0.3s',
-    opacity: 0,
-  },
-
-  '&:hover::after': {
-    opacity: 1,
-  },
 })

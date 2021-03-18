@@ -17,11 +17,15 @@ export const EpisodePicker = (): JSX.Element => {
   return (
     <StyledPicker
       labelPrefix={'episode:'}
-      labelValue={pipe(
-        query.episode,
-        Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
-        Maybe.getOrElse(() => '–'),
-      )}
+      labelValue={
+        <LabelValue>
+          {pipe(
+            query.episode,
+            Maybe.map(e => (e === 'unknown' ? unknownLabel : StringUtils.pad10(e))),
+            Maybe.getOrElse(() => '–'),
+          )}
+        </LabelValue>
+      }
       valueIsSelected={Maybe.isSome(query.episode)}
       content={
         <Container>
@@ -58,6 +62,10 @@ const StyledPicker = styled(Picker)({
     gridColumnEnd: 'span 2',
     justifySelf: 'end',
   },
+})
+
+const LabelValue = styled.span({
+  fontWeight: 'bold',
 })
 
 const Container = styled.div({

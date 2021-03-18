@@ -7,6 +7,7 @@ import { useKlkPostsQuery } from '../contexts/KlkPostsQueryContext'
 import { cssClasses } from '../utils/cssClasses'
 import { theme } from '../utils/theme'
 import { ClickOutside } from './ClickOutside'
+import { prettyLinkStyle } from './PrettyLink'
 import { ChevronUp } from './svgs'
 
 type Props = {
@@ -70,7 +71,7 @@ const Container = styled.button({
   alignItems: 'center',
   border: 'none',
   borderRadius: 2,
-  padding: `0 ${theme.Header.link.padding.left}`,
+  padding: `0 ${theme.Header.link.padding.left} 0 0`,
   color: 'inherit',
   backgroundColor: 'transparent',
   lineHeight: 'inherit',
@@ -78,27 +79,13 @@ const Container = styled.button({
   cursor: 'pointer',
   position: 'relative',
 
-  [`& .${LABEL_PREFIX}`]: {
-    marginRight: theme.spacing.xxs,
-    textDecoration: 'underline',
-    position: 'relative',
-  },
+  [`& .${LABEL_PREFIX}`]: prettyLinkStyle.base,
 
-  [`& .${LABEL_PREFIX}::after`]: {
-    content: "''",
-    position: 'absolute',
-    width: '100%',
-    borderBottom: `2px solid ${theme.colors.lime}`,
-    left: 0,
-    bottom: -1,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
-    opacity: 0,
-    transition: 'all 0.3s',
-  },
+  [`& .${LABEL_PREFIX}::before`]: prettyLinkStyle.before,
 
-  [`&:hover .${LABEL_PREFIX}::after`]: {
-    opacity: 1,
-  },
+  [`& .${LABEL_PREFIX}::after`]: prettyLinkStyle.after,
+
+  [`&:hover .${LABEL_PREFIX}::after`]: prettyLinkStyle.afterHover,
 
   [`& .${LABEL_VALUE}`]: {
     borderRadius: 2,
@@ -165,6 +152,7 @@ const Visible = styled.span({
 })
 
 const ChevronDown = styled(ChevronUp)({
+  height: '0.8em',
   marginLeft: theme.spacing.xxs,
   transform: 'rotate(-180deg)',
 })

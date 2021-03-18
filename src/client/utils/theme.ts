@@ -36,6 +36,8 @@ const mediaQueries = {
 const galleryThumnailSuffix: ThumbnailSuffix = 'h'
 const galleryThumnailMaxSize = ThumbnailSuffix.maxSizes[galleryThumnailSuffix]
 
+const textShadow = (color: string): string => `1px 1px 0 ${color}`
+
 export const theme = {
   colors,
 
@@ -44,7 +46,8 @@ export const theme = {
   boxShadow: '0 0 8px black',
   boxShadowLight: '0 0 4px black',
   textOutline: '-1px -1px 1px black, 1px -1px 1px black, -1px 1px 1px black, 1px 1px 1px black',
-  textShadow: (color: string): string => `1px 1px 0 ${color}`,
+  textShadow,
+  dropShadow: (color: string): string => `drop-shadow(${textShadow(color)})`,
 
   Gallery: {
     smallestSide: 500,
@@ -62,6 +65,14 @@ export const theme = {
       padding: {
         top: '0.4em',
         left: '0.3em',
+      },
+      underline: {
+        top: 'calc(1.4em + 1px)',
+      },
+    },
+    search: {
+      underline: {
+        bottom: '0.2em',
       },
     },
   },

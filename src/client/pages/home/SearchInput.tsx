@@ -130,7 +130,7 @@ const InputContainer = styled.div({
     width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
     position: 'absolute',
     left: theme.Header.link.padding.left,
-    bottom: theme.Header.link.padding.top,
+    bottom: theme.Header.search.underline.bottom,
     borderBottom: `1px solid ${theme.colors.white}`,
   },
 })

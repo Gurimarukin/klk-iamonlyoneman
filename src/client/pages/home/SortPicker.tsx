@@ -14,7 +14,7 @@ export const SortPicker = (): JSX.Element => {
   const query = useKlkPostsQuery()
 
   return (
-    <StyledPicker
+    <Picker
       labelPrefix={labelSort}
       labelValue={query.sortNew ? labelNew : labelOld}
       valueIsSelected={false}
@@ -32,14 +32,9 @@ export const SortPicker = (): JSX.Element => {
   )
 }
 
-const StyledPicker = styled(Picker)({
-  fontWeight: 'normal',
-})
-
 const Container = styled.div({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   padding: theme.Header.link.padding.top,
-  fontWeight: 'bold',
 })

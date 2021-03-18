@@ -1,10 +1,10 @@
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
-import React, { forwardRef, useCallback } from 'react'
+import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
-import { Link } from '../../components/Link'
+import { PrettyLink } from '../../components/PrettyLink'
 import { Logout } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
@@ -20,10 +20,11 @@ const SELECTED = 'selected'
 export const Header = forwardRef<HTMLElement>(
   ({}, ref): JSX.Element => {
     const { isAdmin, logout } = useUser()
+    const Nav = useMemo(() => (isAdmin ? AdminNav : StyledNav), [isAdmin])
 
     return (
       <StyledHeader ref={ref}>
-        <StyledNav>
+        <Nav>
           <HomeLink to={{ episode: Maybe.none, sortNew: true }}>all</HomeLink>
           <EpisodePicker />
           <SearchInput />
@@ -37,7 +38,7 @@ export const Header = forwardRef<HTMLElement>(
               </LogoutButton>
             </>
           ) : null}
-        </StyledNav>
+        </Nav>
       </StyledHeader>
     )
   },
@@ -58,12 +59,12 @@ export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false,
     : klkPostsQueryWithoutSortNewEquals(newQuery, query)
 
   return (
-    <StyledLink
+    <StyledHomeLink
       to={routes.home(KlkPostsQuery.toPartial(newQuery))}
       className={isSelected ? SELECTED : undefined}
     >
       {children}
-    </StyledLink>
+    </StyledHomeLink>
   )
 }
 
@@ -94,7 +95,6 @@ const StyledHeader = styled.header({
   color: theme.colors.white,
   boxShadow: theme.boxShadow,
   padding: '0.67em',
-  fontWeight: 'bold',
   fontSize: '1.05em',
 })
 
@@ -103,8 +103,9 @@ const StyledNav = styled.nav({
   maxWidth: 1200,
   display: 'grid',
   alignItems: 'center',
+  textShadow: theme.textShadow(theme.colors.darkgrey),
   [theme.mediaQueries.desktop]: {
-    gridTemplateColumns: 'auto auto 1fr auto auto auto auto',
+    gridTemplateColumns: 'auto auto 1fr auto auto',
     columnGap: theme.spacing.m,
   },
   [theme.mediaQueries.mobile]: {
@@ -114,39 +115,30 @@ const StyledNav = styled.nav({
   },
 })
 
-const StyledLink = styled(Link)({
-  padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
-  color: 'inherit',
-  textShadow: theme.textShadow(theme.colors.darkgrey),
-  borderRadius: 2,
-  position: 'relative',
-  transition: 'all 0.3s',
+const AdminNav = styled(StyledNav)({
+  [theme.mediaQueries.desktop]: {
+    gridTemplateColumns: 'auto auto 1fr auto auto auto auto',
+  },
+})
 
+const StyledLink = styled(PrettyLink)({
   [`&.${SELECTED}`]: {
     backgroundColor: theme.colors.lime,
     boxShadow: theme.boxShadowLight,
+
+    '&::before': {
+      filter: theme.dropShadow(theme.colors.darkgrey),
+    },
 
     '&::after': {
       borderColor: theme.colors.white,
       filter: 'none',
     },
   },
+})
 
-  '&::after': {
-    content: "''",
-    position: 'absolute',
-    width: `calc(100% - 2 * ${theme.Header.link.padding.left})`,
-    borderBottom: `2px solid ${theme.colors.lime}`,
-    left: theme.Header.link.padding.left,
-    bottom: `calc(${theme.Header.link.padding.top} - 1px)`,
-    filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
-    opacity: 0,
-    transition: 'all 0.3s',
-  },
-
-  '&:hover::after': {
-    opacity: 1,
-  },
+const StyledHomeLink = styled(StyledLink)({
+  fontWeight: 'bold',
 })
 
 const ActiveLabel = styled.label({
@@ -170,7 +162,7 @@ const LogoutButton = styled.button({
   justifyContent: 'center',
   alignItems: 'center',
   padding: 0,
-  filter: `drop-shadow(1px 1px 0 ${theme.colors.darkgrey})`,
+  filter: theme.dropShadow(theme.colors.darkgrey),
   [theme.mediaQueries.mobile]: {
     gridColumnStart: 3,
     justifySelf: 'end',
