@@ -5,7 +5,7 @@
   "port": 8676,
   "allowedOrigins": ["*"],
   "db": {
-    "host": "localhost:27017",
+    "host": "localhost:27018",
     "dbName": "klkIamonlyoneman",
     "user": "user",
     "password": "password"
