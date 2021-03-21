@@ -11,7 +11,7 @@ import { Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
-import { Pencil } from '../../components/svgs'
+import { InfoCircle, Pencil } from '../../components/svgs'
 import { useUser } from '../../contexts/UserContext'
 import { cssClasses } from '../../utils/cssClasses'
 import { theme } from '../../utils/theme'
@@ -53,22 +53,52 @@ const EditableImageWithDetail = (props: EditableImageWithDetailProps): JSX.Eleme
 }
 
 const MobileImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDetailProps>(
-  (props, ref) => <StatelessImageWithDetail ref={ref} {...props} />,
+  (props, ref) => {
+    const [isDetailed, setIsDetailed] = useState(false)
+    const toggleDetail = useCallback(() => setIsDetailed(d => !d), [])
+    const closeDetail = useCallback(() => setIsDetailed(false), [])
+
+    return (
+      <ClickOutside onClickOutside={closeDetail}>
+        <StatelessImageWithDetail
+          ref={ref}
+          {...props}
+          isDetailed={isDetailed}
+          toggleDetail={toggleDetail}
+        />
+      </ClickOutside>
+    )
+  },
 )
 
 type StatelessImageWithDetailProps = ImageWithDetailProps & {
   readonly token?: Token
   readonly isEditing?: boolean
   readonly toggleEditing?: () => void
+  readonly isDetailed?: boolean
+  readonly toggleDetail?: () => void
 }
 
 const PLACEHOLDER = 'placeholder'
 const DETAIL = 'detail'
-const EDIT_BTN = 'editBtn'
-const EDITING = 'editing'
+const IS_DETAILED = 'is-detailed'
+const EDIT_BTN = 'edit-btn'
+const IS_EDITING = 'is-editing'
 
 const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDetailProps>(
-  ({ scrollPosition, resizeImg, post, token, isEditing = false, toggleEditing }, ref) => {
+  (
+    {
+      scrollPosition,
+      resizeImg,
+      post,
+      token,
+      isEditing = false,
+      toggleEditing,
+      isDetailed = false,
+      toggleDetail,
+    },
+    ref,
+  ) => {
     const size: Partial<Size> = useMemo(
       () =>
         pipe(
@@ -80,7 +110,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
     const permalink = `https://reddit.com${post.permalink}`
 
     return (
-      <Container ref={ref} className={cssClasses([EDITING, isEditing])}>
+      <Container ref={ref} className={cssClasses([IS_EDITING, isEditing])}>
         <ABlank href={post.url}>
           <StyledImage
             alt={post.title}
@@ -93,7 +123,12 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
         </ABlank>
         <TitleContainer style={{ width: size.width }}>
           <TitleABlank href={permalink}>{post.title}</TitleABlank>
-          <div className={DETAIL}>
+          {toggleDetail !== undefined ? (
+            <DetailButton onClick={toggleDetail}>
+              <InfoCircle />
+            </DetailButton>
+          ) : null}
+          <div className={cssClasses([DETAIL, true], [IS_DETAILED, isDetailed])}>
             <span>
               {StringUtils.formatDate(post.createdAt)}
               {pipe(
@@ -113,9 +148,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
             <EditButton onClick={toggleEditing} className={EDIT_BTN}>
               <Pencil />
             </EditButton>
-            <StyledForm token={token} post={post}>
-              form
-            </StyledForm>
+            <StyledForm token={token} post={post} />
           </>
         ) : null}
       </Container>
@@ -149,7 +182,7 @@ const Container = styled.div({
     visibility: 'hidden',
   },
 
-  [`&:hover > .${EDIT_BTN}, &.${EDITING} > .${EDIT_BTN}, &.${EDITING} > form`]: {
+  [`&:hover > .${EDIT_BTN}, &.${IS_EDITING} > .${EDIT_BTN}, &.${IS_EDITING} > form`]: {
     opacity: 1,
     visibility: 'visible',
   },
@@ -171,7 +204,7 @@ const Container = styled.div({
     transition: 'all 0.3s',
   },
 
-  [`&:hover .${DETAIL}`]: {
+  [`&:hover .${DETAIL}, & .${DETAIL}.${IS_DETAILED}`]: {
     opacity: 1,
     filter: 'blur(0)',
   },
@@ -180,12 +213,14 @@ const Container = styled.div({
 const StyledImage = styled(LazyLoadImage)({})
 
 const TitleContainer = styled.span({
+  display: 'flex',
   padding: '0.3em 0',
   textShadow: theme.textOutline,
   position: 'relative',
 })
 
 const TitleABlank = styled(ABlank)({
+  flexGrow: 1,
   color: 'inherit',
 })
 
@@ -214,7 +249,7 @@ const ABlankRed = styled(StyledABlank)({
   },
 })
 
-const EditButton = styled.button({
+const StyledButton = styled.button({
   border: 'none',
   background: 'none',
   color: theme.colors.white,
@@ -226,10 +261,20 @@ const EditButton = styled.button({
   justifyContent: 'center',
   alignItems: 'center',
   padding: 0,
+  filter: `drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
+})
+
+const DetailButton = styled(StyledButton)({
+  marginLeft: theme.spacing.xs,
+  [theme.mediaQueries.desktop]: {
+    display: 'none',
+  },
+})
+
+const EditButton = styled(StyledButton)({
   position: 'absolute',
   top: theme.spacing.xs,
   right: theme.spacing.xs,
-  filter: `drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
   transition: 'all 0.3s',
 })
 
