@@ -83,7 +83,7 @@ const ActiveToggler = (): JSX.Element => {
   return (
     <ActiveLabel>
       <u>active:</u> {' '}
-      <input type='checkbox' checked={query.active} onClick={toggleActive} />
+      <input type='checkbox' checked={query.active} onChange={toggleActive} />
     </ActiveLabel>
   )
 }
