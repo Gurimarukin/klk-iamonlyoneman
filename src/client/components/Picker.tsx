@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statement, functional/no-return-void */
 import styled from '@emotion/styled'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useState } from 'react'
 
 import { isDefined } from '../../shared/utils/isDefined'
 import { useKlkPostsQuery } from '../contexts/KlkPostsQueryContext'
@@ -10,7 +10,7 @@ import { ClickOutside } from './ClickOutside'
 import { prettyLinkStyle } from './PrettyLink'
 import { ChevronUp } from './svgs'
 
-type Props = {
+type PickerProps = {
   readonly labelPrefix?: React.ReactNode
   readonly labelValue: React.ReactNode
   readonly valueIsSelected: boolean
@@ -18,19 +18,7 @@ type Props = {
   readonly className?: string
 }
 
-const IS_OPENED = 'is-opened'
-const SELECTED = 'selected'
-const LABEL_PREFIX = 'label-prefix'
-const LABEL_VALUE = 'label-value'
-const CONTENT = 'content'
-
-export const Picker = ({
-  labelPrefix,
-  labelValue,
-  valueIsSelected,
-  content,
-  className,
-}: Props): JSX.Element => {
+const MobilePicker = (props: PickerProps): JSX.Element => {
   const query = useKlkPostsQuery()
 
   const [isOpened, setIsOpened] = useState(true)
@@ -50,20 +38,46 @@ export const Picker = ({
 
   return (
     <ClickOutside onClickOutside={close}>
-      <Container
-        onClick={toggleOpen}
-        className={cssClasses([SELECTED, valueIsSelected], [className, true])}
-      >
-        <Visible>
-          {isDefined(labelPrefix) ? <span className={LABEL_PREFIX}>{labelPrefix}</span> : null}
-          {isDefined(labelValue) ? <span className={LABEL_VALUE}>{labelValue}</span> : null}
-          <ChevronDown />
-        </Visible>
-        <div className={cssClasses([CONTENT, true], [IS_OPENED, isOpened])}>{content}</div>
-      </Container>
+      <StatelessPicker {...props} isOpened={isOpened} toggleOpen={toggleOpen} />
     </ClickOutside>
   )
 }
+
+type StatelessPickerProps = PickerProps & {
+  readonly isOpened?: boolean
+  readonly toggleOpen?: () => void
+}
+
+const IS_OPENED = 'is-opened'
+const SELECTED = 'selected'
+const LABEL_PREFIX = 'label-prefix'
+const LABEL_VALUE = 'label-value'
+const CONTENT = 'content'
+
+const StatelessPicker = forwardRef<HTMLButtonElement, StatelessPickerProps>(
+  (
+    { labelPrefix, labelValue, valueIsSelected, content, className, isOpened = false, toggleOpen },
+    ref,
+  ) => (
+    <Container
+      ref={ref}
+      onClick={toggleOpen}
+      disabled={toggleOpen === undefined}
+      className={cssClasses([SELECTED, valueIsSelected], [className, true])}
+    >
+      <Visible>
+        {isDefined(labelPrefix) ? <span className={LABEL_PREFIX}>{labelPrefix}</span> : null}
+        {isDefined(labelValue) ? <span className={LABEL_VALUE}>{labelValue}</span> : null}
+        <ChevronDown />
+      </Visible>
+      <div className={cssClasses([CONTENT, true], [IS_OPENED, isOpened])}>{content}</div>
+    </Container>
+  ),
+)
+
+export const Picker = window.matchMedia(theme.mediaQueries.js.mobile).matches
+  ? MobilePicker
+  : StatelessPicker
 
 const Container = styled.button({
   display: 'flex',
@@ -76,8 +90,10 @@ const Container = styled.button({
   backgroundColor: 'transparent',
   lineHeight: 'inherit',
   font: 'inherit',
-  cursor: 'pointer',
   position: 'relative',
+  '&:not(:disabled)': {
+    cursor: 'pointer',
+  },
 
   [`& .${LABEL_PREFIX}`]: prettyLinkStyle.base,
 
@@ -131,9 +147,6 @@ const Container = styled.button({
     filter: 'blur(10px)',
     visibility: 'hidden',
     transition: 'all 0.3s',
-    [theme.mediaQueries.desktop]: {
-      // left: 0,
-    },
     [theme.mediaQueries.mobile]: {
       right: 0,
     },

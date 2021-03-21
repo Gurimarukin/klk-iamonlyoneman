@@ -27,10 +27,15 @@ const colors = {
   pink2: '#ed69d0',
 }
 
-const mobileLimit = '664px'
+const mobileLimit = 664
+const js = {
+  mobile: `(max-width: ${mobileLimit}px)`,
+  desktop: `(min-width: ${mobileLimit + 1}px)`,
+}
 const mediaQueries = {
-  mobile: `@media (max-width: ${mobileLimit})`,
-  desktop: `@media (min-width: ${mobileLimit})`,
+  mobile: `@media ${js.mobile}`,
+  desktop: `@media ${js.desktop}`,
+  js,
 }
 
 const galleryThumnailSuffix: ThumbnailSuffix = 'h'
