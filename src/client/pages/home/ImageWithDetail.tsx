@@ -11,7 +11,7 @@ import { Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
 import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
-import { InfoCircle, Pencil } from '../../components/svgs'
+import { ExternalLink, InfoCircle, Pencil } from '../../components/svgs'
 import { useUser } from '../../contexts/UserContext'
 import { cssClasses } from '../../utils/cssClasses'
 import { theme } from '../../utils/theme'
@@ -84,6 +84,7 @@ const DETAIL = 'detail'
 const IS_DETAILED = 'is-detailed'
 const EDIT_BTN = 'edit-btn'
 const IS_EDITING = 'is-editing'
+const EXTERNAL_LINK = 'external-link'
 
 const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDetailProps>(
   (
@@ -110,8 +111,8 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
 
     return (
       <Container ref={ref} className={cssClasses([IS_EDITING, isEditing])}>
-        <ABlank href={post.url}>
-          <StyledImage
+        <ImageABlank href={post.url} title='View image'>
+          <LazyLoadImage
             alt={post.title}
             src={thumbnailUrl(post.url, theme.Gallery.thumbnail.suffix)}
             scrollPosition={scrollPosition}
@@ -119,14 +120,6 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
             wrapperClassName={PLACEHOLDER}
             {...size}
           />
-        </ABlank>
-        <TitleContainer style={{ width: size.width }}>
-          <TitleABlank href={`https://reddit.com${post.permalink}`}>{post.title}</TitleABlank>
-          {toggleDetail !== undefined ? (
-            <DetailButton onClick={toggleDetail}>
-              <InfoCircle />
-            </DetailButton>
-          ) : null}
           <div className={cssClasses(DETAIL, [IS_DETAILED, isDetailed])}>
             {StringUtils.formatDate(post.createdAt)}
             {pipe(
@@ -135,6 +128,17 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
               Maybe.toNullable,
             )}
           </div>
+        </ImageABlank>
+        <TitleContainer style={{ width: size.width }}>
+          <TitleABlank href={`https://reddit.com${post.permalink}`} title='Reddit post'>
+            <span>{post.title}</span>
+            <ExternalLink className={EXTERNAL_LINK} />
+          </TitleABlank>
+          {toggleDetail !== undefined ? (
+            <DetailButton onClick={toggleDetail}>
+              <InfoCircle />
+            </DetailButton>
+          ) : null}
         </TitleContainer>
         {token !== undefined ? (
           <>
@@ -179,10 +183,15 @@ const Container = styled.div({
     opacity: 1,
     visibility: 'visible',
   },
+})
+
+const ImageABlank = styled(ABlank)({
+  color: 'inherit',
+  position: 'relative',
 
   [`& .${DETAIL}`]: {
     position: 'absolute',
-    bottom: '100%',
+    bottom: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -194,19 +203,20 @@ const Container = styled.div({
     borderRadius: `0 0 ${imgBorderRadius} ${imgBorderRadius}`,
     opacity: 0,
     filter: 'blur(10px)',
+    visibility: 'hidden',
     transition: 'all 0.3s',
   },
 
   [`&:hover .${DETAIL}, & .${DETAIL}.${IS_DETAILED}`]: {
     opacity: 1,
     filter: 'blur(0)',
+    visibility: 'visible',
   },
 })
 
-const StyledImage = styled(LazyLoadImage)({})
-
 const TitleContainer = styled.span({
   display: 'flex',
+  alignItems: 'center',
   textShadow: theme.textOutline,
   position: 'relative',
 })
@@ -215,6 +225,22 @@ const TitleABlank = styled(ABlank)({
   flexGrow: 1,
   padding: '0.3em 0',
   color: 'inherit',
+
+  [`& .${EXTERNAL_LINK}`]: {
+    height: 13,
+    marginLeft: theme.spacing.xs,
+    marginBottom: 1,
+    filter: `drop-shadow(-1px -1px 1px ${theme.colors.black}) drop-shadow(1px 1px 1px ${theme.colors.black})`,
+    verticalAlign: 'middle',
+    [theme.mediaQueries.desktop]: {
+      opacity: 0,
+      transition: 'all 0.3s',
+    },
+  },
+
+  [`&:hover .${EXTERNAL_LINK}`]: {
+    opacity: 1,
+  },
 })
 
 const StyledButton = styled.button({
@@ -233,6 +259,11 @@ const StyledButton = styled.button({
 })
 
 const DetailButton = styled(StyledButton)({
+  flexShrink: 0,
+  width: '1.8em',
+  height: '1.8em',
+  position: 'relative',
+  left: '0.33em',
   marginLeft: theme.spacing.xs,
   [theme.mediaQueries.desktop]: {
     display: 'none',
