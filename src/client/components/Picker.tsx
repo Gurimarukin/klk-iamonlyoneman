@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+/* eslint-disable functional/no-return-void */
 import styled from '@emotion/styled'
 import React, { forwardRef, useCallback, useEffect, useState } from 'react'
 
@@ -24,14 +24,6 @@ const MobilePicker = (props: PickerProps): JSX.Element => {
   const [isOpened, setIsOpened] = useState(true)
   const toggleOpen = useCallback(() => setIsOpened(o => !o), [])
   const close = useCallback(() => setIsOpened(false), [])
-
-  useEffect(() => {
-    function onKeyUp(e: KeyboardEvent): void {
-      if (e.key === 'Escape') close()
-    }
-    window.addEventListener('keyup', onKeyUp)
-    return () => window.removeEventListener('keyup', onKeyUp)
-  }, [close])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(close, [query])
