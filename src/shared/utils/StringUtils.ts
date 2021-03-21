@@ -54,4 +54,14 @@ export namespace StringUtils {
     )
 
   export const pad10 = (n: number): string => (n < 10 ? `0${n}` : `${n}`)
+
+  export const formatDate = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = pad10(date.getMonth() + 1)
+    const day = pad10(date.getDate())
+    const hours = pad10(date.getHours())
+    const minutes = pad10(date.getMinutes())
+
+    return `${year}/${month}/${day}, ${hours}:${minutes}`
+  }
 }
