@@ -214,13 +214,13 @@ const StyledImage = styled(LazyLoadImage)({})
 
 const TitleContainer = styled.span({
   display: 'flex',
-  padding: '0.3em 0',
   textShadow: theme.textOutline,
   position: 'relative',
 })
 
 const TitleABlank = styled(ABlank)({
   flexGrow: 1,
+  padding: '0.3em 0',
   color: 'inherit',
 })
 
