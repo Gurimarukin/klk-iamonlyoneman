@@ -128,7 +128,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
               <InfoCircle />
             </DetailButton>
           ) : null}
-          <div className={cssClasses([DETAIL, true], [IS_DETAILED, isDetailed])}>
+          <div className={cssClasses(DETAIL, [IS_DETAILED, isDetailed])}>
             <span>
               {StringUtils.formatDate(post.createdAt)}
               {pipe(

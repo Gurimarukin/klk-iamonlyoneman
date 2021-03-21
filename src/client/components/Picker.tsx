@@ -55,14 +55,14 @@ const StatelessPicker = forwardRef<HTMLButtonElement, StatelessPickerProps>(
       ref={ref}
       onClick={toggleOpen}
       disabled={toggleOpen === undefined}
-      className={cssClasses([SELECTED, valueIsSelected], [className, true])}
+      className={cssClasses([SELECTED, valueIsSelected], className)}
     >
       <Visible>
         {isDefined(labelPrefix) ? <span className={LABEL_PREFIX}>{labelPrefix}</span> : null}
         {isDefined(labelValue) ? <span className={LABEL_VALUE}>{labelValue}</span> : null}
         <ChevronDown />
       </Visible>
-      <div className={cssClasses([CONTENT, true], [IS_OPENED, isOpened])}>{content}</div>
+      <div className={cssClasses(CONTENT, [IS_OPENED, isOpened])}>{content}</div>
     </Container>
   ),
 )
