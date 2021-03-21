@@ -107,7 +107,6 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
         ),
       [post.size, resizeImg],
     )
-    const permalink = `https://reddit.com${post.permalink}`
 
     return (
       <Container ref={ref} className={cssClasses([IS_EDITING, isEditing])}>
@@ -122,25 +121,19 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
           />
         </ABlank>
         <TitleContainer style={{ width: size.width }}>
-          <TitleABlank href={permalink}>{post.title}</TitleABlank>
+          <TitleABlank href={`https://reddit.com${post.permalink}`}>{post.title}</TitleABlank>
           {toggleDetail !== undefined ? (
             <DetailButton onClick={toggleDetail}>
               <InfoCircle />
             </DetailButton>
           ) : null}
           <div className={cssClasses(DETAIL, [IS_DETAILED, isDetailed])}>
-            <span>
-              {StringUtils.formatDate(post.createdAt)}
-              {pipe(
-                post.episode,
-                Maybe.map(e => ` • E${StringUtils.pad10(e)}`),
-                Maybe.toNullable,
-              )}
-            </span>
-            <Links>
-              <ABlankBlue href={post.url}>View image</ABlankBlue>•
-              <ABlankRed href={permalink}>Reddit post</ABlankRed>
-            </Links>
+            {StringUtils.formatDate(post.createdAt)}
+            {pipe(
+              post.episode,
+              Maybe.map(e => ` • E${StringUtils.pad10(e)}`),
+              Maybe.toNullable,
+            )}
           </div>
         </TitleContainer>
         {token !== undefined ? (
@@ -194,7 +187,7 @@ const Container = styled.div({
     flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
-    padding: '0.67em 0.67em 0.33em',
+    padding: '0.67em',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     textShadow: theme.textShadow(theme.colors.black),
     overflow: 'hidden',
@@ -222,31 +215,6 @@ const TitleABlank = styled(ABlank)({
   flexGrow: 1,
   padding: '0.3em 0',
   color: 'inherit',
-})
-
-const Links = styled.nav({
-  marginTop: '0.33em',
-})
-
-const StyledABlank = styled(ABlank)({
-  display: 'inline-block',
-  color: 'inherit',
-  padding: '0.4em 0.3em',
-  margin: '0 0.3em',
-  borderRadius: 2,
-  transition: 'all 0.3s',
-})
-
-const ABlankBlue = styled(StyledABlank)({
-  '&:hover': {
-    backgroundColor: theme.colors.darkblue,
-  },
-})
-
-const ABlankRed = styled(StyledABlank)({
-  '&:hover': {
-    backgroundColor: theme.colors.darkred,
-  },
 })
 
 const StyledButton = styled.button({
