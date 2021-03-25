@@ -7,8 +7,7 @@ import { ScrollPosition } from 'react-lazy-load-image-component'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { List, Maybe, Tuple } from '../../../shared/utils/fp'
-import { useMaybeRef } from '../../hooks/useMaybeRef'
+import { List, Tuple } from '../../../shared/utils/fp'
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 
@@ -18,37 +17,8 @@ type Props = {
 }
 
 export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {
-  const [ref, mountRef] = useMaybeRef<HTMLDivElement>()
-
-  const getMaxDimension = useCallback(
-    (): Tuple<number, number> =>
-      pipe(
-        ref.current,
-        Maybe.fold<HTMLDivElement, Tuple<number, number>>(
-          () => [
-            window.innerWidth - 2 * theme.Gallery.margin,
-            window.innerHeight * theme.Gallery.maxHeight,
-          ],
-          e => [e.clientWidth - 2 * theme.Gallery.margin, e.clientHeight * theme.Gallery.maxHeight],
-        ),
-        Tuple.bimap(
-          w => Math.min(w, theme.Gallery.thumbnail.maxSize),
-          h => Math.min(h, theme.Gallery.thumbnail.maxSize),
-        ),
-      ),
-    [ref],
-  )
-
   const [[maxWidth, maxHeight], setMaxDimensions] = useState<Tuple<number, number>>(getMaxDimension)
-  const onResize = useCallback((): void => setMaxDimensions(getMaxDimension()), [getMaxDimension])
-
-  const onMount = useCallback(
-    (elt: HTMLDivElement | null) => {
-      mountRef(elt)
-      onResize()
-    },
-    [mountRef, onResize],
-  )
+  const onResize = useCallback((): void => setMaxDimensions(getMaxDimension()), [])
 
   useEffect(() => {
     window.addEventListener('resize', onResize)
@@ -75,7 +45,7 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
   )
 
   return (
-    <Container ref={onMount}>
+    <Container ref={onResize}>
       {klkPosts.map(p => (
         <ImageWithDetail
           key={KlkPostId.unwrap(p.id)}
@@ -89,13 +59,23 @@ export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children })
   )
 }
 
-function widthFromHeight({ width, height }: Size, newHeight: number): number {
-  return (width * newHeight) / height
-}
+const getMaxDimension = (): Tuple<number, number> =>
+  pipe(
+    Tuple.of(
+      window.innerWidth - 2 * theme.Gallery.margin,
+      window.innerHeight * theme.Gallery.maxHeight,
+    ),
+    Tuple.bimap(
+      w => Math.min(w, theme.Gallery.thumbnail.maxSize),
+      h => Math.min(h, theme.Gallery.thumbnail.maxSize),
+    ),
+  )
 
-function heightFromWidth({ width, height }: Size, newWidth: number): number {
-  return (height * newWidth) / width
-}
+const widthFromHeight = ({ width, height }: Size, newHeight: number): number =>
+  (width * newHeight) / height
+
+const heightFromWidth = ({ width, height }: Size, newWidth: number): number =>
+  (height * newWidth) / width
 
 const Container = styled.div({
   flexGrow: 1,
