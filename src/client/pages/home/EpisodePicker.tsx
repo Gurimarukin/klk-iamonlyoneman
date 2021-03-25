@@ -10,12 +10,16 @@ import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
 import { HomeLink } from './Header'
 
+type Props = {
+  readonly className?: string
+}
+
 const unknownLabel = 'unknown'
 
-export const EpisodePicker = (): JSX.Element => {
+export const EpisodePicker = ({ className }: Props): JSX.Element => {
   const query = useKlkPostsQuery()
   return (
-    <StyledPicker
+    <Picker
       labelPrefix={'episode:'}
       labelValue={
         <LabelValue>
@@ -53,16 +57,10 @@ export const EpisodePicker = (): JSX.Element => {
           </EpisodeCenter>
         </Container>
       }
+      className={className}
     />
   )
 }
-
-const StyledPicker = styled(Picker)({
-  [theme.mediaQueries.mobile]: {
-    gridColumnEnd: 'span 2',
-    justifySelf: 'end',
-  },
-})
 
 const LabelValue = styled.span({
   fontWeight: 'bold',

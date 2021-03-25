@@ -13,9 +13,13 @@ import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 
+type Props = {
+  readonly className?: string
+}
+
 const maybeStringEq: Eq<Maybe<string>> = Maybe.getEq(eq.eqString)
 
-export const SearchInput = (): JSX.Element => {
+export const SearchInput = ({ className }: Props): JSX.Element => {
   const { navigate } = useHistory()
   const query = useKlkPostsQuery()
 
@@ -59,27 +63,19 @@ export const SearchInput = (): JSX.Element => {
   )
 
   return (
-    <Container>
-      <StyledForm onSubmit={handleSubmit}>
-        <InputContainer>
-          <StyledInput value={search} onChange={handleChange} placeholder='search' />
-          <ResetButton type='reset' onClick={resetAll}>
-            <Times />
-          </ResetButton>
-        </InputContainer>
-        <UnstyledButton type='submit'>
-          <Search />
-        </UnstyledButton>
-      </StyledForm>
-    </Container>
+    <StyledForm onSubmit={handleSubmit} className={className}>
+      <InputContainer>
+        <StyledInput value={search} onChange={handleChange} placeholder='search' />
+        <ResetButton type='reset' onClick={resetAll}>
+          <Times />
+        </ResetButton>
+      </InputContainer>
+      <UnstyledButton type='submit'>
+        <Search />
+      </UnstyledButton>
+    </StyledForm>
   )
 }
-
-const Container = styled.div({
-  [theme.mediaQueries.mobile]: {
-    gridColumnEnd: 'span 2',
-  },
-})
 
 const UnstyledButton = styled.button({
   border: 'none',

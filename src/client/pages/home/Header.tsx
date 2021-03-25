@@ -25,11 +25,11 @@ export const Header = forwardRef<HTMLElement>(
     return (
       <StyledHeader ref={ref}>
         <Nav>
-          <HomeLink to={{ episode: Maybe.none, sortNew: true }}>all</HomeLink>
-          <EpisodePicker />
-          <SearchInput />
-          <SortPicker />
-          <StyledLink to={routes.about}>about</StyledLink>
+          <All to={{ episode: Maybe.none, sortNew: true }}>all</All>
+          <StyledEpisodePicker />
+          <StyledSearchInput />
+          <StyledSortPicker />
+          <StyledAbout to={routes.about}>about</StyledAbout>
           {isAdmin ? (
             <>
               <ActiveToggler />
@@ -110,6 +110,11 @@ const StyledNav = styled.nav({
   },
   [theme.mediaQueries.mobile]: {
     gridTemplateColumns: 'auto 1fr auto',
+    gridTemplateAreas: `
+      "all episode episode"
+      "about sort sort"
+      "search search search"
+    `,
     rowGap: theme.spacing.s,
     justifyItems: 'start',
   },
@@ -118,6 +123,40 @@ const StyledNav = styled.nav({
 const AdminNav = styled(StyledNav)({
   [theme.mediaQueries.desktop]: {
     gridTemplateColumns: 'auto auto 1fr auto auto auto auto',
+  },
+  [theme.mediaQueries.mobile]: {
+    gridTemplateAreas: `
+      "all episode episode"
+      "about sort sort"
+      "search search search"
+      "active active logout"
+    `,
+  },
+})
+
+const All = styled(HomeLink)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'all',
+  },
+})
+
+const StyledEpisodePicker = styled(EpisodePicker)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'episode',
+    justifySelf: 'end',
+  },
+})
+
+const StyledSearchInput = styled(SearchInput)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'search',
+  },
+})
+
+const StyledSortPicker = styled(SortPicker)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'sort',
+    justifySelf: 'end',
   },
 })
 
@@ -137,6 +176,12 @@ const StyledLink = styled(PrettyLink)({
   },
 })
 
+const StyledAbout = styled(StyledLink)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'about',
+  },
+})
+
 const StyledHomeLink = styled(StyledLink)({
   fontWeight: 'bold',
 })
@@ -144,9 +189,10 @@ const StyledHomeLink = styled(StyledLink)({
 const ActiveLabel = styled.label({
   display: 'flex',
   alignItems: 'center',
+  padding: `${theme.Header.link.padding.top} ${theme.Header.link.padding.left}`,
   fontWeight: 'normal',
   [theme.mediaQueries.mobile]: {
-    justifySelf: 'end',
+    gridArea: 'active',
   },
 })
 
@@ -164,8 +210,7 @@ const LogoutButton = styled.button({
   padding: 0,
   filter: theme.dropShadow(theme.colors.darkgrey),
   [theme.mediaQueries.mobile]: {
-    gridColumnStart: 3,
-    justifySelf: 'end',
+    gridArea: 'logout',
   },
 
   '&::after': {

@@ -6,13 +6,16 @@ import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
 import { HomeLink } from './Header'
 
+type Props = {
+  readonly className?: string
+}
+
 const labelSort = 'sort:'
 const labelNew = 'new'
 const labelOld = 'old'
 
-export const SortPicker = (): JSX.Element => {
+export const SortPicker = ({ className }: Props): JSX.Element => {
   const query = useKlkPostsQuery()
-
   return (
     <Picker
       labelPrefix={labelSort}
@@ -28,6 +31,7 @@ export const SortPicker = (): JSX.Element => {
           </HomeLink>
         </Container>
       }
+      className={className}
     />
   )
 }
