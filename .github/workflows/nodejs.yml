@@ -1,37 +1,32 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
 name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm/yarn/pnpm install
-      uses: Jaid/action-npm-install@v1.2.4
-      with: 
-        packageManager: pnpm
-    - run: echo "API_HOST=http://localhost:8676" > conf/client/.env
-    - run: npm run server-build
-    - run: npm run client-build
-    - run: npm run lint
-    - run: npm run test
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install
+        run: yarn install --frozen-lockfile
+      - name: test
+        run: yarn run test
+      - name: build
+        run: cp conf/client/.env.example conf/client/.env && yarn run build

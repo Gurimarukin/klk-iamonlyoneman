@@ -1,6 +1,7 @@
+/.docker-data
 /.eslintcache
-/.prettierrc.json
-/conf/client/.env
+/.parcel-cache.env
+/conf/client/
 /conf/server/local.conf.json
 /dist
 /node_modules
