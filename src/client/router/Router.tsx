@@ -1,28 +1,13 @@
 /* eslint-disable functional/no-expression-statements */
 import { pipe } from 'fp-ts/function'
-import qs from 'qs'
 import { ReactElement, useEffect } from 'react'
 
-import { PartialKlkPostsQuery } from '../shared/models/PartialKlkPostsQuery'
-import { Dict, Maybe, Tuple } from '../shared/utils/fp'
+import { Dict, Maybe, Tuple } from '../../shared/utils/fp'
 
-import { About } from './pages/About'
-import { Login } from './pages/Login'
-import { NotFound } from './pages/NotFound'
-import { Home } from './pages/home/Home'
-
-export const routes = {
-  home: (query: PartialKlkPostsQuery = {}): string => {
-    const str = pipe(
-      query,
-      Dict.filter(isDefined),
-      PartialKlkPostsQuery.encoder.encode,
-      qs.stringify,
-    )
-    return `/${str === '' ? '' : `?${str}`}`
-  },
-  about: '/about',
-}
+import { About } from '../pages/About'
+import { Login } from '../pages/Login'
+import { NotFound } from '../pages/NotFound'
+import { Home } from '../pages/home/Home'
 
 type RouteElem = Tuple<Maybe<string>, ReactElement>
 
@@ -53,8 +38,4 @@ export const Router = ({ path }: Props): JSX.Element => {
   }, [title])
 
   return node
-}
-
-function isDefined<A>(a: A | undefined): a is A {
-  return a !== undefined
 }

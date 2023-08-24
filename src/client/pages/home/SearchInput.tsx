@@ -8,10 +8,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
 
-import { routes } from '../../Router'
 import { Search, Times } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
+import { routes } from '../../router/routes'
 import { theme } from '../../utils/theme'
 
 type Props = {

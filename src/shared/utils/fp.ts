@@ -15,7 +15,7 @@ import * as C_ from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import * as E_ from 'io-ts/Encoder'
 
-import { MsDuration } from '../../server/models/MsDuration'
+import { MsDuration } from '../MsDuration'
 
 export const unknownToError = (e: unknown): Error =>
   e instanceof Error ? e : Error('unknown error')

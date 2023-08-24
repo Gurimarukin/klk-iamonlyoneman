@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { Picker } from '../../components/Picker'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'
-import { HomeLink } from './Header'
+import { HomeLink } from './HomeLink'
 
 type Props = {
   readonly className?: string

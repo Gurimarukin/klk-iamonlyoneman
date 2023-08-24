@@ -14,9 +14,8 @@ import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
+import { MsDuration } from '../../../shared/MsDuration'
 import { Dict, Either, Future, List, Try, Tuple, unknownToError } from '../../../shared/utils/fp'
-
-import { MsDuration } from '../../models/MsDuration'
 
 type MyMiddleware<I, O, A> = (c: Connection<I>) => Future<Tuple<A, Connection<O>>>
 

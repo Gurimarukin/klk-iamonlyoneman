@@ -1,22 +1,20 @@
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
-import React, { forwardRef, useCallback, useMemo } from 'react'
+import { forwardRef, useCallback, useMemo } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
 
-import { routes } from '../../Router'
-import { PrettyLink } from '../../components/PrettyLink'
 import { Logout } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useUser } from '../../contexts/UserContext'
+import { routes } from '../../router/routes'
 import { theme } from '../../utils/theme'
 import { EpisodePicker } from './EpisodePicker'
+import { HomeLink, StyledAbout } from './HomeLink'
 import { SearchInput } from './SearchInput'
 import { SortPicker } from './SortPicker'
-
-const SELECTED = 'selected'
 
 export const Header = forwardRef<HTMLElement>(({}, ref): JSX.Element => {
   const { isAdmin, logout } = useUser()
@@ -42,33 +40,6 @@ export const Header = forwardRef<HTMLElement>(({}, ref): JSX.Element => {
     </StyledHeader>
   )
 })
-
-type HomeLinkProps = {
-  readonly to: Partial<KlkPostsQuery>
-  readonly compareOnlySort?: boolean
-}
-
-export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false, children }) => {
-  const query = useKlkPostsQuery()
-
-  const newQuery = { ...query, ...to }
-
-  const isSelected = compareOnlySort
-    ? newQuery.sortNew === query.sortNew
-    : klkPostsQueryWithoutSortNewEquals(newQuery, query)
-
-  return (
-    <StyledHomeLink
-      to={routes.home(KlkPostsQuery.toPartial(newQuery))}
-      className={isSelected ? SELECTED : undefined}
-    >
-      {children}
-    </StyledHomeLink>
-  )
-}
-
-const klkPostsQueryWithoutSortNewEquals = (a: KlkPostsQuery, b: KlkPostsQuery): boolean =>
-  KlkPostsQuery.eq.equals({ ...a, sortNew: false }, { ...b, sortNew: false })
 
 const ActiveToggler = (): JSX.Element => {
   const { navigate } = useHistory()
@@ -157,32 +128,6 @@ const StyledSortPicker = styled(SortPicker)({
     gridArea: 'sort',
     justifySelf: 'end',
   },
-})
-
-const StyledLink = styled(PrettyLink)({
-  [`&.${SELECTED}`]: {
-    backgroundColor: theme.colors.lime,
-    boxShadow: theme.boxShadowLight,
-
-    '&::before': {
-      filter: theme.dropShadow(theme.colors.darkgrey),
-    },
-
-    '&::after': {
-      borderColor: theme.colors.white,
-      filter: 'none',
-    },
-  },
-})
-
-const StyledAbout = styled(StyledLink)({
-  [theme.mediaQueries.mobile]: {
-    gridArea: 'about',
-  },
-})
-
-const StyledHomeLink = styled(StyledLink)({
-  fontWeight: 'bold',
 })
 
 const ActiveLabel = styled.label({

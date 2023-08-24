@@ -1,16 +1,17 @@
 import { apply } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import readline from 'readline'
 
 import { ClearPassword } from '../../shared/models/ClearPassword'
 import { Token } from '../../shared/models/Token'
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
-import { Either, Future, Maybe } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
 
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
+import { UuidUtils } from '../utils/UuidUtils'
 import { PartialLogger } from './Logger'
 
 export type UserService = ReturnType<typeof UserService>
@@ -32,7 +33,7 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
                 Future.chain(ok =>
                   ok
                     ? pipe(
-                        Token.generate(),
+                        generateToken,
                         Future.fromIOEither,
                         Future.chain(token =>
                           pipe(
@@ -107,3 +108,9 @@ function decodeFuture<A>(
       Future.fromEither,
     )
 }
+
+const generateToken: IO<Token> = pipe(
+  List.makeBy(2, () => UuidUtils.uuidV4),
+  IO.sequenceArray,
+  IO.map(flow(List.mkString('-'), Token.wrap)),
+)

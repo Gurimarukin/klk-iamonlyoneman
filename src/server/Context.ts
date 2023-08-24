@@ -1,6 +1,7 @@
 import { pipe } from 'fp-ts/function'
 import { Collection, Db, MongoClient } from 'mongodb'
 
+import { MsDuration } from '../shared/MsDuration'
 import { Future, List, Task } from '../shared/utils/fp'
 
 import { Config } from './Config'
@@ -8,7 +9,6 @@ import { HealthCheckController } from './controllers/HealthCheckController'
 import { KlkPostController } from './controllers/KlkPostController'
 import { UserController } from './controllers/UserController'
 import { MongoCollection } from './models/MongoCollection'
-import { MsDuration } from './models/MsDuration'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
