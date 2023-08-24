@@ -10,7 +10,8 @@ import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'
 
 export type WithAuth = (f: (user: User) => EndedMiddleware) => EndedMiddleware
 
-export const WithAuth = (userService: UserService): WithAuth =>
+export const WithAuth =
+  (userService: UserService): WithAuth =>
   // const logger = Logger('WithAuth')
   f =>
     pipe(

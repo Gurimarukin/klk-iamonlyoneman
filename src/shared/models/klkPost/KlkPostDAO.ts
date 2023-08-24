@@ -26,19 +26,21 @@ export namespace KlkPostDAO {
     active: C.boolean,
   })
 
-  export const matchesQuery = (query: KlkPostsQuery) => (post: KlkPostDAO): boolean => {
-    const matchesEpisode = maybeNumberEq.equals(
-      post.episode,
-      pipe(query.episode, Maybe.filter(EpisodeNumber.isNumb)),
-    )
-    const matchesSearch =
-      Maybe.isNone(query.search) ||
-      post.title.toLowerCase().match(query.search.value.toLowerCase()) !== null
+  export const matchesQuery =
+    (query: KlkPostsQuery) =>
+    (post: KlkPostDAO): boolean => {
+      const matchesEpisode = maybeNumberEq.equals(
+        post.episode,
+        pipe(query.episode, Maybe.filter(EpisodeNumber.isNumb)),
+      )
+      const matchesSearch =
+        Maybe.isNone(query.search) ||
+        post.title.toLowerCase().match(query.search.value.toLowerCase()) !== null
 
-    const matchesActive = eq.eqBoolean.equals(post.active, query.active)
+      const matchesActive = eq.eqBoolean.equals(post.active, query.active)
 
-    return matchesEpisode && matchesSearch && matchesActive
-  }
+      return matchesEpisode && matchesSearch && matchesActive
+    }
 }
 
 export type KlkPostDAO = C.TypeOf<typeof KlkPostDAO.codec>
@@ -46,7 +48,7 @@ export type KlkPostDAO = C.TypeOf<typeof KlkPostDAO.codec>
 // KlkPostDAOs
 
 export namespace KlkPostDAOs {
-  export const codec = (C.array(KlkPostDAO.codec) as unknown) as C.Codec<
+  export const codec = C.array(KlkPostDAO.codec) as unknown as C.Codec<
     unknown,
     List<C.OutputOf<typeof KlkPostDAO.codec>>,
     List<KlkPostDAO>

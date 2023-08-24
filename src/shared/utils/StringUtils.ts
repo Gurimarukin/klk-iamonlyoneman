@@ -11,12 +11,15 @@ export namespace StringUtils {
   const margin = /^[^\n\S]*\|/gm
   export const stripMargins = (str: string): string => str.replace(margin, '')
 
-  export const ellipse = (take: number) => (str: string): string =>
-    str.length > take ? `${str.substring(0, take)}...` : str
+  export const ellipse =
+    (take: number) =>
+    (str: string): string =>
+      str.length > take ? `${str.substring(0, take)}...` : str
 
-  const matcher = <A>(regex: RegExp, f: (arr: RegExpMatchArray) => Maybe<A>) => (
-    str: string,
-  ): Maybe<A> => pipe(str.match(regex), Maybe.fromNullable, Maybe.chain(f))
+  const matcher =
+    <A>(regex: RegExp, f: (arr: RegExpMatchArray) => Maybe<A>) =>
+    (str: string): Maybe<A> =>
+      pipe(str.match(regex), Maybe.fromNullable, Maybe.chain(f))
 
   export const matches = (regex: RegExp): ((str: string) => boolean) =>
     flow(matcher(regex, Maybe.some), Maybe.isSome)

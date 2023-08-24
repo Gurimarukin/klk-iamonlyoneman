@@ -18,32 +18,30 @@ import { SortPicker } from './SortPicker'
 
 const SELECTED = 'selected'
 
-export const Header = forwardRef<HTMLElement>(
-  ({}, ref): JSX.Element => {
-    const { isAdmin, logout } = useUser()
-    const Nav = useMemo(() => (isAdmin ? AdminNav : StyledNav), [isAdmin])
+export const Header = forwardRef<HTMLElement>(({}, ref): JSX.Element => {
+  const { isAdmin, logout } = useUser()
+  const Nav = useMemo(() => (isAdmin ? AdminNav : StyledNav), [isAdmin])
 
-    return (
-      <StyledHeader ref={ref}>
-        <Nav>
-          <All to={{ episode: Maybe.none, sortNew: true }}>all</All>
-          <StyledEpisodePicker />
-          <StyledSearchInput />
-          <StyledSortPicker />
-          <StyledAbout to={routes.about}>about</StyledAbout>
-          {isAdmin ? (
-            <>
-              <ActiveToggler />
-              <LogoutButton onClick={logout}>
-                <Logout />
-              </LogoutButton>
-            </>
-          ) : null}
-        </Nav>
-      </StyledHeader>
-    )
-  },
-)
+  return (
+    <StyledHeader ref={ref}>
+      <Nav>
+        <All to={{ episode: Maybe.none, sortNew: true }}>all</All>
+        <StyledEpisodePicker />
+        <StyledSearchInput />
+        <StyledSortPicker />
+        <StyledAbout to={routes.about}>about</StyledAbout>
+        {isAdmin ? (
+          <>
+            <ActiveToggler />
+            <LogoutButton onClick={logout}>
+              <Logout />
+            </LogoutButton>
+          </>
+        ) : null}
+      </Nav>
+    </StyledHeader>
+  )
+})
 
 type HomeLinkProps = {
   readonly to: Partial<KlkPostsQuery>

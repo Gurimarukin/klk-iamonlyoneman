@@ -14,19 +14,18 @@ export type UserController = ReturnType<typeof UserController>
 export function UserController(userService: UserService) {
   // const logger = Logger('UserController')
 
-  const login: EndedMiddleware = EndedMiddleware.withBody(
-    LoginPayload.codec,
-  )(({ user, password }) =>
-    pipe(
-      userService.login(user, password),
-      M.fromTaskEither,
-      M.ichain(
-        Maybe.fold(
-          () => M.sendWithStatus(H.Status.BadRequest)(''),
-          flow(TokenDAO, M.json(TokenDAO.codec)),
+  const login: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+    ({ user, password }) =>
+      pipe(
+        userService.login(user, password),
+        M.fromTaskEither,
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(H.Status.BadRequest)(''),
+            flow(TokenDAO, M.json(TokenDAO.codec)),
+          ),
         ),
       ),
-    ),
   )
 
   return { login }

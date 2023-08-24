@@ -47,9 +47,10 @@ export function Context(Logger: PartialLogger, config: Config) {
         ),
       ),
     )
-  const mongoCollection: MongoCollection = (collName: string) => <A>(
-    f: (c: Collection) => Promise<A>,
-  ): Future<A> => withDb(db => f(db.collection(collName)))
+  const mongoCollection: MongoCollection =
+    (collName: string) =>
+    <A>(f: (c: Collection) => Promise<A>): Future<A> =>
+      withDb(db => f(db.collection(collName)))
 
   const healthCheckPersistence = HealthCheckPersistence(withDb)
   const klkPostPersistence = KlkPostPersistence(Logger, mongoCollection)
