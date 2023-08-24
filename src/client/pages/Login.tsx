@@ -67,15 +67,15 @@ export const Login = (): JSX.Element => {
       <form onSubmit={onSubmit}>
         <StyledLabel>
           <span>User:</span>
-          <input type='text' value={state.user} onChange={updateUser} />
+          <input type="text" value={state.user} onChange={updateUser} />
         </StyledLabel>
         <StyledLabel>
           <span>Password:</span>
-          <input type='password' value={state.password} onChange={updatePassword} />
+          <input type="password" value={state.password} onChange={updatePassword} />
         </StyledLabel>
         <SubmitContainer>
           {error}
-          <button role='submit' disabled={Either.isLeft(validated)}>
+          <button role="submit" disabled={Either.isLeft(validated)}>
             Submit
           </button>
         </SubmitContainer>
@@ -85,7 +85,7 @@ export const Login = (): JSX.Element => {
 }
 
 const Container = styled(GradientContainer)({
-  height: '100vh',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

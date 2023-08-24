@@ -81,8 +81,19 @@ export const NonEmptyArray = {
 }
 
 export type List<A> = ReadonlyArray<A>
+
+function mkString(sep: string): (list: List<string>) => string
+function mkString(start: string, sep: string, end: string): (list: List<string>) => string
+function mkString(startOrSep: string, sep?: string, end?: string): (list: List<string>) => string {
+  return list =>
+    sep !== undefined && end !== undefined
+      ? `${startOrSep}${list.join(sep)}${end}`
+      : list.join(startOrSep)
+}
+
 export const List = {
   ...readonlyArray,
+  mkString,
   isEmpty: <A>(l: List<A>): l is readonly [] => readonlyArray.isEmpty(l),
   concat: <A>(a: List<A>, b: List<A>): List<A> => [...a, ...b],
 }

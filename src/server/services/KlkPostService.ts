@@ -2,12 +2,12 @@ import { eq } from 'fp-ts'
 import { Predicate, pipe } from 'fp-ts/function'
 import { Lens as MonocleLens } from 'monocle-ts'
 
+import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
-import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
-import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import { Config } from '../config/Config'
+import { Future, IO, List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
+import { Config } from '../Config'
 import { AxiosConfig } from '../models/AxiosConfig'
 import { KlkPost } from '../models/KlkPost'
 import { Link } from '../models/Link'
@@ -419,7 +419,7 @@ export function KlkPostService(
 function printLinkIds(links: List<Link>): string {
   const res = pipe(
     links.map(_ => KlkPostId.unwrap(_.data.id)),
-    StringUtils.mkString(','),
+    List.mkString(','),
   )
   return `(${links.length}) ${res}`
 }

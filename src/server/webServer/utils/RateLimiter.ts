@@ -3,10 +3,10 @@ import { isDeepStrictEqual } from 'util'
 import { pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
 
-import { List, Maybe, Tuple } from '../../shared/utils/fp'
-import { EndedMiddleware } from '../models/EndedMiddleware'
-import { MsDuration } from '../models/MsDuration'
-import { PartialLogger } from '../services/Logger'
+import { List, Maybe, Tuple } from '../../../shared/utils/fp'
+import { MsDuration } from '../../models/MsDuration'
+import { PartialLogger } from '../../services/Logger'
+import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'
 import { WithIp } from './WithIp'
 
 export type RateLimiter = ReturnType<typeof RateLimiter>
@@ -39,14 +39,14 @@ export function RateLimiter(Logger: PartialLogger, withIp: WithIp, lifeTime: MsD
             if (cleaned.length >= limit) {
               const res = pipe(
                 logger.warn(`Too many request on route "${path}" with ip "${ip}"`),
-                H.fromIOEither,
-                H.ichain(() => EndedMiddleware.text(H.Status.Unauthorized)('Too many requests')),
+                M.fromIOEither,
+                M.ichain(() => M.sendWithStatus(H.Status.Unauthorized)('Too many requests')),
               )
               return [requests, res]
             }
 
             const newHistory = RequestsHistory(key, List.snoc(cleaned, now))
-            return [List.unsafeUpdateAt(i, newHistory, requests), middleware]
+            return [List.unsafeUpdateAt(i, newHistory, requests), middleware] as const
           },
         ),
       )

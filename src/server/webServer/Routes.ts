@@ -1,20 +1,19 @@
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
-
-import { KlkPostId } from '../shared/models/klkPost/KlkPostId'
-import { List } from '../shared/utils/fp'
-import { HealthCheckController } from './controllers/HealthCheckController'
-import { KlkPostController } from './controllers/KlkPostController'
-import { RateLimiter } from './controllers/RateLimiter'
-import { UserController } from './controllers/UserController'
-import { MsDuration } from './models/MsDuration'
+import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
+import { List } from '../../shared/utils/fp'
+import { HealthCheckController } from '../controllers/HealthCheckController'
+import { KlkPostController } from '../controllers/KlkPostController'
+import { UserController } from '../controllers/UserController'
+import { MsDuration } from '../models/MsDuration'
+import { EndedMiddleware } from './models/MyMiddleware'
 import { Route } from './models/Route'
-import { ControllerUtils } from './utils/ControllerUtils'
+import type { RateLimiter } from './utils/RateLimiter'
 
-const withParams = ControllerUtils.withParams
+const { withParams } = EndedMiddleware
 
 const postId = pipe(
-  D.type({ id: KlkPostId.codec }),
+  D.struct({ id: KlkPostId.codec }),
   D.map(({ id }) => id),
 )
 

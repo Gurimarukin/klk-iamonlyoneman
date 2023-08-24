@@ -1,7 +1,7 @@
 import { apply } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 
-import { List, Maybe, Tuple, Tuple3 } from './fp'
+import { Maybe, Tuple, Tuple3 } from './fp'
 
 export namespace StringUtils {
   export const isEmpty = (str: string): boolean => str === ''
@@ -10,19 +10,6 @@ export namespace StringUtils {
 
   const margin = /^[^\n\S]*\|/gm
   export const stripMargins = (str: string): string => str.replace(margin, '')
-
-  export function mkString(sep: string): (list: List<string>) => string
-  export function mkString(start: string, sep: string, end: string): (list: List<string>) => string
-  export function mkString(
-    startOrSep: string,
-    sep?: string,
-    end?: string,
-  ): (list: List<string>) => string {
-    return list =>
-      sep !== undefined && end !== undefined
-        ? `${startOrSep}${list.join(sep)}${end}`
-        : list.join(startOrSep)
-  }
 
   export const ellipse = (take: number) => (str: string): string =>
     str.length > take ? `${str.substring(0, take)}...` : str

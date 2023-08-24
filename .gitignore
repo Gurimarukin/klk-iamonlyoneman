@@ -1,8 +1,7 @@
 /.docker-data
+/.env
 /.eslintcache
-/.parcel-cache.env
-/conf/client/
-/conf/server/local.conf.json
+/.parcel-cache
 /dist
 /node_modules
 /tsbuild

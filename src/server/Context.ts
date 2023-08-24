@@ -2,26 +2,26 @@ import { pipe } from 'fp-ts/function'
 import { Collection, Db, MongoClient } from 'mongodb'
 
 import { Future, List, Task } from '../shared/utils/fp'
-import { Config } from './config/Config'
+import { Config } from './Config'
 import { HealthCheckController } from './controllers/HealthCheckController'
 import { KlkPostController } from './controllers/KlkPostController'
-import { RateLimiter } from './controllers/RateLimiter'
 import { UserController } from './controllers/UserController'
-import { WithAuth } from './controllers/WithAuth'
-import { WithIp } from './controllers/WithIp'
 import { MongoCollection } from './models/MongoCollection'
 import { MsDuration } from './models/MsDuration'
-import { Route } from './models/Route'
 import { HealthCheckPersistence } from './persistence/HealthCheckPersistence'
 import { KlkPostPersistence } from './persistence/KlkPostPersistence'
 import { UserPersistence } from './persistence/UserPersistence'
-import { Routes } from './Routes'
 import { HealthCheckService } from './services/HealthCheckService'
 import { KlkPostService } from './services/KlkPostService'
 import { PartialLogger } from './services/Logger'
 import { UserService } from './services/UserService'
 import { FutureUtils } from './utils/FutureUtils'
-import { startWebServer } from './Webserver'
+import { Routes } from './webServer/Routes'
+import { Route } from './webServer/models/Route'
+import { startWebServer } from './webServer/startWebServer'
+import { RateLimiter } from './webServer/utils/RateLimiter'
+import { WithAuth } from './webServer/utils/WithAuth'
+import { WithIp } from './webServer/utils/WithIp'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function Context(Logger: PartialLogger, config: Config) {
@@ -100,7 +100,7 @@ export namespace Context {
     return pipe(
       Future.Do,
       Future.bind('config', () =>
-        pipe(Config.load(), Future.fromIOEither, Future.map(configModifier)),
+        pipe(Config.load, Future.fromIOEither, Future.map(configModifier)),
       ),
       Future.bind('Logger', ({ config }) => Future.right(PartialLogger(config.logLevel))),
       Future.map(({ config, Logger }) => Context(Logger, config)),

@@ -194,7 +194,7 @@ function printDetailedResponse<A>(res: AxiRes<A>): string {
   const headers = pipe(
     res.headers as Dict<string, string>,
     Dict.collect((key, val) => `${key}: ${val}`),
-    StringUtils.mkString('\n'),
+    List.mkString('\n'),
   )
   const data = JSON.stringify(res.data, null, 2)
 

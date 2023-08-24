@@ -2,7 +2,7 @@
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useMemo } from 'react'
-import { LazyComponentProps, trackWindowScroll } from 'react-lazy-load-image-component'
+import { trackWindowScroll } from 'react-lazy-load-image-component'
 import { useSWRInfinite } from 'swr'
 
 import { config } from '../../../shared/config'
@@ -26,7 +26,7 @@ const ERROR = 'error'
 const NO_RESULT = 'no result.'
 const NBSP = ' '
 
-export const Home: React.ComponentType<Pick<LazyComponentProps, never>> = trackWindowScroll(
+export const Home = trackWindowScroll(
   ({ scrollPosition }): JSX.Element => {
     const query = useKlkPostsQuery()
 
@@ -127,7 +127,7 @@ export const Home: React.ComponentType<Pick<LazyComponentProps, never>> = trackW
             </Gallery>
           )}
           {List.isEmpty(klkPosts) ? null : (
-            <ScrollToTop onClick={scrollToTop} title='Scroll to top'>
+            <ScrollToTop onClick={scrollToTop} title="Scroll to top">
               <ChevronUp />
             </ScrollToTop>
           )}
@@ -135,11 +135,11 @@ export const Home: React.ComponentType<Pick<LazyComponentProps, never>> = trackW
       </Container>
     )
   },
-)
+) as React.FC
 
 const Container = styled(GradientContainer)({
-  height: '100vh',
-  width: '1OOvw',
+  height: '100%',
+  width: '100%',
   overflowX: 'hidden',
   overflowY: 'auto',
   position: 'relative',

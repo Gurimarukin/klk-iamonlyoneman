@@ -1,6 +1,0 @@
-{
-  "logLevel": "info",
-  "isDev": false,
-  "pollOnStart": false,
-  "pollEveryHours": 2
-}
