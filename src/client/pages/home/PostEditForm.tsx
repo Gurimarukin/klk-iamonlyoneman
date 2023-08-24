@@ -1,14 +1,15 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import * as E from 'io-ts/Encoder'
 import { Lens } from 'monocle-ts'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { Token } from '../../../shared/models/Token'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
-import { Token } from '../../../shared/models/Token'
 import { Either, Future } from '../../../shared/utils/fp'
+
 import { useKlkPosts } from '../../contexts/KlkPostsContext'
 import { theme } from '../../utils/theme'
 import { postKlkPostEditForm } from './klkPostsApi'
@@ -107,12 +108,12 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
       </Size>
       <Active>
         <span>Active:</span>
-        <input type='checkbox' checked={state.active} onChange={updateActive} />
+        <input type="checkbox" checked={state.active} onChange={updateActive} />
       </Active>
       <SubmitContainer>
         {status}
         <button
-          role='submit'
+          role="submit"
           disabled={Either.isLeft(validated) || status === Status.loading || status === Status.done}
         >
           Submit

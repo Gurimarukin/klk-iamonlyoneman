@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import { Lens as MLens } from 'monocle-ts'
@@ -6,10 +6,11 @@ import React, { useCallback, useState } from 'react'
 
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Either, Maybe } from '../../shared/utils/fp'
+
 import { GradientContainer } from '../components/GradientContainer'
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
-import { routes } from '../Router'
+import { routes } from '../router/routes'
 import { theme } from '../utils/theme'
 
 type State = {
@@ -67,15 +68,15 @@ export const Login = (): JSX.Element => {
       <form onSubmit={onSubmit}>
         <StyledLabel>
           <span>User:</span>
-          <input type='text' value={state.user} onChange={updateUser} />
+          <input type="text" value={state.user} onChange={updateUser} />
         </StyledLabel>
         <StyledLabel>
           <span>Password:</span>
-          <input type='password' value={state.password} onChange={updatePassword} />
+          <input type="password" value={state.password} onChange={updatePassword} />
         </StyledLabel>
         <SubmitContainer>
           {error}
-          <button role='submit' disabled={Either.isLeft(validated)}>
+          <button role="submit" disabled={Either.isLeft(validated)}>
             Submit
           </button>
         </SubmitContainer>
@@ -85,7 +86,7 @@ export const Login = (): JSX.Element => {
 }
 
 const Container = styled(GradientContainer)({
-  height: '100vh',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

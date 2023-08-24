@@ -3,12 +3,13 @@ import * as C from 'io-ts/Codec'
 import { Collection, Cursor, FilterQuery } from 'mongodb'
 
 import { config } from '../../shared/config'
+import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
+import { EpisodeNumber } from '../../shared/models/PartialKlkPostsQuery'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
-import { EpisodeNumber } from '../../shared/models/PartialKlkPostsQuery'
 import { Either, Future, List, Maybe, Task } from '../../shared/utils/fp'
+
 import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
 import { MongoCollection } from '../models/MongoCollection'
 import { PartialLogger } from '../services/Logger'
@@ -116,6 +117,7 @@ export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: Mongo
       ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
       ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
     })
+    // eslint-disable-next-line functional/immutable-data
     const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
     return sorted.skip(page * config.pageSize).limit(config.pageSize)

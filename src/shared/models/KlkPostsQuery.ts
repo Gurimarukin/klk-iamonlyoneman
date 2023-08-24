@@ -32,7 +32,7 @@ export namespace KlkPostsQuery {
     }
     return pipe(
       res,
-      Dict.filter(val => val !== undefined),
+      Dict.filter(val => (val as typeof val | undefined) !== undefined),
     )
   }
 

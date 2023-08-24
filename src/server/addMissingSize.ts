@@ -1,10 +1,11 @@
 import { pipe } from 'fp-ts/function'
 
 import { Future } from '../shared/utils/fp'
-import { Config } from './config/Config'
+
+import { Config } from './Config'
 import { Context } from './Context'
 
-// eslint-disable-next-line functional/no-expression-statement
+// eslint-disable-next-line functional/no-expression-statements
 pipe(
   Context.load(Config.Lens.logLevel.set('debug')),
   Future.chain(({ Logger, ensureIndexes, addMissingSize }) => {

@@ -1,13 +1,13 @@
-import querystring from 'querystring'
-
 import Axios, { AxiosRequestConfig } from 'axios'
 import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
+import querystring from 'querystring'
 
-import { Dict, Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
-import { AxiosConfig } from '../models/AxiosConfig'
+import { Dict, Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
+
 import { AxiRes } from '../models/AxiRes'
+import { AxiosConfig } from '../models/AxiosConfig'
 import { Listing, UnknownListing } from '../models/Listing'
 import { Logger } from '../services/Logger'
 
@@ -194,7 +194,7 @@ function printDetailedResponse<A>(res: AxiRes<A>): string {
   const headers = pipe(
     res.headers as Dict<string, string>,
     Dict.collect((key, val) => `${key}: ${val}`),
-    StringUtils.mkString('\n'),
+    List.mkString('\n'),
   )
   const data = JSON.stringify(res.data, null, 2)
 

@@ -1,6 +1,7 @@
 import * as axios from 'axios'
 
 import { Dict, List } from '../../shared/utils/fp'
+
 import { RedditSort } from '../models/RedditSort'
 
 // copy-pasta from AxiosRequestConfig
@@ -40,8 +41,10 @@ export namespace AxiosConfig {
   export const setParamSort = (value: RedditSort): ((c: AxiosConfig) => AxiosConfig) =>
     setParam('sort', value)
 
-  export const setParam = (key: string, value: string) => (c: AxiosConfig): AxiosConfig => ({
-    ...c,
-    params: { ...c.params, [key]: value },
-  })
+  export const setParam =
+    (key: string, value: string) =>
+    (c: AxiosConfig): AxiosConfig => ({
+      ...c,
+      params: { ...c.params, [key]: value },
+    })
 }

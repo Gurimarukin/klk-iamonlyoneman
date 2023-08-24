@@ -1,8 +1,9 @@
 import qs from 'qs'
 
-import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { PartialKlkPostsQuery } from '../../shared/models/PartialKlkPostsQuery'
+import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Dict } from '../../shared/utils/fp'
+
 import { Config } from './Config'
 
 export const apiRoutes = {

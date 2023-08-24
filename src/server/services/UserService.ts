@@ -1,16 +1,17 @@
+import { apply } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/function'
+import * as D from 'io-ts/Decoder'
 import readline from 'readline'
 
-import { apply } from 'fp-ts'
-import { pipe } from 'fp-ts/function'
-import * as D from 'io-ts/Decoder'
-
 import { ClearPassword } from '../../shared/models/ClearPassword'
-import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Token } from '../../shared/models/Token'
-import { Either, Future, Maybe } from '../../shared/utils/fp'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
+import { Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
+
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
+import { UuidUtils } from '../utils/UuidUtils'
 import { PartialLogger } from './Logger'
 
 export type UserService = ReturnType<typeof UserService>
@@ -32,7 +33,7 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
                 Future.chain(ok =>
                   ok
                     ? pipe(
-                        Token.generate(),
+                        generateToken,
                         Future.fromIOEither,
                         Future.chain(token =>
                           pipe(
@@ -88,7 +89,7 @@ function prompt(label: string): Future<string> {
       })
       return new Promise<string>(resolve => rl.question(label, answer => resolve(answer))).then(
         res => {
-          // eslint-disable-next-line functional/no-expression-statement
+          // eslint-disable-next-line functional/no-expression-statements
           rl.close()
           return res
         },
@@ -107,3 +108,9 @@ function decodeFuture<A>(
       Future.fromEither,
     )
 }
+
+const generateToken: IO<Token> = pipe(
+  List.makeBy(2, () => UuidUtils.uuidV4),
+  IO.sequenceArray,
+  IO.map(flow(List.mkString('-'), Token.wrap)),
+)

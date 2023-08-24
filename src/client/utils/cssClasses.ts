@@ -7,15 +7,13 @@ export const cssClasses = (
 ): string | undefined => {
   const res = pipe(
     classes,
-    List.filterMap(
-      (args): Maybe<string> => {
-        if (args === undefined) return Maybe.none
-        if (typeof args === 'string') return Maybe.some(args)
+    List.filterMap((args): Maybe<string> => {
+      if (args === undefined) return Maybe.none
+      if (typeof args === 'string') return Maybe.some(args)
 
-        const [className, display] = args
-        return display && className !== undefined ? Maybe.some(className) : Maybe.none
-      },
-    ),
+      const [className, display] = args
+      return display && className !== undefined ? Maybe.some(className) : Maybe.none
+    }),
   )
   return List.isEmpty(res) ? undefined : res.join(' ')
 }

@@ -20,6 +20,7 @@ import {
 } from 'mongodb'
 
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
+
 import { IndexSpecification, ReadonlyPartial, WithoutProjection } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'
 
@@ -41,7 +42,6 @@ export function FpCollection<A, O extends { readonly [key: string]: unknown }>(
       pipe(
         Future.fromIOEither(logger.debug('Ensuring indexes')),
         Future.chain(() =>
-          // eslint-disable-next-line functional/prefer-readonly-type
           collection(c => c.createIndexes(indexSpecs as IndexSpecification<A>[], options)),
         ),
       ),

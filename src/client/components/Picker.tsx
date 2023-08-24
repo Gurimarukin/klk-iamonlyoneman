@@ -3,6 +3,7 @@ import styled from '@emotion/styled'
 import React, { forwardRef, useCallback, useEffect, useState } from 'react'
 
 import { isDefined } from '../../shared/utils/isDefined'
+
 import { useKlkPostsQuery } from '../contexts/KlkPostsQueryContext'
 import { cssClasses } from '../utils/cssClasses'
 import { theme } from '../utils/theme'

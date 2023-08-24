@@ -3,6 +3,7 @@ import { UpdateWriteOpResult } from 'mongodb'
 
 import { Token } from '../../shared/models/Token'
 import { Future, Maybe } from '../../shared/utils/fp'
+
 import { MongoCollection } from '../models/MongoCollection'
 import { User } from '../models/user/User'
 import { UserId } from '../models/user/UserId'

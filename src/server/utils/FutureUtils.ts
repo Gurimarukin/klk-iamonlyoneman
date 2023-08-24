@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
+import { MsDuration } from '../../shared/MsDuration'
 import { Either, Future, IO, Task } from '../../shared/utils/fp'
-import { MsDuration } from '../models/MsDuration'
 
 type OnComplete<A> = {
   readonly onFailure: (e: Error) => IO<void>

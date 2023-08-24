@@ -1,9 +1,8 @@
 import styled from '@emotion/styled'
-import React from 'react'
 
 import { GradientContainer } from '../components/GradientContainer'
 import { PrettyLink } from '../components/PrettyLink'
-import { routes } from '../Router'
+import { routes } from '../router/routes'
 import { theme } from '../utils/theme'
 
 export const NotFound = (): JSX.Element => (
@@ -14,7 +13,7 @@ export const NotFound = (): JSX.Element => (
 )
 
 const Container = styled(GradientContainer)({
-  height: '100vh',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',

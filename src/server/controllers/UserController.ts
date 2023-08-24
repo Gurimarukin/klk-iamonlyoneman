@@ -4,9 +4,9 @@ import * as H from 'hyper-ts'
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { TokenDAO } from '../../shared/models/login/TokenDAO'
 import { Maybe } from '../../shared/utils/fp'
-import { EndedMiddleware } from '../models/EndedMiddleware'
+
 import { UserService } from '../services/UserService'
-import { ControllerUtils } from '../utils/ControllerUtils'
+import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 
 export type UserController = ReturnType<typeof UserController>
 
@@ -14,19 +14,18 @@ export type UserController = ReturnType<typeof UserController>
 export function UserController(userService: UserService) {
   // const logger = Logger('UserController')
 
-  const login: EndedMiddleware = ControllerUtils.withJsonBody(
-    LoginPayload.codec.decode,
-  )(({ user, password }) =>
-    pipe(
-      userService.login(user, password),
-      H.fromTaskEither,
-      H.ichain(
-        Maybe.fold(
-          () => EndedMiddleware.text(H.Status.BadRequest)(),
-          flow(TokenDAO, EndedMiddleware.json(H.Status.OK, TokenDAO.codec.encode)),
+  const login: EndedMiddleware = EndedMiddleware.withBody(LoginPayload.codec)(
+    ({ user, password }) =>
+      pipe(
+        userService.login(user, password),
+        M.fromTaskEither,
+        M.ichain(
+          Maybe.fold(
+            () => M.sendWithStatus(H.Status.BadRequest)(''),
+            flow(TokenDAO, M.json(TokenDAO.codec)),
+          ),
         ),
       ),
-    ),
   )
 
   return { login }

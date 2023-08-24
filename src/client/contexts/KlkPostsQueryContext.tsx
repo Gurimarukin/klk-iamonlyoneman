@@ -4,6 +4,7 @@ import React, { createContext, useContext, useMemo } from 'react'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { PartialKlkPostsQuery } from '../../shared/models/PartialKlkPostsQuery'
 import { Either } from '../../shared/utils/fp'
+
 import { useHistory } from './HistoryContext'
 
 const KlkPostsQueryContext = createContext<KlkPostsQuery | undefined>(undefined)
@@ -27,7 +28,7 @@ export const KlkPostsQueryContextProvider: React.FC = ({ children }) => {
 export const useKlkPostsQuery = (): KlkPostsQuery => {
   const context = useContext(KlkPostsQueryContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useKlkPostsQuery must be used within a KlkPostsQueryContextProvider')
   }
   return context

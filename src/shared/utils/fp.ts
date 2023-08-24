@@ -15,20 +15,22 @@ import * as C_ from 'io-ts/Codec'
 import * as D from 'io-ts/Decoder'
 import * as E_ from 'io-ts/Encoder'
 
-import { MsDuration } from '../../server/models/MsDuration'
+import { MsDuration } from '../MsDuration'
 
 export const unknownToError = (e: unknown): Error =>
   e instanceof Error ? e : Error('unknown error')
 
 export const todo = (...[]: List<unknown>): never => {
-  // eslint-disable-next-line functional/no-throw-statement
+  // eslint-disable-next-line functional/no-throw-statements
   throw Error('Missing implementation')
 }
 
-export const inspect = (...label: List<unknown>) => <A>(a: A): A => {
-  console.log(...label, a)
-  return a
-}
+export const inspect =
+  (...label: List<unknown>) =>
+  <A>(a: A): A => {
+    console.log(...label, a)
+    return a
+  }
 
 export type Dict<K extends string, A> = readonlyRecord.ReadonlyRecord<K, A>
 export const Dict = readonlyRecord
@@ -81,8 +83,19 @@ export const NonEmptyArray = {
 }
 
 export type List<A> = ReadonlyArray<A>
+
+function mkString(sep: string): (list: List<string>) => string
+function mkString(start: string, sep: string, end: string): (list: List<string>) => string
+function mkString(startOrSep: string, sep?: string, end?: string): (list: List<string>) => string {
+  return list =>
+    sep !== undefined && end !== undefined
+      ? `${startOrSep}${list.join(sep)}${end}`
+      : list.join(startOrSep)
+}
+
 export const List = {
   ...readonlyArray,
+  mkString,
   isEmpty: <A>(l: List<A>): l is readonly [] => readonlyArray.isEmpty(l),
   concat: <A>(a: List<A>, b: List<A>): List<A> => [...a, ...b],
 }
@@ -107,7 +120,7 @@ export const Try = {
     pipe(
       t,
       Either.getOrElse<Error, A>(e => {
-        // eslint-disable-next-line functional/no-throw-statement
+        // eslint-disable-next-line functional/no-throw-statements
         throw e
       }),
     ),
@@ -130,8 +143,10 @@ export const Future = {
   recover: <A>(onError: (e: Error) => Future<A>): ((future: Future<A>) => Future<A>) =>
     task.chain(either.fold(onError, futureRight)),
   runUnsafe: <A>(fa: Future<A>): Promise<A> => pipe(fa, task.map(Try.get))(),
-  delay: <A>(ms: MsDuration) => (future: Future<A>): Future<A> =>
-    pipe(future, task.delay(MsDuration.unwrap(ms))),
+  delay:
+    <A>(ms: MsDuration) =>
+    (future: Future<A>): Future<A> =>
+      pipe(future, task.delay(MsDuration.unwrap(ms))),
 }
 
 const ioTryCatch = <A>(a: Lazy<A>): IO<A> => ioEither.tryCatch(a, unknownAsError)
@@ -142,7 +157,7 @@ export const IO = {
   unit: ioEither.right<never, void>(undefined),
   runFuture: <A>(f: Future<A>): IO<void> =>
     ioTryCatch(() => {
-      // eslint-disable-next-line functional/no-expression-statement
+      // eslint-disable-next-line functional/no-expression-statements
       Future.runUnsafe(f)
     }),
   runUnsafe: <A>(ioA: IO<A>): A => Try.get(ioA()),

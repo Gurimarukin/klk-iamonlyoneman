@@ -1,35 +1,38 @@
+import fmt from 'dateformat'
 import util from 'util'
 
-import fmt from 'dateformat'
-
 import { Future, IO, List } from '../../shared/utils/fp'
+
 import { LogLevel, LogLevelOrOff } from '../models/LogLevel'
 
 export type Logger = Record<LogLevel, (arg: unknown, ...args: List<unknown>) => IO<void>>
 
 export type PartialLogger = (name: string) => Logger
 
-export const PartialLogger = (configLogLevel: LogLevelOrOff): PartialLogger => name => {
-  const consoleLog = (level: LogLevel, msg: string): Future<void> =>
-    shouldLog(configLogLevel, level)
-      ? Future.tryCatch(
-          () => new Promise<void>(resolve => resolve(console.log(formatConsole(name, level, msg)))),
-        )
-      : Future.unit
+export const PartialLogger =
+  (configLogLevel: LogLevelOrOff): PartialLogger =>
+  name => {
+    const consoleLog = (level: LogLevel, msg: string): Future<void> =>
+      shouldLog(configLogLevel, level)
+        ? Future.tryCatch(
+            () =>
+              new Promise<void>(resolve => resolve(console.log(formatConsole(name, level, msg)))),
+          )
+        : Future.unit
 
-  const log = (level: LogLevel, msg: string): IO<void> => IO.runFuture(consoleLog(level, msg))
+    const log = (level: LogLevel, msg: string): IO<void> => IO.runFuture(consoleLog(level, msg))
 
-  const debug = (param: unknown, ...params: List<unknown>): IO<void> =>
-    log('debug', util.format(param, ...params))
-  const info = (param: unknown, ...params: List<unknown>): IO<void> =>
-    log('info', util.format(param, ...params))
-  const warn = (param: unknown, ...params: List<unknown>): IO<void> =>
-    log('warn', util.format(param, ...params))
-  const error = (param: unknown, ...params: List<unknown>): IO<void> =>
-    log('error', util.format(param, ...params))
+    const debug = (param: unknown, ...params: List<unknown>): IO<void> =>
+      log('debug', util.format(param, ...params))
+    const info = (param: unknown, ...params: List<unknown>): IO<void> =>
+      log('info', util.format(param, ...params))
+    const warn = (param: unknown, ...params: List<unknown>): IO<void> =>
+      log('warn', util.format(param, ...params))
+    const error = (param: unknown, ...params: List<unknown>): IO<void> =>
+      log('error', util.format(param, ...params))
 
-  return { debug, info, warn, error }
-}
+    return { debug, info, warn, error }
+  }
 
 function shouldLog(setLevel: LogLevelOrOff, level: LogLevel): boolean {
   return LogLevelOrOff.value[setLevel] >= LogLevelOrOff.value[level]

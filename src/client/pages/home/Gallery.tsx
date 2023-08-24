@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+/* eslint-disable functional/no-expression-statements, functional/no-return-void */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -8,6 +8,7 @@ import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { List, Tuple } from '../../../shared/utils/fp'
+
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 
