@@ -29,4 +29,4 @@ jobs:
       - name: test
         run: yarn run test
       - name: build
-        run: cp conf/client/.env.example conf/client/.env && yarn run build
+        run: yarn run build
