@@ -1,0 +1,17 @@
+{
+  "extends": "@type-config/strict",
+  "compilerOptions": {
+    "outDir": "tsbuild",
+    "jsx": "react-jsx",
+    "lib": ["ES2021", "DOM"],
+    "module": "ESNext",
+    "incremental": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules"]
+}
