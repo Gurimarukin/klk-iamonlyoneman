@@ -10,7 +10,7 @@ const argon2 = require('@phc/argon2')
 const upash = require('upash')
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-// eslint-disable-next-line functional/no-expression-statement
+// eslint-disable-next-line functional/no-expression-statements
 upash.install('argon2', argon2)
 
 export namespace PasswordUtils {

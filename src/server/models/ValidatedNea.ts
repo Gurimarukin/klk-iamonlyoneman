@@ -1,5 +1,5 @@
 import { apply } from 'fp-ts'
-import { Applicative2C } from 'fp-ts/lib/Applicative'
+import { Applicative2C } from 'fp-ts/Applicative'
 
 import { Dict, Either, NonEmptyArray } from '../../shared/utils/fp'
 

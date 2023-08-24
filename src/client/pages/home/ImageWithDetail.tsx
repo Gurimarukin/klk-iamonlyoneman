@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-return-void */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
-import React, { forwardRef, useCallback, useMemo, useState } from 'react'
+import { forwardRef, useCallback, useMemo, useState } from 'react'
 import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 
 import { Token } from '../../../shared/models/Token'

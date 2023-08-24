@@ -9,13 +9,13 @@ module.exports = {
   },
   plugins: ['functional', 'fp-ts'],
   extends: [
-    'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:functional/recommended',
+    'plugin:functional/strict',
     'plugin:fp-ts/all',
-    'prettier/@typescript-eslint',
-    'plugin:prettier/recommended',
+    'plugin:react/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:react/jsx-runtime',
+    'prettier',
   ],
   settings: {
     react: {
@@ -23,6 +23,7 @@ module.exports = {
     },
   },
   reportUnusedDisableDirectives: true,
+  ignorePatterns: ['src/**/libs/**/*.ts', 'src/**/libs/**/*.tsx'],
   rules: {
     '@typescript-eslint/array-type': ['warn', { default: 'array', readonly: 'generic' }],
     '@typescript-eslint/consistent-type-definitions': 'off', // use functional/prefer-type-literal, it's better
@@ -80,8 +81,8 @@ module.exports = {
         enforceParameterCount: false,
       },
     ],
-    'functional/no-conditional-statement': 'off', // switch aren't bad :/
-    'functional/no-expression-statement': [
+    'functional/no-conditional-statements': 'off', // switch aren't bad :/
+    'functional/no-expression-statements': [
       'error',
       {
         ignorePattern: [
@@ -95,8 +96,10 @@ module.exports = {
         ],
       },
     ],
-    'functional/no-mixed-type': 'off',
+    'functional/no-mixed-types': 'off',
     'functional/no-promise-reject': 'error',
+    'functional/prefer-immutable-types': 'off',
+    'functional/type-declaration-immutability': 'off',
     'max-len': [
       'warn',
       {

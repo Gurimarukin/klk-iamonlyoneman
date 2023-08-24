@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import { Lens as MLens } from 'monocle-ts'

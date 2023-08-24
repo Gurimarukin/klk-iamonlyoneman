@@ -23,7 +23,7 @@ export const KlkPostsContextProvider: React.FC<Props> = ({ updateById, children 
 export const useKlkPosts = (): KlkPostsContext => {
   const context = useContext(KlkPostsContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useKlkPosts must be used within a KlkPostsContextProvider')
   }
   return context

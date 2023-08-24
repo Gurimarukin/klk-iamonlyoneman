@@ -22,11 +22,11 @@ const accessControl = {
 type Header = string | string[] | undefined
 
 export const startWebServer = (
-  Logger: PartialLogger,
+  Logger_: PartialLogger,
   config: Config,
   routes: List<Route>,
 ): IO<http.Server> => {
-  const logger = Logger('WebServer')
+  const logger = Logger_('WebServer')
 
   const filterOrigin: (fa: Maybe<Header>) => Maybe<Header> = pipe(
     config.allowedOrigins,
@@ -173,15 +173,13 @@ function isStatus(a: Action): a is { readonly type: 'setStatus'; readonly status
   return a.type === 'setStatus'
 }
 
-const errorHandler = (onError: (error: unknown) => IO<unknown>): ErrorRequestHandler => (
-  err,
-  _req,
-  res,
-) => {
-  /* eslint-disable functional/no-expression-statements */
-  onError(err)()
-  res.status(500).end()
-  /* eslint-enable functional/no-expression-statements */
-}
+const errorHandler =
+  (onError: (error: unknown) => IO<unknown>): ErrorRequestHandler =>
+  (err, _req, res) => {
+    /* eslint-disable functional/no-expression-statements */
+    onError(err)()
+    res.status(500).end()
+    /* eslint-enable functional/no-expression-statements */
+  }
 
 const headers = (values: List<string>): string => pipe(values, List.mkString(', '))

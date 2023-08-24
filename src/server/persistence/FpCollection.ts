@@ -42,7 +42,6 @@ export function FpCollection<A, O extends { readonly [key: string]: unknown }>(
       pipe(
         Future.fromIOEither(logger.debug('Ensuring indexes')),
         Future.chain(() =>
-          // eslint-disable-next-line functional/prefer-readonly-type
           collection(c => c.createIndexes(indexSpecs as IndexSpecification<A>[], options)),
         ),
       ),

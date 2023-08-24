@@ -34,11 +34,9 @@ export function KlkPostController(
   withAuth: WithAuth,
   klkPostService: KlkPostService,
 ) {
-  const logger = Logger('KlkPostController')
-
   const klkPosts: EndedMiddleware = M.withQuery(klkPostsQuery)(({ page, ...query }) =>
     pipe(
-      M.fromTaskEither(klkPostService.findAll(query, page === undefined ? 0 : page)),
+      M.fromTaskEither(klkPostService.findAll(query, page ?? 0)),
       M.ichain(M.json(KlkPostDAOs.codec)),
     ),
   )

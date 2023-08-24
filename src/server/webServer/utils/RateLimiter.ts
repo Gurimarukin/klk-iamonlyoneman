@@ -18,44 +18,45 @@ export function RateLimiter(Logger: PartialLogger, withIp: WithIp, lifeTime: MsD
   // eslint-disable-next-line functional/no-let
   let requests: List<RequestsHistory> = []
 
-  // eslint-disable-next-line functional/no-expression-statement
+  // eslint-disable-next-line functional/no-expression-statements
   setTimeout(() => (requests = []), MsDuration.unwrap(lifeTime))
 
-  return (limit: number, window: MsDuration) => (middleware: EndedMiddleware): EndedMiddleware =>
-    withIp('route with rate limiting')((ip, { path }) => {
-      const key = Key(path, ip)
-      const now = Date.now()
-      const windowStart = now - MsDuration.unwrap(window)
+  return (limit: number, window: MsDuration) =>
+    (middleware: EndedMiddleware): EndedMiddleware =>
+      withIp('route with rate limiting')((ip, { path }) => {
+        const key = Key(path, ip)
+        const now = Date.now()
+        const windowStart = now - MsDuration.unwrap(window)
 
-      const [newRequests, result]: Tuple<List<RequestsHistory>, EndedMiddleware> = pipe(
-        requests,
-        List.findIndex(_ => isDeepStrictEqual(_.key, key)),
-        Maybe.fold(
-          () => [[RequestsHistory(key, [now])], middleware],
-          i => {
-            const { history } = requests[i] as RequestsHistory
-            const cleaned = history.filter(_ => _ > windowStart)
+        const [newRequests, result]: Tuple<List<RequestsHistory>, EndedMiddleware> = pipe(
+          requests,
+          List.findIndex(_ => isDeepStrictEqual(_.key, key)),
+          Maybe.fold(
+            () => [[RequestsHistory(key, [now])], middleware],
+            i => {
+              const { history } = requests[i] as RequestsHistory
+              const cleaned = history.filter(_ => _ > windowStart)
 
-            if (cleaned.length >= limit) {
-              const res = pipe(
-                logger.warn(`Too many request on route "${path}" with ip "${ip}"`),
-                M.fromIOEither,
-                M.ichain(() => M.sendWithStatus(H.Status.Unauthorized)('Too many requests')),
-              )
-              return [requests, res]
-            }
+              if (cleaned.length >= limit) {
+                const res = pipe(
+                  logger.warn(`Too many request on route "${path}" with ip "${ip}"`),
+                  M.fromIOEither,
+                  M.ichain(() => M.sendWithStatus(H.Status.Unauthorized)('Too many requests')),
+                )
+                return [requests, res]
+              }
 
-            const newHistory = RequestsHistory(key, List.snoc(cleaned, now))
-            return [List.unsafeUpdateAt(i, newHistory, requests), middleware] as const
-          },
-        ),
-      )
+              const newHistory = RequestsHistory(key, List.snoc(cleaned, now))
+              return [List.unsafeUpdateAt(i, newHistory, requests), middleware] as const
+            },
+          ),
+        )
 
-      // eslint-disable-next-line functional/no-expression-statement
-      requests = newRequests
+        // eslint-disable-next-line functional/no-expression-statements
+        requests = newRequests
 
-      return result
-    })
+        return result
+      })
 }
 
 type RequestsHistory = {

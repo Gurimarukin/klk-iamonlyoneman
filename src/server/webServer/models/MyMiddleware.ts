@@ -24,7 +24,6 @@ const URI = 'MyMiddleware' as const
 type URI = typeof URI
 
 declare module 'fp-ts/HKT' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface URItoKind2<E, A> {
     [URI]: MyMiddleware<E, E, A>
   }
@@ -137,36 +136,41 @@ const withRequest: MyMiddleware<StatusOpen, StatusOpen, express.Request> = (
   conn: Connection<StatusOpen>,
 ) => Future.right([(conn as ExpressConnection<StatusOpen>).req, conn])
 
-const withQuery = <A>(decoder: Decoder<unknown, A>) => (
-  onRight: (a: A) => EndedMiddleware,
-): EndedMiddleware =>
-  pipe(
-    decodeQuery(decoder),
-    ichain(onRight),
-    orElse(e => sendWithStatus(Status.BadRequest)('')),
-  )
+const withQuery =
+  <A>(decoder: Decoder<unknown, A>) =>
+  (onRight: (a: A) => EndedMiddleware): EndedMiddleware =>
+    pipe(
+      decodeQuery(decoder),
+      ichain(onRight),
+      orElse(() => sendWithStatus(Status.BadRequest)('')),
+    )
 
-const match = <I, A, B>(onLeft: (e: Error) => B, onRight: (a: A) => B) => (
-  ma: MyMiddleware<I, I, A>,
-): MyMiddleware<I, I, B> => conn =>
-  pipe(
-    ma(conn),
-    task.map(
-      flow(
-        Either.fold(e => Tuple.of(onLeft(e), conn), Tuple.mapFst(onRight)),
-        Try.right,
+const match =
+  <I, A, B>(onLeft: (e: Error) => B, onRight: (a: A) => B) =>
+  (ma: MyMiddleware<I, I, A>): MyMiddleware<I, I, B> =>
+  conn =>
+    pipe(
+      ma(conn),
+      task.map(
+        flow(
+          Either.fold(e => Tuple.of(onLeft(e), conn), Tuple.mapFst(onRight)),
+          Try.right,
+        ),
       ),
-    ),
-  )
+    )
 
-const matchE = <I, A, O, B>(
-  onLeft: (e: Error) => MyMiddleware<I, O, B>,
-  onRight: (a: A) => MyMiddleware<I, O, B>,
-) => (ma: MyMiddleware<I, I, A>): MyMiddleware<I, O, B> =>
-  pipe(ma, match(onLeft, onRight), ichain(identity))
+const matchE =
+  <I, A, O, B>(
+    onLeft: (e: Error) => MyMiddleware<I, O, B>,
+    onRight: (a: A) => MyMiddleware<I, O, B>,
+  ) =>
+  (ma: MyMiddleware<I, I, A>): MyMiddleware<I, O, B> =>
+    pipe(ma, match(onLeft, onRight), ichain(identity))
 
-const getRequest = <I = StatusOpen>(): MyMiddleware<I, I, http.IncomingMessage> => conn =>
-  Future.right(Tuple.of(conn.getRequest(), conn))
+const getRequest =
+  <I = StatusOpen>(): MyMiddleware<I, I, http.IncomingMessage> =>
+  conn =>
+    Future.right(Tuple.of(conn.getRequest(), conn))
 
 const getBodyChunks = <I = StatusOpen>(): MyMiddleware<I, I, List<unknown>> =>
   pipe(getRequest<I>(), ichain(flow(requestChunks, f => M.fromTaskEither(f))))
@@ -182,27 +186,25 @@ const getUrl = <I = StatusOpen>(): MyMiddleware<I, I, string> =>
 const getBodyString = <I = StatusOpen>(): MyMiddleware<I, I, string> =>
   pipe(getBodyChunks<I>(), map(flow(List.map(String), List.mkString(''))))
 
-const sendWithStatus = (status: Status, headers: Dict<string, string> = {}) => (
-  message: string,
-): EndedMiddleware =>
-  pipe(
-    reduceHeaders(status, headers),
-    ichain(() => M.closeHeaders()),
-    ichain(() => M.send(message)),
-  )
+const sendWithStatus =
+  (status: Status, headers: Dict<string, string> = {}) =>
+  (message: string): EndedMiddleware =>
+    pipe(
+      reduceHeaders(status, headers),
+      ichain(() => M.closeHeaders()),
+      ichain(() => M.send(message)),
+    )
 
 const noContent = (headers: Dict<string, string> = {}): EndedMiddleware =>
   sendWithStatus(Status.NoContent, headers)('')
 
-const jsonWithStatus = <O, A>(
-  status: Status,
-  encoder: Encoder<O, A>,
-  headers: Dict<string, string> = {},
-) => (data: A): EndedMiddleware =>
-  pipe(
-    reduceHeaders(status, headers),
-    ichain(() => M.json(encoder.encode(data), unknownToError)),
-  )
+const jsonWithStatus =
+  <O, A>(status: Status, encoder: Encoder<O, A>, headers: Dict<string, string> = {}) =>
+  (data: A): EndedMiddleware =>
+    pipe(
+      reduceHeaders(status, headers),
+      ichain(() => M.json(encoder.encode(data), unknownToError)),
+    )
 
 const jsonOK = <O, A>(
   encoder: Encoder<O, A>,
@@ -248,52 +250,52 @@ const MyMiddleware = {
 
 type EndedMiddleware = MyMiddleware<StatusOpen, ResponseEnded, void>
 
-const withParams = <A = never>(decoder: Decoder<unknown, A>) => (
-  f: (a: A) => EndedMiddleware,
-): EndedMiddleware =>
-  pipe(
-    M.decodeParams(
-      flow(
-        decoder.decode,
-        Either.mapLeft(() => Error('')),
+const withParams =
+  <A = never>(decoder: Decoder<unknown, A>) =>
+  (f: (a: A) => EndedMiddleware): EndedMiddleware =>
+    pipe(
+      M.decodeParams(
+        flow(
+          decoder.decode,
+          Either.mapLeft(() => Error('')),
+        ),
       ),
-    ),
-    ichain(f),
-    orElse(() => sendWithStatus(Status.BadRequest)('')),
-  )
+      ichain(f),
+      orElse(() => sendWithStatus(Status.BadRequest)('')),
+    )
 
-const withBody = <A = never>(decoder: Decoder<unknown, A>) => (
-  f: (a: A) => EndedMiddleware,
-): EndedMiddleware =>
-  pipe(
-    M.decodeHeader('Content-Type', contentType =>
-      Either.right(
-        contentType === MediaType.applicationJSON
-          ? Either.right(undefined)
-          : Either.left(expectedContentTypeToBeJSON),
-      ),
-    ),
-    eitherT.chain(Monad)(() =>
-      pipe(getBodyString(), map<string, Either<string, string>>(Either.right)),
-    ),
-    map(
-      flow(
-        Either.chain(
-          flow(
-            json.parse,
-            Either.mapLeft(() => 'Invalid json'),
-          ),
-        ),
-        Either.chain(
-          flow(
-            decoder.decode,
-            Either.mapLeft(e => `Invalid body\n${D.draw(e)}`),
-          ),
+const withBody =
+  <A = never>(decoder: Decoder<unknown, A>) =>
+  (f: (a: A) => EndedMiddleware): EndedMiddleware =>
+    pipe(
+      M.decodeHeader('Content-Type', contentType =>
+        Either.right(
+          contentType === MediaType.applicationJSON
+            ? Either.right(undefined)
+            : Either.left(expectedContentTypeToBeJSON),
         ),
       ),
-    ),
-    ichain(Either.fold(sendWithStatus(Status.BadRequest), f)),
-  )
+      eitherT.chain(Monad)(() =>
+        pipe(getBodyString(), map<string, Either<string, string>>(Either.right)),
+      ),
+      map(
+        flow(
+          Either.chain(
+            flow(
+              json.parse,
+              Either.mapLeft(() => 'Invalid json'),
+            ),
+          ),
+          Either.chain(
+            flow(
+              decoder.decode,
+              Either.mapLeft(e => `Invalid body\n${D.draw(e)}`),
+            ),
+          ),
+        ),
+      ),
+      ichain(Either.fold(sendWithStatus(Status.BadRequest), f)),
+    )
 
 const EndedMiddleware = { withParams, withBody }
 
@@ -314,11 +316,13 @@ const requestChunks = (req: http.IncomingMessage): Future<List<unknown>> =>
       }),
   )
 
-const tryDecode = <A>(decoder: Decoder<unknown, A>) => (u: unknown): Try<A> =>
-  pipe(
-    decoder.decode(u),
-    Either.mapLeft(e => Error(`decodeError: ${D.draw(e)}`)),
-  )
+const tryDecode =
+  <A>(decoder: Decoder<unknown, A>) =>
+  (u: unknown): Try<A> =>
+    pipe(
+      decoder.decode(u),
+      Either.mapLeft(e => Error(`decodeError: ${D.draw(e)}`)),
+    )
 
 const reduceHeaders = (
   status: Status,

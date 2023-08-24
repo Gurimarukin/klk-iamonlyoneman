@@ -1,5 +1,4 @@
 import styled from '@emotion/styled'
-import React from 'react'
 
 import { Picker } from '../../components/Picker'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'

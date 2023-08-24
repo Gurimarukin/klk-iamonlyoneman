@@ -1,6 +1,5 @@
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
-import React from 'react'
 
 import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
 import { StringUtils } from '../../../shared/utils/StringUtils'

@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+/* eslint-disable functional/no-expression-statements, functional/no-return-void */
 import styled from '@emotion/styled'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'

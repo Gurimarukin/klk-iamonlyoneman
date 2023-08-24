@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+/* eslint-disable functional/no-expression-statements, functional/no-return-void */
 import { pipe } from 'fp-ts/function'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
@@ -71,7 +71,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
 export const useUser = (): UserContext => {
   const context = useContext(UserContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useUser must be used within a UserContextProvider')
   }
   return context

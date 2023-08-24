@@ -117,6 +117,7 @@ export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: Mongo
       ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
       ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
     })
+    // eslint-disable-next-line functional/immutable-data
     const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
 
     return sorted.skip(page * config.pageSize).limit(config.pageSize)

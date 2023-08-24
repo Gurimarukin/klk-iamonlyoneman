@@ -28,7 +28,7 @@ export const KlkPostsQueryContextProvider: React.FC = ({ children }) => {
 export const useKlkPostsQuery = (): KlkPostsQuery => {
   const context = useContext(KlkPostsQueryContext)
   if (context === undefined) {
-    // eslint-disable-next-line functional/no-throw-statement
+    // eslint-disable-next-line functional/no-throw-statements
     throw Error('useKlkPostsQuery must be used within a KlkPostsQueryContextProvider')
   }
   return context

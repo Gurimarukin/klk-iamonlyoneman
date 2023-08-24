@@ -1,4 +1,4 @@
-/* eslint-disable functional/no-expression-statement, functional/no-return-void */
+/* eslint-disable functional/no-expression-statements, functional/no-return-void */
 import React, { cloneElement, createRef, useCallback, useEffect } from 'react'
 
 import { List } from '../../shared/utils/fp'
@@ -25,9 +25,9 @@ export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {
     return () => document.removeEventListener('click', handleClick)
   }, [handleClick])
 
-  return (React.Children.map(children, (elt, idx) =>
+  return React.Children.map(children, (elt, idx) =>
     cloneElement(elt as React.ReactElement, {
       ref: (refs as List<React.RefObject<Node>>)[idx],
     }),
-  ) as unknown) as React.ReactElement
+  ) as unknown as React.ReactElement
 }

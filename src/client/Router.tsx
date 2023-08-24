@@ -1,7 +1,7 @@
-/* eslint-disable functional/no-expression-statement */
+/* eslint-disable functional/no-expression-statements */
 import { pipe } from 'fp-ts/function'
 import qs from 'qs'
-import React, { ReactElement, useEffect } from 'react'
+import { ReactElement, useEffect } from 'react'
 
 import { PartialKlkPostsQuery } from '../shared/models/PartialKlkPostsQuery'
 import { Dict, Maybe, Tuple } from '../shared/utils/fp'
