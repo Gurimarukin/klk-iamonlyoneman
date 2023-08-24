@@ -3,8 +3,9 @@ import { pipe } from 'fp-ts/function'
 import React from 'react'
 
 import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
-import { List, Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import { List, Maybe } from '../../../shared/utils/fp'
+
 import { Picker } from '../../components/Picker'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { theme } from '../../utils/theme'

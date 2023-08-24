@@ -1,12 +1,12 @@
 import express, { ErrorRequestHandler } from 'express'
+import { toArray } from 'fp-ts-contrib/List'
 import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
 import * as H from 'hyper-ts'
+import { Action, ExpressConnection } from 'hyper-ts/lib/express'
 
 import { Dict, Either, Future, IO, List, Maybe, Task } from '../../shared/utils/fp'
 
-import { toArray } from 'fp-ts-contrib/List'
-import { Action, ExpressConnection } from 'hyper-ts/lib/express'
 import { Config } from '../Config'
 import { Logger, PartialLogger } from '../services/Logger'
 import { EndedMiddleware, MyMiddleware as M } from './models/MyMiddleware'

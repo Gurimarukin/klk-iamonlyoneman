@@ -2,6 +2,7 @@ import { predicate, string } from 'fp-ts'
 import { flow, pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
 import { Decoder } from 'io-ts/Decoder'
+
 import { List, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 
 /**

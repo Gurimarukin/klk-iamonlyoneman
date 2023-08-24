@@ -1,8 +1,9 @@
 import { flow, pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
-import { iso, Newtype } from 'newtype-ts'
+import { Newtype, iso } from 'newtype-ts'
 
 import { UuidUtils } from '../../server/utils/UuidUtils'
+
 import { IO, List } from '../utils/fp'
 import { fromNewtype } from '../utils/fromNewtype'
 

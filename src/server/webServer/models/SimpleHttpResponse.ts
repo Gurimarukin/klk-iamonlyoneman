@@ -1,6 +1,8 @@
 import { pipe } from 'fp-ts/function'
 import type { Status } from 'hyper-ts'
+
 import { Dict, List, NonEmptyArray } from '../../../shared/utils/fp'
+
 import { DictUtils } from '../../utils/DictUtils'
 
 type SimpleHttpResponse = {

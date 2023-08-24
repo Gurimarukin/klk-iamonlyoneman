@@ -20,6 +20,7 @@ import {
 } from 'mongodb'
 
 import { Either, Future, List, Maybe } from '../../shared/utils/fp'
+
 import { IndexSpecification, ReadonlyPartial, WithoutProjection } from '../models/MongoTypings'
 import { Logger } from '../services/Logger'
 

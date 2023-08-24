@@ -1,4 +1,5 @@
 import { Future } from '../../shared/utils/fp'
+
 import { HealthCheckPersistence } from '../persistence/HealthCheckPersistence'
 
 export type HealthCheckService = ReturnType<typeof HealthCheckService>

@@ -2,12 +2,13 @@
 import { pipe } from 'fp-ts/function'
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
+import { Token } from '../../shared/models/Token'
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { TokenDAO } from '../../shared/models/login/TokenDAO'
-import { Token } from '../../shared/models/Token'
 import { Future, Maybe } from '../../shared/utils/fp'
-import { apiRoutes } from '../utils/apiRoutes'
+
 import { Http } from '../utils/Http'
+import { apiRoutes } from '../utils/apiRoutes'
 
 type UserContext = {
   readonly token: Maybe<Token>

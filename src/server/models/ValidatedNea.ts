@@ -1,5 +1,6 @@
 import { apply } from 'fp-ts'
 import { Applicative2C } from 'fp-ts/lib/Applicative'
+
 import { Dict, Either, NonEmptyArray } from '../../shared/utils/fp'
 
 type ValidatedNea<E, A> = Either<NonEmptyArray<E>, A>

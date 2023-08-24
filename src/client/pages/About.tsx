@@ -1,9 +1,9 @@
 import styled from '@emotion/styled'
 
+import { routes } from '../Router'
 import { ABlank } from '../components/ABlank'
 import { GradientContainer } from '../components/GradientContainer'
 import { PrettyLink, prettyLinkStyle } from '../components/PrettyLink'
-import { routes } from '../Router'
 import { theme } from '../utils/theme'
 
 export const About = (): JSX.Element => (

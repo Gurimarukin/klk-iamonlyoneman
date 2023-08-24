@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv'
 import { pipe } from 'fp-ts/function'
+
 import { Dict, IO } from '../../../shared/utils/fp'
 
 export const loadDotEnv: IO<Partial<Dict<string, string>>> = pipe(

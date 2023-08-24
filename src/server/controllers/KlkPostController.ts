@@ -9,6 +9,7 @@ import { KlkPostDAO, KlkPostDAOs } from '../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Maybe } from '../../shared/utils/fp'
+
 import { User } from '../models/user/User'
 import { KlkPostService } from '../services/KlkPostService'
 import { PartialLogger } from '../services/Logger'

@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 
 import { ClearPassword } from '../../shared/models/ClearPassword'
 import { Future } from '../../shared/utils/fp'
+
 import { HashedPassword } from '../models/HashedPassword'
 
 /* eslint-disable @typescript-eslint/no-var-requires */

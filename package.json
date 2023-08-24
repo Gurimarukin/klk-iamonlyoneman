@@ -73,6 +73,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "4.2.0",
     "@emotion/core": "10.1.1",
     "@types/dateformat": "3.0.1",
     "@types/dotenv": "8.2.0",

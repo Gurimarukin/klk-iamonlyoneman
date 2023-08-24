@@ -4,6 +4,7 @@ import React, { createContext, useContext, useMemo } from 'react'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { PartialKlkPostsQuery } from '../../shared/models/PartialKlkPostsQuery'
 import { Either } from '../../shared/utils/fp'
+
 import { useHistory } from './HistoryContext'
 
 const KlkPostsQueryContext = createContext<KlkPostsQuery | undefined>(undefined)

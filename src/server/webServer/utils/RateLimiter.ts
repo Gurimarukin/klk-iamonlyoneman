@@ -1,9 +1,9 @@
-import { isDeepStrictEqual } from 'util'
-
 import { pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
+import { isDeepStrictEqual } from 'util'
 
 import { List, Maybe, Tuple } from '../../../shared/utils/fp'
+
 import { MsDuration } from '../../models/MsDuration'
 import { PartialLogger } from '../../services/Logger'
 import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'

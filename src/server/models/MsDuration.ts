@@ -1,13 +1,11 @@
-import { Newtype, iso } from 'newtype-ts'
-
 import { either, option, predicate } from 'fp-ts'
 import { Option } from 'fp-ts/Option'
 import { pipe } from 'fp-ts/function'
 import { Decoder } from 'io-ts/Decoder'
+import * as D from 'io-ts/Decoder'
 import type { StringValue } from 'ms'
 import vercelMs from 'ms'
-
-import * as D from 'io-ts/Decoder'
+import { Newtype, iso } from 'newtype-ts'
 
 export type MsDuration = Newtype<{ readonly MsDuration: unique symbol }, number>
 

@@ -5,10 +5,11 @@ import React, { ReactElement, useEffect } from 'react'
 
 import { PartialKlkPostsQuery } from '../shared/models/PartialKlkPostsQuery'
 import { Dict, Maybe, Tuple } from '../shared/utils/fp'
+
 import { About } from './pages/About'
-import { Home } from './pages/home/Home'
 import { Login } from './pages/Login'
 import { NotFound } from './pages/NotFound'
+import { Home } from './pages/home/Home'
 
 export const routes = {
   home: (query: PartialKlkPostsQuery = {}): string => {

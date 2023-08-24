@@ -8,8 +8,9 @@ import { DateFromISOString } from '../../shared/models/DateFromISOString'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
+import { Maybe } from '../../shared/utils/fp'
+
 import { Link } from './Link'
 
 // KlkPost

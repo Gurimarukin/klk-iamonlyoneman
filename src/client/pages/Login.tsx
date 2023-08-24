@@ -6,10 +6,11 @@ import React, { useCallback, useState } from 'react'
 
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Either, Maybe } from '../../shared/utils/fp'
+
+import { routes } from '../Router'
 import { GradientContainer } from '../components/GradientContainer'
 import { useHistory } from '../contexts/HistoryContext'
 import { useUser } from '../contexts/UserContext'
-import { routes } from '../Router'
 import { theme } from '../utils/theme'
 
 type State = {

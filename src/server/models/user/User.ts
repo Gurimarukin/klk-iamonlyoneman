@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 
 import { IO, Maybe } from '../../../shared/utils/fp'
+
 import { UuidUtils } from '../../utils/UuidUtils'
 import { HashedPassword } from '../HashedPassword'
 import { UserId } from './UserId'

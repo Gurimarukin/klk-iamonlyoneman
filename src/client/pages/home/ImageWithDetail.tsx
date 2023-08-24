@@ -4,11 +4,12 @@ import { pipe } from 'fp-ts/function'
 import React, { forwardRef, useCallback, useMemo, useState } from 'react'
 import { LazyLoadImage, ScrollPosition } from 'react-lazy-load-image-component'
 
+import { Token } from '../../../shared/models/Token'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { Size } from '../../../shared/models/klkPost/Size'
-import { Token } from '../../../shared/models/Token'
-import { Maybe } from '../../../shared/utils/fp'
 import { StringUtils } from '../../../shared/utils/StringUtils'
+import { Maybe } from '../../../shared/utils/fp'
+
 import { ABlank } from '../../components/ABlank'
 import { ClickOutside } from '../../components/ClickOutside'
 import { ExternalLink, InfoCircle, Pencil } from '../../components/svgs'
@@ -111,12 +112,12 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
 
     return (
       <Container ref={ref} className={cssClasses([IS_EDITING, isEditing])}>
-        <ImageABlank href={post.url} title='View image'>
+        <ImageABlank href={post.url} title="View image">
           <LazyLoadImage
             alt={post.title}
             src={thumbnailUrl(post.url, theme.Gallery.thumbnail.suffix)}
             scrollPosition={scrollPosition}
-            effect='blur'
+            effect="blur"
             wrapperClassName={PLACEHOLDER}
             {...size}
           />
@@ -130,7 +131,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
           </div>
         </ImageABlank>
         <TitleContainer style={{ width: size.width }}>
-          <TitleABlank href={`https://reddit.com${post.permalink}`} title='Reddit post'>
+          <TitleABlank href={`https://reddit.com${post.permalink}`} title="Reddit post">
             <span>{post.title}</span>
             <ExternalLink className={EXTERNAL_LINK} />
           </TitleABlank>

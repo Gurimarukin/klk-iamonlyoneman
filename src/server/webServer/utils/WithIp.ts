@@ -1,12 +1,13 @@
 import express from 'express'
 import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
-
 import * as H from 'hyper-ts'
 import * as D from 'io-ts/Decoder'
+
 import { NonEmptyString } from '../../../shared/models/NonEmptyString'
 import { Undefined } from '../../../shared/models/Undefined'
 import { Maybe } from '../../../shared/utils/fp'
+
 import { Config } from '../../Config'
 import { PartialLogger } from '../../services/Logger'
 import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'

@@ -4,12 +4,13 @@ import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
+
+import { routes } from '../../Router'
 import { PrettyLink } from '../../components/PrettyLink'
 import { Logout } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useUser } from '../../contexts/UserContext'
-import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 import { EpisodePicker } from './EpisodePicker'
 import { SearchInput } from './SearchInput'
@@ -83,7 +84,7 @@ const ActiveToggler = (): JSX.Element => {
   return (
     <ActiveLabel>
       <u>active:</u> {' '}
-      <input type='checkbox' checked={query.active} onChange={toggleActive} />
+      <input type="checkbox" checked={query.active} onChange={toggleActive} />
     </ActiveLabel>
   )
 }

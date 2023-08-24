@@ -8,6 +8,7 @@ import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../../shared/models/klkPost/Size'
 import { List, Tuple } from '../../../shared/utils/fp'
+
 import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 

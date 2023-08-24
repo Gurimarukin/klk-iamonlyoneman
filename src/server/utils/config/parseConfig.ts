@@ -1,7 +1,9 @@
 import { flow, pipe } from 'fp-ts/function'
 import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
+
 import { Dict, Either, List, NonEmptyArray, Try } from '../../../shared/utils/fp'
+
 import { ValidatedNea } from '../../models/ValidatedNea'
 
 export type DecodeKey = <B>(

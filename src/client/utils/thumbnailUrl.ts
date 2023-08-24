@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/function'
 
-import { Maybe } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
+import { Maybe } from '../../shared/utils/fp'
 
 // | Thumbnail Suffix | Thumbnail Name   | Thumbnail Size | Keeps Image Proportions |
 // | ---------------- | ---------------- | -------------- | ----------------------- |

@@ -1,6 +1,7 @@
 import * as axios from 'axios'
 
 import { Dict, List } from '../../shared/utils/fp'
+
 import { RedditSort } from '../models/RedditSort'
 
 // copy-pasta from AxiosRequestConfig

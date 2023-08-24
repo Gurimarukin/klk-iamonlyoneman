@@ -1,10 +1,11 @@
+import { Token } from '../../../shared/models/Token'
 import { KlkPostDAO, KlkPostDAOs } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostEditPayload } from '../../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
-import { Token } from '../../../shared/models/Token'
 import { Future } from '../../../shared/utils/fp'
-import { apiRoutes } from '../../utils/apiRoutes'
+
 import { Http } from '../../utils/Http'
+import { apiRoutes } from '../../utils/apiRoutes'
 
 export const getKlkPosts = (url: string): Promise<KlkPostDAOs> =>
   Http.get(url, KlkPostDAOs.codec.decode)

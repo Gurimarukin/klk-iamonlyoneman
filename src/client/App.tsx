@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 
-import { useHistory } from './contexts/HistoryContext'
 import { Router } from './Router'
+import { useHistory } from './contexts/HistoryContext'
 
 export const App = (): JSX.Element => {
   const { location } = useHistory()

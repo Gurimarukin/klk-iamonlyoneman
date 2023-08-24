@@ -1,9 +1,10 @@
 import { Right } from 'fp-ts/Either'
 
-import { KlkPost } from '../../../src/server/models/KlkPost'
-import { Link } from '../../../src/server/models/Link'
 import { KlkPostId } from '../../../src/shared/models/klkPost/KlkPostId'
 import { Either, Maybe } from '../../../src/shared/utils/fp'
+
+import { KlkPost } from '../../../src/server/models/KlkPost'
+import { Link } from '../../../src/server/models/Link'
 
 const image = `{
   "kind": "t3",

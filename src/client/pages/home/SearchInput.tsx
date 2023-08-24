@@ -7,10 +7,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { Maybe } from '../../../shared/utils/fp'
+
+import { routes } from '../../Router'
 import { Search, Times } from '../../components/svgs'
 import { useHistory } from '../../contexts/HistoryContext'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
-import { routes } from '../../Router'
 import { theme } from '../../utils/theme'
 
 type Props = {
@@ -65,12 +66,12 @@ export const SearchInput = ({ className }: Props): JSX.Element => {
   return (
     <StyledForm onSubmit={handleSubmit} className={className}>
       <InputContainer>
-        <StyledInput value={search} onChange={handleChange} placeholder='search' />
-        <ResetButton type='reset' onClick={resetAll}>
+        <StyledInput value={search} onChange={handleChange} placeholder="search" />
+        <ResetButton type="reset" onClick={resetAll}>
           <Times />
         </ResetButton>
       </InputContainer>
-      <UnstyledButton type='submit'>
+      <UnstyledButton type="submit">
         <Search />
       </UnstyledButton>
     </StyledForm>

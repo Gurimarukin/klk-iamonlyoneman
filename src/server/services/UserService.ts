@@ -1,13 +1,13 @@
-import readline from 'readline'
-
 import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as D from 'io-ts/Decoder'
+import readline from 'readline'
 
 import { ClearPassword } from '../../shared/models/ClearPassword'
-import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Token } from '../../shared/models/Token'
+import { LoginPayload } from '../../shared/models/login/LoginPayload'
 import { Either, Future, Maybe } from '../../shared/utils/fp'
+
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'

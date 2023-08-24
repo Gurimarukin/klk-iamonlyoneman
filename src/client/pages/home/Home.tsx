@@ -6,10 +6,11 @@ import { trackWindowScroll } from 'react-lazy-load-image-component'
 import { useSWRInfinite } from 'swr'
 
 import { config } from '../../../shared/config'
+import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { KlkPostDAO } from '../../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../../shared/models/klkPost/KlkPostId'
-import { KlkPostsQuery } from '../../../shared/models/KlkPostsQuery'
 import { List, Maybe, NonEmptyArray } from '../../../shared/utils/fp'
+
 import { GradientContainer } from '../../components/GradientContainer'
 import { ChevronUp } from '../../components/svgs'
 import { KlkPostsContextProvider } from '../../contexts/KlkPostsContext'

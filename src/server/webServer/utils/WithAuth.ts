@@ -1,7 +1,9 @@
 import { pipe } from 'fp-ts/function'
 import * as H from 'hyper-ts'
+
 import { Token } from '../../../shared/models/Token'
 import { Maybe } from '../../../shared/utils/fp'
+
 import { User } from '../../models/user/User'
 import { UserService } from '../../services/UserService'
 import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'

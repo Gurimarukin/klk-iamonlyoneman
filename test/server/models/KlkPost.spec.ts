@@ -1,5 +1,6 @@
-import { imgurId, metadataFromTitle } from '../../../src/server/models/KlkPost'
 import { Maybe } from '../../../src/shared/utils/fp'
+
+import { imgurId, metadataFromTitle } from '../../../src/server/models/KlkPost'
 
 describe('metadataFromTitle', () => {
   it('should parse title', () => {
