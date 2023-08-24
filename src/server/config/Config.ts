@@ -6,7 +6,6 @@ import { Lens as MLens } from 'monocle-ts'
 import { Either, IO, Maybe, NonEmptyArray } from '../../shared/utils/fp'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { LogLevelOrOff } from '../models/LogLevel'
-import { MsDuration } from '../models/MsDuration'
 import { ConfReader, ValidatedNea } from './ConfReader'
 
 // Config
@@ -14,8 +13,6 @@ import { ConfReader, ValidatedNea } from './ConfReader'
 export type Config = {
   readonly logLevel: LogLevelOrOff
   readonly isDev: boolean
-  readonly pollOnStart: boolean
-  readonly pollEveryHours: MsDuration
   readonly port: number
   readonly allowedOrigins: Maybe<NonEmptyArray<string>>
   readonly db: DbConfig
@@ -24,13 +21,11 @@ export type Config = {
 export function Config(
   logLevel: LogLevelOrOff,
   isDev: boolean,
-  pollOnStart: boolean,
-  pollEveryHours: MsDuration,
   port: number,
   allowedOrigins: Maybe<NonEmptyArray<string>>,
   db: DbConfig,
 ): Config {
-  return { logLevel, isDev, pollOnStart, pollEveryHours, port, allowedOrigins, db }
+  return { logLevel, isDev, port, allowedOrigins, db }
 }
 
 export namespace Config {
@@ -59,22 +54,12 @@ function readConfig(reader: ConfReader): ValidatedNea<Config> {
     apply.sequenceT(Either.getValidation(NonEmptyArray.getSemigroup<string>()))(
       reader.read(LogLevelOrOff.decoder)('logLevel'),
       reader.read(D.boolean)('isDev'),
-      reader.read(D.boolean)('pollOnStart'),
-      reader.read(D.number)('pollEveryHours'),
       reader.read(D.number)('port'),
       reader.readOpt(NonEmptyArray.decoder(D.string))('allowedOrigins'),
       DbConfig.read(reader),
     ),
-    Either.map(([logLevel, isDev, pollOnStart, pollEveryHours, port, allowedOrigins, db]) =>
-      Config(
-        logLevel,
-        isDev,
-        pollOnStart,
-        MsDuration.hours(pollEveryHours),
-        port,
-        allowedOrigins,
-        db,
-      ),
+    Either.map(([logLevel, isDev, port, allowedOrigins, db]) =>
+      Config(logLevel, isDev, port, allowedOrigins, db),
     ),
   )
 }

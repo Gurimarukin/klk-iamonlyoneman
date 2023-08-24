@@ -1,3 +1,4 @@
+/.docker-data
 /.eslintcache
 /.prettierrc.json
 /conf/client/.env
