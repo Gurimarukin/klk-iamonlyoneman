@@ -57,7 +57,7 @@ export function Context(Logger: PartialLogger, config: Config) {
   const userPersistence = UserPersistence(Logger, mongoCollection)
 
   const healthCheckService = HealthCheckService(healthCheckPersistence)
-  const klkPostService = KlkPostService(Logger, config, klkPostPersistence)
+  const klkPostService = KlkPostService(Logger, klkPostPersistence)
   const userService = UserService(Logger, userPersistence)
 
   const withIp = WithIp(Logger, config)
@@ -86,9 +86,6 @@ export function Context(Logger: PartialLogger, config: Config) {
           onSuccess: () => logger.info('Ensured indexes'),
         }),
       ),
-    initDbIfEmpty: klkPostService.initDbIfEmpty,
-    scheduleRedditPolling: klkPostService.scheduleRedditPolling,
-    fullPoll: klkPostService.fullPoll,
     addMissingSize: klkPostService.addMissingSize,
     createUser: userService.createUser,
     startWebServer: () => startWebServer(Logger, config, routes),
