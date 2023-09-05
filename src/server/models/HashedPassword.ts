@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 import { Newtype, iso } from 'newtype-ts'
 
-import { fromNewtype } from '../../shared/utils/fromNewtype'
+import { fromNewtype } from '../../shared/utils/ioTsUtils'
 
 export type HashedPassword = Newtype<{ readonly HashedPassword: unique symbol }, string>
 

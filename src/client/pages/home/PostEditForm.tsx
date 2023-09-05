@@ -69,7 +69,7 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
               updateById(post.id, newPost)
               setStatus(Status.done)
             }),
-            Future.recover<unknown>(() => Future.right(setStatus(Status.error))),
+            Future.orElse(() => Future.successful<unknown>(setStatus(Status.error))),
             Future.runUnsafe,
           )
         }),

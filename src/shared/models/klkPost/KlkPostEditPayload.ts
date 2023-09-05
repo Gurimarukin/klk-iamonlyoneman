@@ -22,7 +22,7 @@ namespace OrEmpty {
 
 export namespace KlkPostEditPayload {
   export const decoder = pipe(
-    D.type({
+    D.struct({
       title: NonEmptyString.codec,
       url: NonEmptyString.codec,
       episode: OrEmpty.decoder(EpisodeNumber.Numb.codec),

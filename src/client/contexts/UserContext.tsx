@@ -44,7 +44,7 @@ export const UserContextProvider: React.FC = ({ children }) => {
       pipe(
         Http.post(apiRoutes.login, payload, LoginPayload.codec.encode, TokenDAO.codec.decode),
         Future.map(Maybe.some),
-        Future.recover<Maybe<TokenDAO>>(() => Future.right(Maybe.none)),
+        Future.orElse(() => Future.successful<Maybe<TokenDAO>>(Maybe.none)),
         Future.map(
           Maybe.map(d => {
             updateToken(Maybe.some(d.token))

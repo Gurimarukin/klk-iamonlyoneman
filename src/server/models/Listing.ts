@@ -5,9 +5,9 @@ import { List, Maybe } from '../../shared/utils/fp'
 
 export namespace Listing {
   export function decoder<A>(codec: D.Decoder<unknown, A>): D.Decoder<unknown, Listing<A>> {
-    return D.type({
+    return D.struct({
       kind: D.literal('Listing'),
-      data: D.type({
+      data: D.struct({
         before: Maybe.decoder(D.string),
         after: Maybe.decoder(D.string),
         dist: D.number,

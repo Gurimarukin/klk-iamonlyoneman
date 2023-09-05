@@ -3,21 +3,23 @@ import { pipe } from 'fp-ts/function'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
-import { Future, List, Maybe } from '../../shared/utils/fp'
+import { Future, List, Maybe, NotUsed } from '../../shared/utils/fp'
 
 import { KlkPost } from '../models/KlkPost'
+import { LoggerGetter } from '../models/logger/LoggerGetter'
 import { KlkPostPersistence } from '../persistence/KlkPostPersistence'
 import { ProbeUtils } from '../utils/ProbeUtils'
-import { PartialLogger } from './Logger'
 
 export type KlkPostService = ReturnType<typeof KlkPostService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPostPersistence) {
+export function KlkPostService(Logger: LoggerGetter, klkPostPersistence: KlkPostPersistence) {
   const logger = Logger('KlkPostService')
 
   return {
-    addMissingSize,
+    addMissingSize: addMissingSize(),
+
+    downloadImages: downloadImages(),
 
     findAll: (query: KlkPostsQuery, page: number): Future<List<KlkPost>> =>
       klkPostPersistence.findAll(query, page),
@@ -25,13 +27,13 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
     updatePostAndGetUpdated: (id: KlkPostId, payload: KlkPostEditPayload): Future<Maybe<KlkPost>> =>
       pipe(
         klkPostPersistence.updatePostById(id, payload),
-        Future.chain(ok => (ok ? klkPostPersistence.findById(id) : Future.right(Maybe.none))),
+        Future.chain(ok => (ok ? klkPostPersistence.findById(id) : Future.successful(Maybe.none))),
       ),
   }
 
-  function addMissingSize(): Future<void> {
+  function addMissingSize(): Future<NotUsed> {
     return pipe(
-      klkPostPersistence.findWithEmptySize(),
+      klkPostPersistence.findWithEmptySize,
       Future.chain(posts =>
         pipe(
           posts,
@@ -40,7 +42,7 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
               ProbeUtils.probeSize(post.url, logger),
               Future.chain(
                 Maybe.fold(
-                  () => Future.right(false),
+                  () => Future.successful(false),
                   size => klkPostPersistence.updateSizeById(post.id, size),
                 ),
               ),
@@ -55,5 +57,9 @@ export function KlkPostService(Logger: PartialLogger, klkPostPersistence: KlkPos
         ),
       ),
     )
+  }
+
+  function downloadImages(): Future<NotUsed> {
+    return Future.todo()
   }
 }

@@ -4,6 +4,7 @@ import * as D from 'io-ts/Decoder'
 
 export namespace LogLevel {
   export const decoder = D.union(
+    D.literal('trace'),
     D.literal('debug'),
     D.literal('info'),
     D.literal('warn'),
@@ -11,6 +12,7 @@ export namespace LogLevel {
   )
 
   export const color: Record<LogLevel, string> = {
+    trace: '90',
     debug: '90',
     info: '36',
     warn: '33',
@@ -26,6 +28,7 @@ export namespace LogLevelOrOff {
   export const decoder = D.union(LogLevel.decoder, D.literal('off'))
 
   export const value: Record<LogLevelOrOff, number> = {
+    trace: 5,
     debug: 4,
     info: 3,
     warn: 2,

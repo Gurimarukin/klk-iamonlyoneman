@@ -1,6 +1,5 @@
-import { flow, pipe } from 'fp-ts/function'
-import * as C from 'io-ts/Codec'
-import { Collection, Cursor, FilterQuery } from 'mongodb'
+import { pipe } from 'fp-ts/function'
+import { Filter } from 'mongodb'
 
 import { config } from '../../shared/config'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
@@ -8,72 +7,100 @@ import { EpisodeNumber } from '../../shared/models/PartialKlkPostsQuery'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Either, Future, List, Maybe, Task } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, NonEmptyArray, NotUsed } from '../../shared/utils/fp'
+import { futureMaybe } from '../../shared/utils/futureMaybe'
+import { decodeError } from '../../shared/utils/ioTsUtils'
 
 import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
-import { MongoCollection } from '../models/MongoCollection'
-import { PartialLogger } from '../services/Logger'
-import { FpCollection, decodeError } from './FpCollection'
+import { Store } from '../models/Store'
+import { LoggerGetter } from '../models/logger/LoggerGetter'
+import { MongoCollectionGetter } from '../models/mongo/MongoCollection'
+import { Sink } from '../models/rx/Sink'
+import { TObservable } from '../models/rx/TObservable'
+import { FpCollection } from './FpCollection'
 
 export type KlkPostPersistence = ReturnType<typeof KlkPostPersistence>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: MongoCollection) {
+export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoCollectionGetter) {
   const logger = Logger('KlkPostPersistence')
-  const collection = FpCollection<KlkPost, KlkPost.Output>(
-    logger,
-    mongoCollection('klkPost'),
-    KlkPost.codec,
+  const collection = FpCollection(logger)([KlkPost.codec, 'KlkPost'])(mongoCollection('klkPost'))
+
+  const ensureIndexes: Future<NotUsed> = collection.ensureIndexes([
+    { key: { id: -1 }, unique: true },
+    { key: { createdAt: -1 } },
+    { key: { episode: -1 } },
+    { key: { title: 'text' } },
+  ])
+
+  const count: Future<number> = collection.count({})
+
+  const findWithEmptySize: Future<List<OnlyWithIdAndUrlKlkPost>> = pipe(
+    collection.findAll([KlkPost.onlyWithIdAndUrlCodec, 'OnlyWithIdAndUrlKlkPost'])(
+      { size: null },
+      { projection: { id: 1, url: 1 } },
+    ),
+    Sink.readonlyArray,
   )
 
-  type OutputType = C.OutputOf<typeof KlkPost.codec>
-
   return {
-    ensureIndexes: (): Future<void> =>
-      collection.ensureIndexes([
-        { key: { id: -1 }, unique: true },
-        { key: { createdAt: -1 } },
-        { key: { episode: -1 } },
-        { key: { title: 'text' } },
-      ]),
+    ensureIndexes,
 
-    count: (): Future<number> => collection.count({}),
+    count,
 
-    findAll: (query: KlkPostsQuery, page: number): Future<List<KlkPost>> =>
-      pipe(
-        collection.collection(coll =>
-          cursorFromQueryParams(coll, query, page)
-            .map(flow(KlkPost.codec.decode, Either.mapLeft(decodeError)))
-            .toArray(),
-        ),
-        Future.chain(flow(Either.sequenceArray, Task.of)),
-      ),
-
-    findWithEmptySize: (): Future<List<OnlyWithIdAndUrlKlkPost>> =>
-      pipe(
-        collection.collection(coll =>
+    findAll: (
+      { episode, search, sortNew, active }: KlkPostsQuery,
+      page: number,
+    ): Future<List<KlkPost>> => {
+      const count_ = Store<number>(0)
+      return pipe(
+        collection.collection.observable(coll =>
+          // eslint-disable-next-line functional/immutable-data
           coll
-            .find({ size: null }, { projection: { id: 1, url: 1 } })
-            .map(flow(KlkPost.onlyWithIdAndUrlCodec.decode, Either.mapLeft(decodeError)))
-            .toArray(),
+            .find({
+              active,
+              ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
+              ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
+            })
+            .sort([['createdAt', sortNew ? -1 : 1]])
+            .skip(page * config.pageSize)
+            .limit(config.pageSize)
+            .stream(),
         ),
-        Future.chain(flow(Either.sequenceArray, Task.of)),
-      ),
+
+        TObservable.chainEitherK(u =>
+          pipe(KlkPost.codec.decode(u), Either.mapLeft(decodeError('KlkPost')(u))),
+        ),
+        TObservable.chainFirstIOK(() => count_.modify(n => n + 1)),
+        TObservable.map(Maybe.some),
+        TObservable.concat(
+          pipe(
+            futureMaybe.none,
+            Future.chainFirstIOEitherK(() =>
+              pipe(
+                count_.get,
+                IO.fromIO,
+                IO.chain(n => logger.trace(`Found all ${n} documents`)),
+              ),
+            ),
+            TObservable.fromTaskEither,
+          ),
+        ),
+        TObservable.compact,
+        Sink.readonlyArray,
+      )
+    },
+
+    findWithEmptySize,
 
     findByIds: (ids: List<KlkPostId>): Future<List<KlkPostId>> =>
       pipe(
-        collection.collection(coll =>
-          coll
-            .find({ id: { $in: ids.map(KlkPostId.unwrap) } }, { projection: { id: 1 } })
-            .map(
-              flow(
-                KlkPost.onlyWithIdCodec.decode,
-                Either.bimap(decodeError, p => p.id),
-              ),
-            )
-            .toArray(),
+        collection.findAll([KlkPost.onlyWithIdAndUrlCodec, 'OnlyWithIdAndUrlKlkPost'])(
+          { id: { $in: ids.map(KlkPostId.unwrap) } },
+          { projection: { id: 1 } },
         ),
-        Future.chain(flow(Either.sequenceArray, Task.of)),
+        TObservable.map(p => p.id),
+        Sink.readonlyArray,
       ),
 
     findById: (id: KlkPostId): Future<Maybe<KlkPost>> =>
@@ -81,24 +108,29 @@ export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: Mongo
 
     updateSizeById: (id: KlkPostId, size: Size): Future<boolean> =>
       pipe(
-        collection.collection(coll =>
+        collection.collection.future(coll =>
           coll.updateOne({ id: KlkPostId.unwrap(id) }, { $set: { size } }),
         ),
-        Future.map(r => r.matchedCount === 1),
-      ),
-
-    updatePostById: (id: KlkPostId, payload: KlkPostEditPayload): Future<boolean> =>
-      pipe(
-        collection.collection(coll =>
-          coll.updateOne(
-            { id: KlkPostId.unwrap(id) },
-            { $set: klkPostEditPayloadEncoder.encode(payload) },
-          ),
+        Future.chainFirstIOEitherK(() =>
+          logger.trace('Updated', JSON.stringify({ $set: { size } })),
         ),
         Future.map(r => r.matchedCount === 1),
       ),
 
-    insertMany: (posts: List<KlkPost>) => collection.insertMany(posts),
+    updatePostById: (id: KlkPostId, payload: KlkPostEditPayload): Future<boolean> => {
+      const encoded = klkPostEditPayloadEncoder.encode(payload)
+      return pipe(
+        collection.collection.future(coll =>
+          coll.updateOne({ id: KlkPostId.unwrap(id) }, { $set: encoded }),
+        ),
+        Future.chainFirstIOEitherK(() =>
+          logger.trace('Updated', JSON.stringify({ $set: encoded })),
+        ),
+        Future.map(r => r.matchedCount === 1),
+      )
+    },
+
+    insertMany: (posts: NonEmptyArray<KlkPost>) => collection.insertMany(posts),
 
     upsert: (id: KlkPostId, post: KlkPost): Future<boolean> =>
       pipe(
@@ -106,27 +138,11 @@ export function KlkPostPersistence(Logger: PartialLogger, mongoCollection: Mongo
         Future.map(_ => _.modifiedCount + _.upsertedCount === 1),
       ),
   }
+}
 
-  function cursorFromQueryParams(
-    coll: Collection<OutputType>,
-    { episode, search, sortNew, active }: KlkPostsQuery,
-    page: number,
-  ): Cursor<OutputType> {
-    const find = coll.find({
-      active,
-      ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
-      ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
-    })
-    // eslint-disable-next-line functional/immutable-data
-    const sorted = find.sort([['createdAt', sortNew ? -1 : 1]])
-
-    return sorted.skip(page * config.pageSize).limit(config.pageSize)
-  }
-
-  function foldRecord<A, B>(maybe: Maybe<A>, f: (a: A) => FilterQuery<B>): FilterQuery<B> {
-    return pipe(
-      maybe,
-      Maybe.fold(() => ({}), f),
-    )
-  }
+function foldRecord<A, B>(maybe: Maybe<A>, f: (a: A) => Filter<B>): Filter<B> {
+  return pipe(
+    maybe,
+    Maybe.fold(() => ({}), f),
+  )
 }

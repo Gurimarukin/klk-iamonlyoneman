@@ -1,3 +1,4 @@
+import type { nonEmptyArray } from 'fp-ts'
 import {
   either,
   io,
@@ -10,15 +11,22 @@ import {
   task,
   taskEither,
 } from 'fp-ts'
-import { Lazy, flow, pipe } from 'fp-ts/function'
+import type { Applicative2 } from 'fp-ts/Applicative'
+import type { Kind2, URIS2 } from 'fp-ts/HKT'
+import type { Predicate } from 'fp-ts/Predicate'
+import type { Refinement } from 'fp-ts/Refinement'
+import type { LazyArg } from 'fp-ts/function'
+import { flow, identity, pipe, tuple } from 'fp-ts/function'
+import type { Codec } from 'io-ts/Codec'
 import * as C_ from 'io-ts/Codec'
+import type { Decoder } from 'io-ts/Decoder'
 import * as D from 'io-ts/Decoder'
+import type { Encoder } from 'io-ts/Encoder'
 import * as E_ from 'io-ts/Encoder'
+import type { Newtype } from 'newtype-ts'
+import { iso } from 'newtype-ts'
 
 import { MsDuration } from '../MsDuration'
-
-export const unknownToError = (e: unknown): Error =>
-  e instanceof Error ? e : Error('unknown error')
 
 export const todo = (...[]: List<unknown>): never => {
   // eslint-disable-next-line functional/no-throw-statements
@@ -32,53 +40,100 @@ export const inspect =
     return a
   }
 
+export type NotUsed = Newtype<{ readonly NotUsed: unique symbol }, void>
+
+export const NotUsed = iso<NotUsed>().wrap(undefined)
+
+// a Future is an IO
+export type NonIO<A> = A extends io.IO<unknown> ? never : A
+
+type NonIONonNotUsed<A> = A extends NotUsed ? never : NonIO<A>
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const toNotUsed = <A>(_: NonIONonNotUsed<A>): NotUsed => NotUsed
+
 export type Dict<K extends string, A> = readonlyRecord.ReadonlyRecord<K, A>
-export const Dict = readonlyRecord
+
+export const Dict = {
+  ...readonlyRecord,
+  empty: <K extends string = string, A = never>(): Dict<K, A> => readonlyRecord.empty,
+}
+
+export type PartialDict<K extends string, A> = Partial<Dict<K, A>>
+
+export const PartialDict = {
+  every: readonlyRecord.every as {
+    <A, B extends A>(
+      refinement: Refinement<A, B>,
+    ): Refinement<PartialDict<string, A>, PartialDict<string, B>>
+    <A>(predicate: Predicate<A>): Predicate<PartialDict<string, A>>
+  },
+  fromEntries: Object.fromEntries as <K extends string, A>(
+    fa: List<Tuple<K, A>>,
+  ) => PartialDict<K, A>,
+  map: readonlyRecord.map as <A, B>(
+    f: (a: A) => B,
+  ) => <K extends string>(fa: PartialDict<K, A>) => PartialDict<K, B>,
+  mapWithIndex: readonlyRecord.mapWithIndex as <K extends string, A, B>(
+    f: (k: K, a: A) => B,
+  ) => (fa: PartialDict<K, A>) => PartialDict<K, B>,
+  traverse: readonlyRecord.traverse as <F extends URIS2>(
+    F: Applicative2<F>,
+  ) => <E, A, B>(
+    f: (a: A) => Kind2<F, E, B>,
+  ) => <K extends string>(ta: PartialDict<K, A>) => Kind2<F, E, PartialDict<K, B>>,
+}
 
 export type Either<E, A> = either.Either<E, A>
-export const Either = either
+
+export const Either = {
+  ...either,
+  exists: either.exists as <A>(predicate: Predicate<A>) => <E>(ma: either.Either<E, A>) => boolean,
+}
 
 export type Maybe<A> = option.Option<A>
-const maybeDecoder = <I, A>(decoder: D.Decoder<I, A>): D.Decoder<I, Maybe<A>> => ({
-  decode: (u: I) =>
+
+const maybeDecoder = <I, A>(decoder: Decoder<I, A>): Decoder<I | null | undefined, Maybe<A>> => ({
+  decode: u =>
     u === null || u === undefined
       ? D.success(option.none)
       : pipe(decoder.decode(u), either.map(option.some)),
 })
-const maybeEncoder = <O, A>(encoder: E_.Encoder<O, A>): E_.Encoder<O | null, Maybe<A>> => ({
+
+const maybeEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<O | null, Maybe<A>> => ({
   encode: flow(option.map(encoder.encode), option.toNullable),
 })
+
 export const Maybe = {
   ...option,
-  toArray: <A>(opt: Maybe<A>): List<A> =>
-    pipe(
-      opt,
-      option.fold(
-        () => [],
-        _ => [_],
-      ),
-    ),
+  every: <A>(predicate: Predicate<A>): ((fa: Maybe<A>) => boolean) =>
+    option.fold(() => true, predicate),
   decoder: maybeDecoder,
   encoder: maybeEncoder,
-  codec: <O, A>(codec: C_.Codec<unknown, O, A>): C_.Codec<unknown, O | null, Maybe<A>> =>
+  codec: <O, A>(codec: Codec<unknown, O, A>): Codec<unknown, O | null, Maybe<A>> =>
     C_.make(maybeDecoder(codec), maybeEncoder(codec)),
 }
 
 export type NonEmptyArray<A> = readonlyNonEmptyArray.ReadonlyNonEmptyArray<A>
-const neaDecoder = <A>(codec: D.Decoder<unknown, A>): D.Decoder<unknown, NonEmptyArray<A>> =>
-  pipe(D.array(codec), D.refine<List<A>, NonEmptyArray<A>>(List.isNonEmpty, 'NonEmptyArray'))
-const neaEncoder = <O, A>(
-  codec: E_.Encoder<O, A>,
-): E_.Encoder<NonEmptyArray<O>, NonEmptyArray<A>> => ({
-  encode: a => pipe(a, NonEmptyArray.map(codec.encode)),
+
+const neaDecoder = <A>(decoder: Decoder<unknown, A>): Decoder<unknown, NonEmptyArray<A>> =>
+  pipe(D.array(decoder), D.refine<List<A>, NonEmptyArray<A>>(List.isNonEmpty, 'NonEmptyArray'))
+
+const neaEncoder = <O, A>(encoder: Encoder<O, A>): Encoder<NonEmptyArray<O>, NonEmptyArray<A>> => ({
+  encode: NonEmptyArray.map(encoder.encode),
 })
+
+const {
+  groupBy: {},
+  ...neaMethods
+} = readonlyNonEmptyArray
+
 export const NonEmptyArray = {
-  ...readonlyNonEmptyArray,
+  ...neaMethods,
+  asMutable: identity as <A>(fa: NonEmptyArray<A>) => nonEmptyArray.NonEmptyArray<A>,
   decoder: neaDecoder,
   encoder: neaEncoder,
-  codec: <O, A>(
-    codec: C_.Codec<unknown, O, A>,
-  ): C_.Codec<unknown, NonEmptyArray<O>, NonEmptyArray<A>> =>
+  codec: <O, A>(codec: Codec<unknown, O, A>): Codec<unknown, NonEmptyArray<O>, NonEmptyArray<A>> =>
     C_.make(neaDecoder(codec), neaEncoder(codec)),
 }
 
@@ -93,30 +148,52 @@ function mkString(startOrSep: string, sep?: string, end?: string): (list: List<s
       : list.join(startOrSep)
 }
 
+const listDecoder: <A>(decoder: Decoder<unknown, A>) => Decoder<unknown, List<A>> = D.array
+
+const listEncoder: <O, A>(encoder: Encoder<O, A>) => Encoder<List<O>, List<A>> = flow(
+  E_.array,
+  E_.readonly,
+)
+
 export const List = {
   ...readonlyArray,
+  empty: <A = never>(): List<A> => readonlyArray.empty,
+  groupBy: readonlyNonEmptyArray.groupBy as <A, K extends string>(
+    f: (a: A) => K,
+  ) => (as: List<A>) => PartialDict<K, NonEmptyArray<A>>,
+  groupByStr: readonlyNonEmptyArray.groupBy,
+  asMutable: identity as <A>(fa: List<A>) => A[],
   mkString,
-  isEmpty: <A>(l: List<A>): l is readonly [] => readonlyArray.isEmpty(l),
-  concat: <A>(a: List<A>, b: List<A>): List<A> => [...a, ...b],
+  decoder: listDecoder,
+  encoder: listEncoder,
+  codec: <O, A>(codec: Codec<unknown, O, A>): Codec<unknown, List<O>, List<A>> =>
+    C_.make(listDecoder(codec), listEncoder(codec)),
 }
 
 export type Tuple<A, B> = readonly [A, B]
+
 export const Tuple = {
   ...readonlyTuple,
-  of: <A, B>(a: A, b: B): Tuple<A, B> => [a, b],
+  of: tuple,
 }
 
 export type Tuple3<A, B, C> = readonly [A, B, C]
 
-const unknownAsError = (e: unknown): Error => e as Error
-
 export type Try<A> = Either<Error, A>
+
+const {
+  right: {},
+  left: {},
+  ...tryMethods
+} = either
+
 export const Try = {
-  ...either,
-  right: <A>(a: A): Try<A> => Either.right(a),
-  left: <A = never>(e: Error): Try<A> => Either.left(e),
-  tryCatch: <A>(a: Lazy<A>): Try<A> => Either.tryCatch(a, unknownAsError),
-  get: <A>(t: Try<A>): A =>
+  ...tryMethods,
+  success: either.right as <A>(a: A) => Try<A>,
+  failure: either.left as <A = never>(e: Error) => Try<A>,
+  fromNullable: either.fromNullable as (e: Error) => <A>(a: A) => Try<NonNullable<A>>,
+  tryCatch: <A>(a: LazyArg<A>): Try<A> => Either.tryCatch(a, Either.toError),
+  getUnsafe: <A>(t: Try<A>): A =>
     pipe(
       t,
       Either.getOrElse<Error, A>(e => {
@@ -126,39 +203,81 @@ export const Try = {
     ),
 }
 
-export type Task<A> = task.Task<A>
-export const Task = {
-  ...task,
-  run: <A>(fa: Task<A>): Promise<A> => fa(),
-}
-
-const futureRight = <A>(a: A): Future<A> => taskEither.right(a)
 export type Future<A> = task.Task<Try<A>>
+
+const futureNotUsed: Future<NotUsed> = taskEither.right(NotUsed)
+
+const {
+  right: {},
+  left: {},
+  ...futureMethods
+} = taskEither
+
 export const Future = {
-  ...taskEither,
-  right: futureRight,
-  left: <A = never>(e: Error): Future<A> => taskEither.left(e),
-  tryCatch: <A>(f: Lazy<Promise<A>>): Future<A> => taskEither.tryCatch(f, unknownAsError),
-  unit: futureRight<void>(undefined),
-  recover: <A>(onError: (e: Error) => Future<A>): ((future: Future<A>) => Future<A>) =>
-    task.chain(either.fold(onError, futureRight)),
-  runUnsafe: <A>(fa: Future<A>): Promise<A> => pipe(fa, task.map(Try.get))(),
+  ...futureMethods,
+  successful: taskEither.right as <A>(a: A) => Future<A>,
+  failed: taskEither.left as <A = never>(e: Error) => Future<A>,
+  chainFirstIOEitherK: <A, B>(f: (a: A) => IO<B>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.chainFirst(flow(f, taskEither.fromIOEither)),
+  orElseEitherK: <A>(f: (e: Error) => Try<A>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.orElse(flow(f, Future.fromEither)),
+  orElseIOEitherK: <A>(f: (e: Error) => IO<A>): ((fa: Future<A>) => Future<A>) =>
+    taskEither.orElse(flow(f, Future.fromIOEither)),
+  fromIO: taskEither.fromIO as <A>(fa: io.IO<A>) => Future<A>,
+  tryCatch: <A>(f: LazyArg<Promise<A>>): Future<A> => taskEither.tryCatch(f, Either.toError),
+  notUsed: futureNotUsed,
+  todo: (...args: List<unknown>): Future<never> =>
+    taskEither.fromEither(Try.tryCatch(() => todo(args))),
+  run:
+    (onError: (e: Error) => io.IO<NotUsed>) =>
+    (f: Future<NotUsed>): Promise<NotUsed> =>
+      pipe(f, task.chain(either.fold(flow(onError, task.fromIO), task.of)))(),
+  runUnsafe: <A>(fa: Future<A>): Promise<A> => pipe(fa, task.map(Try.getUnsafe))(),
   delay:
     <A>(ms: MsDuration) =>
     (future: Future<A>): Future<A> =>
       pipe(future, task.delay(MsDuration.unwrap(ms))),
 }
 
-const ioTryCatch = <A>(a: Lazy<A>): IO<A> => ioEither.tryCatch(a, unknownAsError)
 export type IO<A> = io.IO<Try<A>>
+
+const ioNotUsed: IO<NotUsed> = ioEither.right(NotUsed)
+
+const ioFromIO: <A>(fa: io.IO<A>) => IO<A> = ioEither.fromIO
+
+const ioRun =
+  (onError: (e: Error) => io.IO<NotUsed>) =>
+  (ioA: IO<NotUsed>): NotUsed =>
+    pipe(ioA, io.chain(either.fold(onError, io.of)))()
+
+const {
+  right: {},
+  left: {},
+  ...ioMethods
+} = ioEither
+
 export const IO = {
-  ...ioEither,
-  tryCatch: ioTryCatch,
-  unit: ioEither.right<never, void>(undefined),
-  runFuture: <A>(f: Future<A>): IO<void> =>
-    ioTryCatch(() => {
+  ...ioMethods,
+  successful: ioEither.right as <A>(a: A) => IO<A>,
+  failed: ioEither.left as <A = never>(e: Error) => IO<A>,
+  tryCatch: <A>(a: LazyArg<A>): IO<A> => ioEither.tryCatch(a, Either.toError),
+  fromIO: ioFromIO,
+  notUsed: ioNotUsed,
+  runFuture:
+    (onError: (e: Error) => io.IO<NotUsed>) =>
+    (f: Future<NotUsed>): io.IO<NotUsed> =>
+    () => {
       // eslint-disable-next-line functional/no-expression-statements
-      Future.runUnsafe(f)
-    }),
-  runUnsafe: <A>(ioA: IO<A>): A => Try.get(ioA()),
+      pipe(f, Future.run(onError))
+      return NotUsed
+    },
+  run: ioRun,
+  runUnsafe: <A>(ioA: IO<A>): A => Try.getUnsafe(ioA()),
+  setTimeout:
+    (onError: (e: Error) => io.IO<NotUsed>) =>
+    (delay: MsDuration) =>
+    (io_: IO<NotUsed>): IO<NodeJS.Timeout> =>
+      IO.tryCatch(() => setTimeout(() => pipe(io_, ioRun(onError)), MsDuration.unwrap(delay))),
 }
+
+export const refinementFromPredicate = identity as <A>(pred: Predicate<A>) => Refinement<A, A>

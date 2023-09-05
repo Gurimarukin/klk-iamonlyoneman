@@ -20,6 +20,7 @@ const sizeCodec = Maybe.codec(Size.codec)
 const titleCodec = C.string
 const urlCodec = C.string
 const activeCodec = C.boolean
+const noLongerAvailableCodec = Maybe.codec(C.boolean)
 
 export namespace KlkPost {
   export const onlyWithIdCodec = C.type({
@@ -45,6 +46,7 @@ export namespace KlkPost {
         createdAt: DateFromISOString.codec,
         permalink: C.string,
         active: activeCodec,
+        noLongerAvailable: noLongerAvailableCodec,
       }),
     ),
   )
@@ -71,6 +73,7 @@ export namespace KlkPost {
             )
           : l.data.url,
       active: true,
+      noLongerAvailable: Maybe.none,
     }
   }
 

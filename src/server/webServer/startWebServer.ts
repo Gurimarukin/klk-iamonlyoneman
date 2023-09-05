@@ -1,14 +1,17 @@
 import express, { ErrorRequestHandler } from 'express'
+import { task } from 'fp-ts'
 import { toArray } from 'fp-ts-contrib/List'
+import { Task } from 'fp-ts/Task'
 import { flow, identity, pipe } from 'fp-ts/function'
 import type * as http from 'http'
 import * as H from 'hyper-ts'
 import { Action, ExpressConnection } from 'hyper-ts/lib/express'
 
-import { Dict, Either, Future, IO, List, Maybe, Task } from '../../shared/utils/fp'
+import { Dict, Either, Future, IO, List, Maybe, NotUsed } from '../../shared/utils/fp'
 
 import { Config } from '../Config'
-import { Logger, PartialLogger } from '../services/Logger'
+import { LoggerGetter } from '../models/logger/LoggerGetter'
+import { LoggerType } from '../models/logger/LoggerType'
 import { EndedMiddleware, MyMiddleware as M } from './models/MyMiddleware'
 import { Route } from './models/Route'
 
@@ -22,7 +25,7 @@ const accessControl = {
 type Header = string | string[] | undefined
 
 export const startWebServer = (
-  Logger_: PartialLogger,
+  Logger_: LoggerGetter,
   config: Config,
   routes: List<Route>,
 ): IO<http.Server> => {
@@ -106,16 +109,16 @@ export const startWebServer = (
   function withLog(middleware: EndedMiddleware): EndedMiddleware {
     return conn =>
       pipe(
-        Task.Do,
-        Task.bind('res', () => middleware(conn)),
-        Task.chain(({ res }) =>
+        task.Do,
+        task.bind('res', () => middleware(conn)),
+        task.chain(({ res }) =>
           pipe(
             res,
             Either.fold(
-              () => Task.of(undefined),
+              () => task.of(undefined),
               ([, _]) => logConnection(logger, _ as ExpressConnection<H.ResponseEnded>),
             ),
-            Task.map(() => res),
+            task.map(() => res),
           ),
         ),
       )
@@ -125,16 +128,16 @@ export const startWebServer = (
     return conn =>
       pipe(
         Future.tryCatch(() => middleware(conn)()),
-        Task.chain(_ =>
+        task.chain(_ =>
           pipe(
             _,
             Either.fold(
               flow(
                 onError,
-                Task.fromIO,
-                Task.chain(() => M.sendWithStatus(H.Status.InternalServerError)('')(conn)),
+                task.fromIO,
+                task.chain(() => M.sendWithStatus(H.Status.InternalServerError)('')(conn)),
               ),
-              Task.of,
+              task.of,
             ),
           ),
         ),
@@ -142,12 +145,15 @@ export const startWebServer = (
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function onError(error: any): IO<void> {
+  function onError(error: any): IO<NotUsed> {
     return logger.error(error.stack === undefined ? error : error.stack)
   }
 }
 
-function logConnection(logger: Logger, conn: ExpressConnection<H.ResponseEnded>): Task<unknown> {
+function logConnection(
+  logger: LoggerType,
+  conn: ExpressConnection<H.ResponseEnded>,
+): Task<unknown> {
   const method = conn.getMethod()
   const uri = conn.getOriginalUrl()
   const status = pipe(
@@ -158,7 +164,7 @@ function logConnection(logger: Logger, conn: ExpressConnection<H.ResponseEnded>)
       _ => [_.toString()],
     ),
   )
-  return Task.fromIO(logger.debug(method, uri, '-', ...status))
+  return task.fromIO(logger.debug(method, uri, '-', ...status))
 }
 
 function getStatus(conn: ExpressConnection<H.ResponseEnded>): Maybe<H.Status> {

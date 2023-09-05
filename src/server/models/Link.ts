@@ -4,10 +4,10 @@ import * as D from 'io-ts/Decoder'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 
 export namespace Link {
-  export const decoder = D.type({
+  export const decoder = D.struct({
     kind: D.literal('t3'),
     data: pipe(
-      D.type({
+      D.struct({
         id: KlkPostId.codec,
         subreddit_name_prefixed: D.string,
         author: D.string,

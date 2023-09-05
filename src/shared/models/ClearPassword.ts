@@ -1,6 +1,6 @@
 import { Newtype, iso } from 'newtype-ts'
 
-import { fromNewtype } from '../utils/fromNewtype'
+import { fromNewtype } from '../utils/ioTsUtils'
 import { NonEmptyString } from './NonEmptyString'
 
 export type ClearPassword = Newtype<{ readonly ClearPassword: unique symbol }, string>
