@@ -39,7 +39,7 @@ export namespace Config {
         isDev: r(BooleanFromString.decoder)('IS_DEV'),
         pollOnStart: r(BooleanFromString.decoder)('POLL_ON_START'),
         pollEveryHours: r(MsDuration.fromStringDecoder)('POLL_EVERY_HOURS'),
-        port: r(NumberFromString.decoder)('PORT'),
+        port: r(NumberFromString.decoder)('SERVER_PORT'),
         allowedOrigins: r(Maybe.decoder(NonEmptyArrayFromString.decoder(URLFromString.decoder)))(
           'ALLOWED_ORIGINS',
         ),
