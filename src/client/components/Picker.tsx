@@ -12,11 +12,11 @@ import { prettyLinkStyle } from './PrettyLink'
 import { ChevronUp } from './svgs'
 
 type PickerProps = {
-  readonly labelPrefix?: React.ReactNode
-  readonly labelValue: React.ReactNode
-  readonly valueIsSelected: boolean
-  readonly content: React.ReactNode
-  readonly className?: string
+  labelPrefix?: React.ReactNode
+  labelValue: React.ReactNode
+  valueIsSelected: boolean
+  content: React.ReactNode
+  className?: string
 }
 
 const MobilePicker = (props: PickerProps): JSX.Element => {
@@ -37,8 +37,8 @@ const MobilePicker = (props: PickerProps): JSX.Element => {
 }
 
 type StatelessPickerProps = PickerProps & {
-  readonly isOpened?: boolean
-  readonly toggleOpen?: () => void
+  isOpened?: boolean
+  toggleOpen?: () => void
 }
 
 const IS_OPENED = 'is-opened'

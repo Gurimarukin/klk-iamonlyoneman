@@ -15,9 +15,9 @@ import { theme } from '../../utils/theme'
 import { postKlkPostEditForm } from './klkPostsApi'
 
 type Props = {
-  readonly token: Token
-  readonly post: KlkPostDAO
-  readonly className?: string
+  token: Token
+  post: KlkPostDAO
+  className?: string
 }
 
 type State = E.OutputOf<typeof KlkPostEditPayload.codec>

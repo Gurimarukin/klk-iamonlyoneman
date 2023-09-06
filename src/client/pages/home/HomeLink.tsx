@@ -11,8 +11,8 @@ import { theme } from '../../utils/theme'
 const SELECTED = 'selected'
 
 type HomeLinkProps = {
-  readonly to: Partial<KlkPostsQuery>
-  readonly compareOnlySort?: boolean
+  to: Partial<KlkPostsQuery>
+  compareOnlySort?: boolean
 }
 
 export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false, children }) => {

@@ -5,13 +5,13 @@ import { KlkPostDAO } from '../../shared/models/klkPost/KlkPostDAO'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 
 type KlkPostsContext = {
-  readonly updateById: (id: KlkPostId, post: KlkPostDAO) => void
+  updateById: (id: KlkPostId, post: KlkPostDAO) => void
 }
 
 const KlkPostsContext = createContext<KlkPostsContext | undefined>(undefined)
 
 type Props = {
-  readonly updateById: (id: KlkPostId, post: KlkPostDAO) => void
+  updateById: (id: KlkPostId, post: KlkPostDAO) => void
 }
 
 export const KlkPostsContextProvider: React.FC<Props> = ({ updateById, children }) => {

@@ -35,6 +35,8 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
 
   const count: Future<number> = collection.count({})
 
+  const findAll: TObservable<KlkPost> = collection.findAll()({})
+
   const findWithEmptySize: Future<List<OnlyWithIdAndUrlKlkPost>> = pipe(
     collection.findAll([KlkPost.onlyWithIdAndUrlCodec, 'OnlyWithIdAndUrlKlkPost'])(
       { size: null },
@@ -48,7 +50,9 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
 
     count,
 
-    findAll: (
+    findAll,
+
+    findAllByQuery: (
       { episode, search, sortNew, active }: KlkPostsQuery,
       page: number,
     ): Future<List<KlkPost>> => {
@@ -105,6 +109,17 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
 
     findById: (id: KlkPostId): Future<Maybe<KlkPost>> =>
       collection.findOne({ id: KlkPostId.unwrap(id) }),
+
+    updateNoLongerAvailableById: (id: KlkPostId, noLongerAvailable: boolean): Future<boolean> =>
+      pipe(
+        collection.collection.future(coll =>
+          coll.updateOne({ id: KlkPostId.unwrap(id) }, { $set: { noLongerAvailable } }),
+        ),
+        Future.chainFirstIOEitherK(() =>
+          logger.trace('Updated', JSON.stringify({ $set: { noLongerAvailable } })),
+        ),
+        Future.map(r => r.matchedCount === 1),
+      ),
 
     updateSizeById: (id: KlkPostId, size: Size): Future<boolean> =>
       pipe(

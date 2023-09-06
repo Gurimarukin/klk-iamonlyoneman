@@ -8,7 +8,7 @@ import { HashedPassword } from '../HashedPassword'
 import { UserId } from './UserId'
 
 export namespace User {
-  export const codec = C.type({
+  export const codec = C.struct({
     id: UserId.codec,
     user: C.string,
     password: HashedPassword.codec,

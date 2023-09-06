@@ -25,7 +25,7 @@ function route(path: string): RouteElem {
 /* eslint-enable react/jsx-key */
 
 type Props = {
-  readonly path: string
+  path: string
 }
 
 export const Router = ({ path }: Props): JSX.Element => {

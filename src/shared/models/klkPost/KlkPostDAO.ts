@@ -15,7 +15,7 @@ const maybeNumberEq: Eq<Maybe<number>> = Maybe.getEq(eq.eqNumber)
 // KlkPostDAO
 
 export namespace KlkPostDAO {
-  export const codec = C.type({
+  export const codec = C.struct({
     id: KlkPostId.codec,
     url: C.string,
     title: C.string,

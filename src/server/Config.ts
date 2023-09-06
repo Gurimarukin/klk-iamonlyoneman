@@ -4,8 +4,9 @@ import { Lens as MLens } from 'monocle-ts'
 
 import { MsDuration } from '../shared/MsDuration'
 import { NumberFromString } from '../shared/models/NumberFromString'
-import { Dict, IO, Maybe, NonEmptyArray, Try } from '../shared/utils/fp'
+import { Dict, Either, IO, Maybe, NonEmptyArray, Try } from '../shared/utils/fp'
 
+import { Dir } from './models/FileOrDir'
 import { ValidatedNea } from './models/ValidatedNea'
 import { LogLevelOrOff } from './models/logger/LogLevel'
 import { loadDotEnv } from './utils/config/loadDotEnv'
@@ -15,20 +16,21 @@ import { BooleanFromString, NonEmptyArrayFromString, URLFromString } from './uti
 const seqS = ValidatedNea.getSeqS<string>()
 
 export type Config = {
-  readonly logLevel: LogLevelOrOff
-  readonly isDev: boolean
-  readonly pollOnStart: boolean
-  readonly pollEveryHours: MsDuration
-  readonly port: number
-  readonly allowedOrigins: Maybe<NonEmptyArray<URL>>
-  readonly db: DbConfig
+  logLevel: LogLevelOrOff
+  isDev: boolean
+  pollOnStart: boolean
+  pollEveryHours: MsDuration
+  port: number
+  allowedOrigins: Maybe<NonEmptyArray<URL>>
+  db: DbConfig
+  imagesDir: Dir
 }
 
 type DbConfig = {
-  readonly host: string
-  readonly dbName: string
-  readonly user: string
-  readonly password: string
+  host: string
+  dbName: string
+  user: string
+  password: string
 }
 
 export namespace Config {
@@ -49,6 +51,11 @@ export namespace Config {
           user: r(D.string)('DB_USER'),
           password: r(D.string)('DB_PASSWORD'),
         }),
+
+        imagesDir: pipe(
+          r(D.string)('IMAGES_DIR'),
+          Either.map(dirName => pipe(Dir.of(__dirname), Dir.joinDir('..', '..', dirName))),
+        ),
       }),
     )
 

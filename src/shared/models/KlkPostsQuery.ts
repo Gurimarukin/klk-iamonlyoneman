@@ -50,8 +50,8 @@ const getSortNew = (episode: Maybe<EpisodeNumber>, sort: PostsSort | undefined):
 const getActive = (active: PostActive | undefined): boolean => active !== 'false'
 
 export type KlkPostsQuery = {
-  readonly episode: Maybe<EpisodeNumber>
-  readonly search: Maybe<string>
-  readonly sortNew: boolean
-  readonly active: boolean
+  episode: Maybe<EpisodeNumber>
+  search: Maybe<string>
+  sortNew: boolean
+  active: boolean
 }

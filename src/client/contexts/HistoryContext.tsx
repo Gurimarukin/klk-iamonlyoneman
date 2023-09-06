@@ -4,9 +4,9 @@ import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 type HistoryContext = {
-  readonly location: history.Location<object | null>
-  readonly navigate: (to: string) => void
-  readonly query: qs.ParsedQs
+  location: history.Location<object | null>
+  navigate: (to: string) => void
+  query: qs.ParsedQs
 }
 
 const HistoryContext = createContext<HistoryContext | undefined>(undefined)

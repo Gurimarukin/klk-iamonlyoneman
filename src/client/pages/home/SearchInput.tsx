@@ -15,7 +15,7 @@ import { routes } from '../../router/routes'
 import { theme } from '../../utils/theme'
 
 type Props = {
-  readonly className?: string
+  className?: string
 }
 
 const maybeStringEq: Eq<Maybe<string>> = Maybe.getEq(eq.eqString)

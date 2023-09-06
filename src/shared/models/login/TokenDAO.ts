@@ -7,7 +7,7 @@ export function TokenDAO(token: Token): TokenDAO {
 }
 
 export namespace TokenDAO {
-  export const codec = C.type({
+  export const codec = C.struct({
     token: Token.codec,
   })
 }

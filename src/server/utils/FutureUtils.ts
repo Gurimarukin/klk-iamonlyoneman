@@ -5,8 +5,8 @@ import { MsDuration } from '../../shared/MsDuration'
 import { Either, Future, IO, NotUsed } from '../../shared/utils/fp'
 
 type OnComplete<A> = {
-  readonly onFailure: (e: Error) => IO<NotUsed>
-  readonly onSuccess: (a: A) => IO<NotUsed>
+  onFailure: (e: Error) => IO<NotUsed>
+  onSuccess: (a: A) => IO<NotUsed>
 }
 
 export namespace FutureUtils {

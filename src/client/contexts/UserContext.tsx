@@ -11,10 +11,10 @@ import { Http } from '../utils/Http'
 import { apiRoutes } from '../utils/apiRoutes'
 
 type UserContext = {
-  readonly token: Maybe<Token>
-  readonly isAdmin: boolean
-  readonly login: (payload: LoginPayload) => Promise<Maybe<Token>>
-  readonly logout: () => void
+  token: Maybe<Token>
+  isAdmin: boolean
+  login: (payload: LoginPayload) => Promise<Maybe<Token>>
+  logout: () => void
 }
 
 const UserContext = createContext<UserContext | undefined>(undefined)

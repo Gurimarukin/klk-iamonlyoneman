@@ -4,7 +4,7 @@ import React, { cloneElement, createRef, useCallback, useEffect } from 'react'
 import { List } from '../../shared/utils/fp'
 
 type Props = {
-  readonly onClickOutside: (e: MouseEvent) => void
+  onClickOutside: (e: MouseEvent) => void
 }
 
 export const ClickOutside: React.FC<Props> = ({ onClickOutside, children }) => {

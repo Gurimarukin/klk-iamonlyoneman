@@ -4,7 +4,7 @@ import { ClearPassword } from '../ClearPassword'
 import { NonEmptyString } from '../NonEmptyString'
 
 export namespace LoginPayload {
-  export const codec = C.type({
+  export const codec = C.struct({
     user: NonEmptyString.codec,
     password: ClearPassword.codec,
   })

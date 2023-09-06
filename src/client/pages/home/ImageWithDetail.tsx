@@ -20,9 +20,9 @@ import { thumbnailUrl } from '../../utils/thumbnailUrl'
 import { PostEditForm } from './PostEditForm'
 
 type ImageWithDetailProps = {
-  readonly scrollPosition: ScrollPosition
-  readonly resizeImg: (size: Size) => Size
-  readonly post: KlkPostDAO
+  scrollPosition: ScrollPosition
+  resizeImg: (size: Size) => Size
+  post: KlkPostDAO
 }
 
 export const ImageWithDetail = (props: ImageWithDetailProps): JSX.Element => {
@@ -38,7 +38,7 @@ export const ImageWithDetail = (props: ImageWithDetailProps): JSX.Element => {
 }
 
 type EditableImageWithDetailProps = ImageWithDetailProps & {
-  readonly token: Token
+  token: Token
 }
 
 const EditableImageWithDetail = (props: EditableImageWithDetailProps): JSX.Element => {
@@ -73,11 +73,11 @@ const MobileImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDetai
 )
 
 type StatelessImageWithDetailProps = ImageWithDetailProps & {
-  readonly token?: Token
-  readonly isEditing?: boolean
-  readonly toggleEditing?: () => void
-  readonly isDetailed?: boolean
-  readonly toggleDetail?: () => void
+  token?: Token
+  isEditing?: boolean
+  toggleEditing?: () => void
+  isDetailed?: boolean
+  toggleDetail?: () => void
 }
 
 const PLACEHOLDER = 'placeholder'

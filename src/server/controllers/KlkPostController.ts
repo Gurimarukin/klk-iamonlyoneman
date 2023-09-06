@@ -31,7 +31,7 @@ export type KlkPostController = ReturnType<typeof KlkPostController>
 export function KlkPostController(withAuth: WithAuth, klkPostService: KlkPostService) {
   const klkPosts: EndedMiddleware = M.withQuery(klkPostsQuery)(({ page, ...query }) =>
     pipe(
-      M.fromTaskEither(klkPostService.findAll(query, page ?? 0)),
+      M.fromTaskEither(klkPostService.findAllByQuery(query, page ?? 0)),
       M.ichain(M.json(KlkPostDAOs.codec)),
     ),
   )

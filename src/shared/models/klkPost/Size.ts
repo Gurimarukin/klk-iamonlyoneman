@@ -1,7 +1,7 @@
 import * as C from 'io-ts/Codec'
 
 export namespace Size {
-  export const codec = C.type({
+  export const codec = C.struct({
     width: C.number,
     height: C.number,
   })

@@ -14,8 +14,8 @@ import { routes } from '../router/routes'
 import { theme } from '../utils/theme'
 
 type State = {
-  readonly user: string
-  readonly password: string
+  user: string
+  password: string
 }
 
 namespace State {

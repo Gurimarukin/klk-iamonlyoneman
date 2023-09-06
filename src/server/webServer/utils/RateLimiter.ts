@@ -60,8 +60,8 @@ export function RateLimiter(Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDu
 }
 
 type RequestsHistory = {
-  readonly key: Key
-  readonly history: List<number>
+  key: Key
+  history: List<number>
 }
 
 function RequestsHistory(key: Key, history: List<number>): RequestsHistory {
@@ -69,8 +69,8 @@ function RequestsHistory(key: Key, history: List<number>): RequestsHistory {
 }
 
 type Key = {
-  readonly path: string
-  readonly ip: string
+  path: string
+  ip: string
 }
 
 function Key(path: string, ip: string): Key {

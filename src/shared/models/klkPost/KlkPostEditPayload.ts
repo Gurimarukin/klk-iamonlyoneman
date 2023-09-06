@@ -72,10 +72,10 @@ export namespace KlkPostEditPayload {
 
 export type KlkPostEditPayload = D.TypeOf<typeof KlkPostEditPayload.decoder>
 type Out = {
-  readonly title: string
-  readonly url: string
-  readonly episode: string
-  readonly width: string
-  readonly height: string
-  readonly active: boolean
+  title: string
+  url: string
+  episode: string
+  width: string
+  height: string
+  active: boolean
 }

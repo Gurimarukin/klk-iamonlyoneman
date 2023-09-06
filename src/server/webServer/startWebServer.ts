@@ -175,7 +175,7 @@ function getStatus(conn: ExpressConnection<H.ResponseEnded>): Maybe<H.Status> {
   )
 }
 
-function isStatus(a: Action): a is { readonly type: 'setStatus'; readonly status: H.Status } {
+function isStatus(a: Action): a is { type: 'setStatus'; status: H.Status } {
   return a.type === 'setStatus'
 }
 

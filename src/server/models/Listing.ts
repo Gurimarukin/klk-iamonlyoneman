@@ -19,13 +19,13 @@ export namespace Listing {
 }
 
 export type Listing<A> = {
-  readonly kind: 'Listing'
-  readonly data: {
-    readonly before: Maybe<string>
-    readonly after: Maybe<string>
-    readonly dist: number
-    readonly modhash: string
-    readonly children: List<A>
+  kind: 'Listing'
+  data: {
+    before: Maybe<string>
+    after: Maybe<string>
+    dist: number
+    modhash: string
+    children: List<A>
   }
 }
 

@@ -2,7 +2,7 @@ import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import * as E from 'io-ts/Encoder'
-import { Lens as MLens } from 'monocle-ts'
+import { lens } from 'monocle-ts'
 
 import { DateFromISOString } from '../../shared/models/DateFromISOString'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
@@ -20,17 +20,17 @@ const sizeCodec = Maybe.codec(Size.codec)
 const titleCodec = C.string
 const urlCodec = C.string
 const activeCodec = C.boolean
-const noLongerAvailableCodec = Maybe.codec(C.boolean)
+const noLongerAvailableCodec = Maybe.codec(C.boolean) // none: imgur hasn't been probed
 
 export namespace KlkPost {
-  export const onlyWithIdCodec = C.type({
+  export const onlyWithIdCodec = C.struct({
     id: KlkPostId.codec,
   })
 
   export const onlyWithIdAndUrlCodec = pipe(
     onlyWithIdCodec,
     C.intersect(
-      C.type({
+      C.struct({
         url: urlCodec,
       }),
     ),
@@ -39,7 +39,7 @@ export namespace KlkPost {
   export const codec = pipe(
     onlyWithIdAndUrlCodec,
     C.intersect(
-      C.type({
+      C.struct({
         title: titleCodec,
         episode: episodeCodec,
         size: sizeCodec,
@@ -78,7 +78,8 @@ export namespace KlkPost {
   }
 
   export namespace Lens {
-    export const size = MLens.fromPath<KlkPost>()(['size'])
+    export const size = pipe(lens.id<KlkPost>(), lens.prop('size'))
+    export const noLongerAvailable = pipe(lens.id<KlkPost>(), lens.prop('noLongerAvailable'))
   }
 }
 
@@ -87,8 +88,8 @@ export type KlkPost = C.TypeOf<typeof KlkPost.codec>
 export type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof KlkPost.onlyWithIdAndUrlCodec>
 
 type Metadata = {
-  readonly episode: Maybe<number>
-  readonly size: Maybe<Size>
+  episode: Maybe<number>
+  size: Maybe<Size>
 }
 
 const Regex = {
@@ -129,7 +130,7 @@ export type KlkPosts = C.TypeOf<typeof KlkPosts.codec>
 // KlkPostEditPayload
 
 type Out = {
-  readonly [K in keyof KlkPostEditPayload]: KlkPost.Output[K]
+  [K in keyof KlkPostEditPayload]: KlkPost.Output[K]
 }
 
 export const klkPostEditPayloadEncoder: E.Encoder<Out, KlkPostEditPayload> = {

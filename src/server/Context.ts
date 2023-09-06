@@ -37,7 +37,7 @@ function of(
   klkPostPersistence: KlkPostPersistence,
   userPersistence: UserPersistence,
 ) {
-  const klkPostService = KlkPostService(Logger, klkPostPersistence)
+  const klkPostService = KlkPostService(config, Logger, klkPostPersistence)
   const userService = UserService(Logger, userPersistence)
 
   const withIp = WithIp(Logger, config)
