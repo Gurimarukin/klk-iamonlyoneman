@@ -8,11 +8,13 @@ type Config = D.TypeOf<typeof decoder>
 
 const decoder = D.struct({
   apiHost: D.string,
+  imagesUrl: D.string,
 })
 
 // It's important to have process.env.ENV_VAR fully, as it is inlined by Parcel
 const inlined: Dict<string, string | undefined> = {
   apiHost: process.env['API_HOST'],
+  imagesUrl: process.env['IMAGES_URL'],
 }
 
 const Config: Config = pipe(
