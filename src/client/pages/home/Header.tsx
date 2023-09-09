@@ -11,6 +11,7 @@ import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
 import { useUser } from '../../contexts/UserContext'
 import { routes } from '../../router/routes'
 import { theme } from '../../utils/theme'
+import { AvailabilityPicker } from './AvailabilityPicker'
 import { EpisodePicker } from './EpisodePicker'
 import { HomeLink, StyledAbout } from './HomeLink'
 import { SearchInput } from './SearchInput'
@@ -25,6 +26,7 @@ export const Header = forwardRef<HTMLElement>(({}, ref): JSX.Element => {
       <Nav>
         <All to={{ episode: Maybe.none, sortNew: true }}>all</All>
         <StyledEpisodePicker />
+        <StyledAvailabilityPicker />
         <StyledSearchInput />
         <StyledSortPicker />
         <StyledAbout to={routes.about}>about</StyledAbout>
@@ -75,15 +77,15 @@ const StyledNav = styled.nav({
   alignItems: 'center',
   textShadow: theme.textShadow(theme.colors.darkgrey),
   [theme.mediaQueries.desktop]: {
-    gridTemplateColumns: 'auto auto 1fr auto auto',
+    gridTemplateColumns: 'auto auto auto 1fr auto auto',
     columnGap: theme.spacing.m,
   },
   [theme.mediaQueries.mobile]: {
     gridTemplateColumns: 'auto 1fr auto',
     gridTemplateAreas: `
       "all episode episode"
-      "about sort sort"
-      "search search search"
+      "available available sort"
+      "search search about"
     `,
     rowGap: theme.spacing.s,
     justifyItems: 'start',
@@ -92,13 +94,13 @@ const StyledNav = styled.nav({
 
 const AdminNav = styled(StyledNav)({
   [theme.mediaQueries.desktop]: {
-    gridTemplateColumns: 'auto auto 1fr auto auto auto auto',
+    gridTemplateColumns: 'auto auto auto 1fr auto auto auto auto',
   },
   [theme.mediaQueries.mobile]: {
     gridTemplateAreas: `
       "all episode episode"
-      "about sort sort"
-      "search search search"
+      "available available sort"
+      "search search about"
       "active active logout"
     `,
   },
@@ -114,6 +116,12 @@ const StyledEpisodePicker = styled(EpisodePicker)({
   [theme.mediaQueries.mobile]: {
     gridArea: 'episode',
     justifySelf: 'end',
+  },
+})
+
+const StyledAvailabilityPicker = styled(AvailabilityPicker)({
+  [theme.mediaQueries.mobile]: {
+    gridArea: 'available',
   },
 })
 
@@ -155,6 +163,7 @@ const LogoutButton = styled.button({
   filter: theme.dropShadow(theme.colors.darkgrey),
   [theme.mediaQueries.mobile]: {
     gridArea: 'logout',
+    justifySelf: 'end',
   },
 
   '&::after': {

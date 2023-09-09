@@ -39,15 +39,21 @@ const EpisodeNumber = {
   },
 }
 
+type PostAvailable = D.TypeOf<typeof postAvailableDecoder>
+
+const postAvailableDecoder = D.literal('yes', 'no', 'both')
+
+const PostAvailable = { decoder: postAvailableDecoder }
+
 type PostsSort = D.TypeOf<typeof postsSortDecoder>
 
-const postsSortDecoder = D.union(D.literal('new'), D.literal('old'))
+const postsSortDecoder = D.literal('new', 'old')
 
 const PostsSort = { decoder: postsSortDecoder }
 
 type PostActive = D.TypeOf<typeof postActiveDecoder>
 
-const postActiveDecoder = D.union(D.literal('true'), D.literal('false'))
+const postActiveDecoder = D.literal('true', 'false')
 
 const PostActive = { decoder: postActiveDecoder }
 
@@ -56,6 +62,7 @@ type PartialKlkPostsQueryOut = Partial<Record<keyof PartialKlkPostsQuery, string
 
 const partialKlkPostsQueryDecoder = D.partial({
   episode: EpisodeNumber.decoder,
+  available: PostAvailable.decoder,
   search: D.string,
   sort: PostsSort.decoder,
   active: PostActive.decoder,
@@ -77,4 +84,4 @@ const PartialKlkPostsQuery = {
   encoder: partialKlkPostsQueryEncoder,
 }
 
-export { EpisodeNumber, PartialKlkPostsQuery, PostActive, PostsSort }
+export { EpisodeNumber, PartialKlkPostsQuery, PostActive, PostAvailable, PostsSort }

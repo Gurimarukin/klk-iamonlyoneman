@@ -4,13 +4,7 @@ import * as D from 'io-ts/Decoder'
 
 type LogLevel = D.TypeOf<typeof decoder>
 
-const decoder = D.union(
-  D.literal('trace'),
-  D.literal('debug'),
-  D.literal('info'),
-  D.literal('warn'),
-  D.literal('error'),
-)
+const decoder = D.literal('trace', 'debug', 'info', 'warn', 'error')
 
 const color: Record<LogLevel, string> = {
   trace: '90',

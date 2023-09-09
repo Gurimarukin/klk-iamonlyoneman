@@ -56,6 +56,7 @@ const StyledLink = styled(PrettyLink)({
 export const StyledAbout = styled(StyledLink)({
   [theme.mediaQueries.mobile]: {
     gridArea: 'about',
+    justifySelf: 'end',
   },
 })
 
