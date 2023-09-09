@@ -124,7 +124,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
 
     return (
       <Container ref={ref} className={cssClasses([IS_EDITING, isEditing])}>
-        <ImageABlank href={post.url} title="View image">
+        <ImageABlank href={src} title="View image">
           <LazyLoadImage
             alt={post.title}
             src={src}
