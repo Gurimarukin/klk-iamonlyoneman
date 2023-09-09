@@ -3,15 +3,29 @@ import { Filter } from 'mongodb'
 
 import { config } from '../../shared/config'
 import { KlkPostsQuery } from '../../shared/models/KlkPostsQuery'
-import { EpisodeNumber } from '../../shared/models/PartialKlkPostsQuery'
+import { EpisodeNumber, PostAvailable } from '../../shared/models/PartialKlkPostsQuery'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
 import { KlkPostId } from '../../shared/models/klkPost/KlkPostId'
 import { Size } from '../../shared/models/klkPost/Size'
-import { Either, Future, IO, List, Maybe, NonEmptyArray, NotUsed } from '../../shared/utils/fp'
+import {
+  Dict,
+  Either,
+  Future,
+  IO,
+  List,
+  Maybe,
+  NonEmptyArray,
+  NotUsed,
+} from '../../shared/utils/fp'
 import { futureMaybe } from '../../shared/utils/futureMaybe'
 import { decodeError } from '../../shared/utils/ioTsUtils'
 
-import { KlkPost, OnlyWithIdAndUrlKlkPost, klkPostEditPayloadEncoder } from '../models/KlkPost'
+import {
+  KlkPost,
+  KlkPostOutput,
+  OnlyWithIdAndUrlKlkPost,
+  klkPostEditPayloadEncoder,
+} from '../models/KlkPost'
 import { Store } from '../models/Store'
 import { LoggerGetter } from '../models/logger/LoggerGetter'
 import { MongoCollectionGetter } from '../models/mongo/MongoCollection'
@@ -53,7 +67,7 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
     findAll,
 
     findAllByQuery: (
-      { episode, search, sortNew, active }: KlkPostsQuery,
+      { episode, available, search, sortNew, active }: KlkPostsQuery,
       page: number,
     ): Future<List<KlkPost>> => {
       const count_ = Store<number>(0)
@@ -62,9 +76,10 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
           // eslint-disable-next-line functional/immutable-data
           coll
             .find({
-              active,
               ...foldRecord(episode, e => ({ episode: EpisodeNumber.toNullable(e) })),
+              ...availableFilter[available],
               ...foldRecord(search, s => ({ $or: [{ id: s }, { $text: { $search: s } }] })),
+              active,
             })
             .sort([['createdAt', sortNew ? -1 : 1]])
             .skip(page * config.pageSize)
@@ -153,6 +168,12 @@ export function KlkPostPersistence(Logger: LoggerGetter, mongoCollection: MongoC
         Future.map(_ => _.modifiedCount + _.upsertedCount === 1),
       ),
   }
+}
+
+const availableFilter: Dict<PostAvailable, Filter<KlkPostOutput>> = {
+  yes: { noLongerAvailable: false },
+  no: { noLongerAvailable: true },
+  both: {},
 }
 
 function foldRecord<A, B>(maybe: Maybe<A>, f: (a: A) => Filter<B>): Filter<B> {
