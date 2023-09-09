@@ -9,14 +9,14 @@ type OnComplete<A> = {
   onSuccess: (a: A) => IO<NotUsed>
 }
 
-export namespace FutureUtils {
-  export function retryIfFailed<A>(
-    delay: MsDuration,
-    onComplete: OnComplete<A>,
-  ): (f: Future<A>) => Future<A> {
-    return f => retryIfFailedRec(f, delay, onComplete, true)
-  }
+function retryIfFailed<A>(
+  delay: MsDuration,
+  onComplete: OnComplete<A>,
+): (f: Future<A>) => Future<A> {
+  return f => retryIfFailedRec(f, delay, onComplete, true)
 }
+
+export const FutureUtils = { retryIfFailed }
 
 function retryIfFailedRec<A>(
   f: Future<A>,

@@ -3,12 +3,12 @@ import { Newtype, iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../utils/ioTsUtils'
 
-export type KlkPostId = Newtype<{ readonly KlkPostId: unique symbol }, string>
+type KlkPostId = Newtype<{ readonly KlkPostId: unique symbol }, string>
 
-const isoKlkPostId = iso<KlkPostId>()
+const { wrap, unwrap } = iso<KlkPostId>()
 
-export namespace KlkPostId {
-  export const wrap = isoKlkPostId.wrap
-  export const unwrap = isoKlkPostId.unwrap
-  export const codec = fromNewtype<KlkPostId>(C.string)
-}
+const codec = fromNewtype<KlkPostId>(C.string)
+
+const KlkPostId = { codec, wrap, unwrap }
+
+export { KlkPostId }

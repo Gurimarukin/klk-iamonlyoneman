@@ -35,7 +35,7 @@ export const HomeLink: React.FC<HomeLinkProps> = ({ to, compareOnlySort = false,
 }
 
 export const klkPostsQueryWithoutSortNewEquals = (a: KlkPostsQuery, b: KlkPostsQuery): boolean =>
-  KlkPostsQuery.eq.equals({ ...a, sortNew: false }, { ...b, sortNew: false })
+  KlkPostsQuery.Eq.equals({ ...a, sortNew: false }, { ...b, sortNew: false })
 
 const StyledLink = styled(PrettyLink)({
   [`&.${SELECTED}`]: {

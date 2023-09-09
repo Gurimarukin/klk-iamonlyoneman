@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-expression-statements */
 import styled from '@emotion/styled'
-import { eq } from 'fp-ts'
+import { string } from 'fp-ts'
 import { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ type Props = {
   className?: string
 }
 
-const maybeStringEq: Eq<Maybe<string>> = Maybe.getEq(eq.eqString)
+const maybeStringEq: Eq<Maybe<string>> = Maybe.getEq(string.Eq)
 
 export const SearchInput = ({ className }: Props): JSX.Element => {
   const { navigate } = useHistory()

@@ -3,11 +3,13 @@ import * as C from 'io-ts/Codec'
 import { ClearPassword } from '../ClearPassword'
 import { NonEmptyString } from '../NonEmptyString'
 
-export namespace LoginPayload {
-  export const codec = C.struct({
-    user: NonEmptyString.codec,
-    password: ClearPassword.codec,
-  })
-}
+type LoginPayload = C.TypeOf<typeof codec>
 
-export type LoginPayload = C.TypeOf<typeof LoginPayload.codec>
+const codec = C.struct({
+  user: NonEmptyString.codec,
+  password: ClearPassword.codec,
+})
+
+const LoginPayload = { codec }
+
+export { LoginPayload }

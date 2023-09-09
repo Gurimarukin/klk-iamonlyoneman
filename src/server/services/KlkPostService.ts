@@ -76,37 +76,6 @@ export function KlkPostService(
   }
 
   function downloadImages(): Future<NotUsed> {
-    // const posts: List<KlkPost> = [
-    //   {
-    //     id: KlkPostId.wrap('obnoyy'),
-    //     url: 'https://i.imgur.com/Tmf6wh6.jpg',
-    //     title: 'w00t this is the very end! (from Episode 25) [1920x2077]',
-    //     episode: Maybe.some(25),
-    //     size: Maybe.some({
-    //       width: 1970,
-    //       height: 5432,
-    //     }),
-    //     createdAt: new Date('2021-07-01T15:03:13.000Z'),
-    //     permalink: '/r/KillLaKill/comments/obnoyy/w00t_this_is_the_very_end_from_episode_25/',
-    //     active: true,
-    //     noLongerAvailable: Maybe.none,
-    //   },
-    //   {
-    //     id: KlkPostId.wrap('obnonw'),
-    //     url: 'https://i.imgur.com/YgkiZi3.jpg',
-    //     title: 'Ryuko (From Episode 25) [1920x2077]',
-    //     episode: Maybe.some(25),
-    //     size: Maybe.some({
-    //       width: 1920,
-    //       height: 2077,
-    //     }),
-    //     createdAt: new Date('2021-07-01T15:02:46.000Z'),
-    //     permalink: '/r/KillLaKill/comments/obnonw/ryuko_from_episode_25_1920x2077/',
-    //     active: true,
-    //     noLongerAvailable: Maybe.none,
-    //   },
-    // ]
-
     return pipe(
       Future.fromIOEither(logger.info('Start images download')),
       Future.chain(() => FsUtils.stat(config.imagesDir)),

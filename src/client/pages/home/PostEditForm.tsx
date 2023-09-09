@@ -27,11 +27,11 @@ type StateKeyString = Diff<keyof State, 'active'>
 
 const activeLens = Lens.fromProp<State>()('active')
 
-namespace Status {
-  export const empty = ''
-  export const loading = 'loading'
-  export const error = 'error'
-  export const done = 'done'
+const Status = {
+  empty: '' as const,
+  loading: 'loading' as const,
+  error: 'error' as const,
+  done: 'done' as const,
 }
 
 type Status = typeof Status.empty | typeof Status.loading | typeof Status.error | typeof Status.done

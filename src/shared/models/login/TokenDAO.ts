@@ -2,14 +2,16 @@ import * as C from 'io-ts/Codec'
 
 import { Token } from '../Token'
 
-export function TokenDAO(token: Token): TokenDAO {
+type TokenDAO = C.TypeOf<typeof codec>
+
+const codec = C.struct({
+  token: Token.codec,
+})
+
+function of(token: Token): TokenDAO {
   return { token }
 }
 
-export namespace TokenDAO {
-  export const codec = C.struct({
-    token: Token.codec,
-  })
-}
+const TokenDAO = { codec, of }
 
-export type TokenDAO = C.TypeOf<typeof TokenDAO.codec>
+export { TokenDAO }

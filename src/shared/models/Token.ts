@@ -3,12 +3,12 @@ import { Newtype, iso } from 'newtype-ts'
 
 import { fromNewtype } from '../utils/ioTsUtils'
 
-export type Token = Newtype<{ readonly Token: unique symbol }, string>
+type Token = Newtype<{ readonly Token: unique symbol }, string>
 
-const isoToken = iso<Token>()
+const { wrap, unwrap } = iso<Token>()
 
-export namespace Token {
-  export const wrap = isoToken.wrap
-  export const unwrap = isoToken.unwrap
-  export const codec = fromNewtype<Token>(C.string)
-}
+const codec = fromNewtype<Token>(C.string)
+
+const Token = { codec, wrap, unwrap }
+
+export { Token }

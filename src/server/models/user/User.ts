@@ -7,23 +7,23 @@ import { UuidUtils } from '../../utils/UuidUtils'
 import { HashedPassword } from '../HashedPassword'
 import { UserId } from './UserId'
 
-export namespace User {
-  export const codec = C.struct({
-    id: UserId.codec,
-    user: C.string,
-    password: HashedPassword.codec,
-    token: Maybe.codec(C.string),
-  })
+type User = C.TypeOf<typeof codec>
 
-  export type Output = C.OutputOf<typeof codec>
+const codec = C.struct({
+  id: UserId.codec,
+  user: C.string,
+  password: HashedPassword.codec,
+  token: Maybe.codec(C.string),
+})
 
-  export const create = (user: string, password: HashedPassword): IO<User> =>
-    pipe(
-      UuidUtils.uuidV4,
-      IO.map(id => ({ id: UserId.wrap(id), user, password, token: Maybe.none })),
-    )
+const create = (user: string, password: HashedPassword): IO<User> =>
+  pipe(
+    UuidUtils.uuidV4,
+    IO.map(id => ({ id: UserId.wrap(id), user, password, token: Maybe.none })),
+  )
 
-  export const canEditPost = ({}: User): boolean => true
-}
+const canEditPost = ({}: User): boolean => true
 
-export type User = C.TypeOf<typeof User.codec>
+const User = { codec, create, canEditPost }
+
+export { User }

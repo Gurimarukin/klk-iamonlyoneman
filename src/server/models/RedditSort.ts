@@ -1,7 +1,7 @@
-import { List } from '../../shared/utils/fp'
+type RedditSort = (typeof values)[number]
 
-export type RedditSort = 'relevance' | 'hot' | 'top' | 'new' | 'comments'
+const values = ['relevance', 'hot', 'top', 'new', 'comments'] as const
 
-export namespace RedditSort {
-  export const values: List<RedditSort> = ['relevance', 'hot', 'top', 'new', 'comments']
-}
+const RedditSort = { values }
+
+export { RedditSort }

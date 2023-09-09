@@ -3,12 +3,12 @@ import { Newtype, iso } from 'newtype-ts'
 
 import { fromNewtype } from '../../shared/utils/ioTsUtils'
 
-export type HashedPassword = Newtype<{ readonly HashedPassword: unique symbol }, string>
+type HashedPassword = Newtype<{ readonly HashedPassword: unique symbol }, string>
 
-const isoHashedPassword = iso<HashedPassword>()
+const { wrap, unwrap } = iso<HashedPassword>()
 
-export namespace HashedPassword {
-  export const wrap = isoHashedPassword.wrap
-  export const unwrap = isoHashedPassword.unwrap
-  export const codec = fromNewtype<HashedPassword>(C.string)
-}
+const codec = fromNewtype<HashedPassword>(C.string)
+
+const HashedPassword = { codec, wrap, unwrap }
+
+export { HashedPassword }

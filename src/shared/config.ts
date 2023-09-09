@@ -1,3 +1,3 @@
-export namespace config {
-  export const pageSize = 25
+export const config = {
+  pageSize: 25,
 }

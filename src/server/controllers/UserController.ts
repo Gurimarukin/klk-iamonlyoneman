@@ -22,7 +22,7 @@ export function UserController(userService: UserService) {
         M.ichain(
           Maybe.fold(
             () => M.sendWithStatus(H.Status.BadRequest)(''),
-            flow(TokenDAO, M.json(TokenDAO.codec)),
+            flow(TokenDAO.of, M.json(TokenDAO.codec)),
           ),
         ),
       ),

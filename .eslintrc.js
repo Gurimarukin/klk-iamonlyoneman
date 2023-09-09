@@ -51,7 +51,6 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/strict-boolean-expressions': [
       'warn',
       {
