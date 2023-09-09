@@ -2,7 +2,7 @@ import { apply } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
 import * as E from 'io-ts/Encoder'
-import { Lens as MLens } from 'monocle-ts'
+import { lens } from 'monocle-ts'
 
 import { DateFromISOString } from '../../shared/models/DateFromISOString'
 import { KlkPostEditPayload } from '../../shared/models/klkPost/KlkPostEditPayload'
@@ -13,79 +13,85 @@ import { Maybe } from '../../shared/utils/fp'
 
 import { Link } from './Link'
 
-// KlkPost
+type KlkPost = C.TypeOf<typeof codec>
+type KlkPostOutput = C.OutputOf<typeof codec>
 
 const episodeCodec = Maybe.codec(C.number)
 const sizeCodec = Maybe.codec(Size.codec)
 const titleCodec = C.string
 const urlCodec = C.string
 const activeCodec = C.boolean
+const noLongerAvailableCodec = Maybe.codec(C.boolean) // none: imgur hasn't been probed
 
-export namespace KlkPost {
-  export const onlyWithIdCodec = C.type({
-    id: KlkPostId.codec,
-  })
+const onlyWithIdCodec = C.struct({
+  id: KlkPostId.codec,
+})
 
-  export const onlyWithIdAndUrlCodec = pipe(
-    onlyWithIdCodec,
-    C.intersect(
-      C.type({
-        url: urlCodec,
-      }),
-    ),
-  )
+const onlyWithIdAndUrlCodec = pipe(
+  onlyWithIdCodec,
+  C.intersect(
+    C.struct({
+      url: urlCodec,
+    }),
+  ),
+)
 
-  export const codec = pipe(
-    onlyWithIdAndUrlCodec,
-    C.intersect(
-      C.type({
-        title: titleCodec,
-        episode: episodeCodec,
-        size: sizeCodec,
-        createdAt: DateFromISOString.codec,
-        permalink: C.string,
-        active: activeCodec,
-      }),
-    ),
-  )
+const codec = pipe(
+  onlyWithIdAndUrlCodec,
+  C.intersect(
+    C.struct({
+      title: titleCodec,
+      episode: episodeCodec,
+      size: sizeCodec,
+      createdAt: DateFromISOString.codec,
+      permalink: C.string,
+      active: activeCodec,
+      noLongerAvailable: noLongerAvailableCodec,
+    }),
+  ),
+)
 
-  export type Output = C.OutputOf<typeof codec>
-
-  export const fromLink = (l: Link): KlkPost => {
-    const { episode, size } = metadataFromTitle(l.data.title)
-    return {
-      id: l.data.id,
-      title: l.data.title,
-      episode,
-      size,
-      createdAt: new Date(l.data.created_utc * 1000),
-      permalink: l.data.permalink,
-      url:
-        l.data.post_hint === 'link'
-          ? pipe(
-              imgurId(l.data.url),
-              Maybe.fold(
-                () => l.data.url,
-                id => `https://i.imgur.com/${id}.jpg`,
-              ),
-            )
-          : l.data.url,
-      active: true,
-    }
-  }
-
-  export namespace Lens {
-    export const size = MLens.fromPath<KlkPost>()(['size'])
+const fromLink = (l: Link): KlkPost => {
+  const { episode, size } = metadataFromTitle(l.data.title)
+  return {
+    id: l.data.id,
+    title: l.data.title,
+    episode,
+    size,
+    createdAt: new Date(l.data.created_utc * 1000),
+    permalink: l.data.permalink,
+    url:
+      l.data.post_hint === 'link'
+        ? pipe(
+            imgurId(l.data.url),
+            Maybe.fold(
+              () => l.data.url,
+              id => `https://i.imgur.com/${id}.jpg`,
+            ),
+          )
+        : l.data.url,
+    active: true,
+    noLongerAvailable: Maybe.none,
   }
 }
 
-export type KlkPost = C.TypeOf<typeof KlkPost.codec>
+const KlkPost = {
+  codec,
+  onlyWithIdAndUrlCodec,
+  fromLink,
+  Lens: {
+    size: pipe(lens.id<KlkPost>(), lens.prop('size')),
+    noLongerAvailable: pipe(lens.id<KlkPost>(), lens.prop('noLongerAvailable')),
+  },
+}
 
-export type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof KlkPost.onlyWithIdAndUrlCodec>
+type OnlyWithIdAndUrlKlkPost = C.TypeOf<typeof onlyWithIdAndUrlCodec>
+
+export { KlkPost, KlkPostOutput, OnlyWithIdAndUrlKlkPost }
 
 type Metadata = {
-  readonly episode: Maybe<number>
-  readonly size: Maybe<Size>
+  episode: Maybe<number>
+  size: Maybe<Size>
 }
 
 const Regex = {
@@ -117,16 +123,18 @@ export function imgurId(url: string): Maybe<string> {
 
 // KlkPosts
 
-export namespace KlkPosts {
-  export const codec = C.array(KlkPost.codec)
-}
+type KlkPosts = C.TypeOf<typeof klkPostsCodec>
 
-export type KlkPosts = C.TypeOf<typeof KlkPosts.codec>
+const klkPostsCodec = C.array(KlkPost.codec)
+
+const KlkPosts = { codec: klkPostsCodec }
+
+export { KlkPosts }
 
 // KlkPostEditPayload
 
 type Out = {
-  readonly [K in keyof KlkPostEditPayload]: KlkPost.Output[K]
+  [K in keyof KlkPostEditPayload]: KlkPostOutput[K]
 }
 
 export const klkPostEditPayloadEncoder: E.Encoder<Out, KlkPostEditPayload> = {

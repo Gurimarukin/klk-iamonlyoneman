@@ -12,7 +12,6 @@ import { Maybe } from '../../shared/utils/fp'
 
 import { User } from '../models/user/User'
 import { KlkPostService } from '../services/KlkPostService'
-import { PartialLogger } from '../services/Logger'
 import { EndedMiddleware, MyMiddleware as M } from '../webServer/models/MyMiddleware'
 import { WithAuth } from '../webServer/utils/WithAuth'
 
@@ -29,14 +28,10 @@ const klkPostsQuery = pipe(
 export type KlkPostController = ReturnType<typeof KlkPostController>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function KlkPostController(
-  Logger: PartialLogger,
-  withAuth: WithAuth,
-  klkPostService: KlkPostService,
-) {
+export function KlkPostController(withAuth: WithAuth, klkPostService: KlkPostService) {
   const klkPosts: EndedMiddleware = M.withQuery(klkPostsQuery)(({ page, ...query }) =>
     pipe(
-      M.fromTaskEither(klkPostService.findAll(query, page ?? 0)),
+      M.fromTaskEither(klkPostService.findAllByQuery(query, page ?? 0)),
       M.ichain(M.json(KlkPostDAOs.codec)),
     ),
   )

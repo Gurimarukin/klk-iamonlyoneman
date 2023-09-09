@@ -1,21 +1,22 @@
+import { task } from 'fp-ts'
 import { pipe } from 'fp-ts/function'
 
 import { MsDuration } from '../../shared/MsDuration'
-import { Either, Future, IO, Task } from '../../shared/utils/fp'
+import { Either, Future, IO, NotUsed } from '../../shared/utils/fp'
 
 type OnComplete<A> = {
-  readonly onFailure: (e: Error) => IO<void>
-  readonly onSuccess: (a: A) => IO<void>
+  onFailure: (e: Error) => IO<NotUsed>
+  onSuccess: (a: A) => IO<NotUsed>
 }
 
-export namespace FutureUtils {
-  export function retryIfFailed<A>(
-    delay: MsDuration,
-    onComplete: OnComplete<A>,
-  ): (f: Future<A>) => Future<A> {
-    return f => retryIfFailedRec(f, delay, onComplete, true)
-  }
+function retryIfFailed<A>(
+  delay: MsDuration,
+  onComplete: OnComplete<A>,
+): (f: Future<A>) => Future<A> {
+  return f => retryIfFailedRec(f, delay, onComplete, true)
 }
+
+export const FutureUtils = { retryIfFailed }
 
 function retryIfFailedRec<A>(
   f: Future<A>,
@@ -26,11 +27,11 @@ function retryIfFailedRec<A>(
   const { onFailure, onSuccess } = onComplete
   return pipe(
     f,
-    Task.chain(
+    task.chain(
       Either.fold(
         e =>
           pipe(
-            firstTime ? onFailure(e) : IO.unit,
+            firstTime ? onFailure(e) : IO.notUsed,
             Future.fromIOEither,
             Future.chain(() => retryIfFailedRec(f, delay, onComplete, false)),
             Future.delay(delay),

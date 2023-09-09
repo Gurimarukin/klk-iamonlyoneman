@@ -15,7 +15,9 @@ import * as D from 'io-ts/Decoder'
 import type { Encoder } from 'io-ts/Encoder'
 
 import { MsDuration } from '../../../shared/MsDuration'
-import { Dict, Either, Future, List, Try, Tuple, unknownToError } from '../../../shared/utils/fp'
+import { Dict, Either, Future, List, Try, Tuple } from '../../../shared/utils/fp'
+
+import { unknownToError } from '../../utils/unknownToError'
 
 type MyMiddleware<I, O, A> = (c: Connection<I>) => Future<Tuple<A, Connection<O>>>
 
@@ -111,8 +113,8 @@ const decodeBody = <I = StatusOpen, A = never>(
   pipe(
     M.decodeHeader<I, Error, void>('Content-Type', contentType =>
       contentType === MediaType.applicationJSON
-        ? Try.right(undefined)
-        : Try.left(Error(expectedContentTypeToBeJSON)),
+        ? Try.success(undefined)
+        : Try.failure(Error(expectedContentTypeToBeJSON)),
     ),
     ichain(() => getBodyString()),
     ichain(flow(json.parse, Either.mapLeft(unknownToError), e => fromEither<I, json.Json>(e))),
@@ -133,7 +135,7 @@ const decodeHeader = <I = StatusOpen, A = never>(
 // assume we use Express
 const withRequest: MyMiddleware<StatusOpen, StatusOpen, express.Request> = (
   conn: Connection<StatusOpen>,
-) => Future.right([(conn as ExpressConnection<StatusOpen>).req, conn])
+) => Future.successful([(conn as ExpressConnection<StatusOpen>).req, conn])
 
 const withQuery =
   <A>(decoder: Decoder<unknown, A>) =>
@@ -153,7 +155,7 @@ const match =
       task.map(
         flow(
           Either.fold(e => Tuple.of(onLeft(e), conn), Tuple.mapFst(onRight)),
-          Try.right,
+          Try.success,
         ),
       ),
     )
@@ -169,7 +171,7 @@ const matchE =
 const getRequest =
   <I = StatusOpen>(): MyMiddleware<I, I, http.IncomingMessage> =>
   conn =>
-    Future.right(Tuple.of(conn.getRequest(), conn))
+    Future.successful(Tuple.of(conn.getRequest(), conn))
 
 const getBodyChunks = <I = StatusOpen>(): MyMiddleware<I, I, List<unknown>> =>
   pipe(getRequest<I>(), ichain(flow(requestChunks, f => M.fromTaskEither(f))))

@@ -14,17 +14,18 @@ import { routes } from '../router/routes'
 import { theme } from '../utils/theme'
 
 type State = {
-  readonly user: string
-  readonly password: string
+  user: string
+  password: string
 }
 
-namespace State {
-  export const empty: State = { user: '', password: '' }
+const empty: State = { user: '', password: '' }
 
-  export namespace Lens {
-    export const user = MLens.fromProp<State>()('user')
-    export const password = MLens.fromProp<State>()('password')
-  }
+const State = {
+  empty,
+  Lens: {
+    user: MLens.fromProp<State>()('user'),
+    password: MLens.fromProp<State>()('password'),
+  },
 }
 
 export const Login = (): JSX.Element => {

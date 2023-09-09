@@ -7,9 +7,9 @@ export const loadDotEnv: IO<Partial<Dict<string, string>>> = pipe(
   IO.tryCatch(() => dotenv.config()),
   IO.chain(result =>
     result.parsed !== undefined
-      ? IO.right(process.env)
+      ? IO.successful(process.env)
       : result.error !== undefined
-      ? IO.left(result.error)
-      : IO.left(Error('result.error was undefined')),
+      ? IO.failed(result.error)
+      : IO.failed(Error('result.error was undefined')),
   ),
 )

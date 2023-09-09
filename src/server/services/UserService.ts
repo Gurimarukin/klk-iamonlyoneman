@@ -6,18 +6,18 @@ import readline from 'readline'
 import { ClearPassword } from '../../shared/models/ClearPassword'
 import { Token } from '../../shared/models/Token'
 import { LoginPayload } from '../../shared/models/login/LoginPayload'
-import { Either, Future, IO, List, Maybe } from '../../shared/utils/fp'
+import { Either, Future, IO, List, Maybe, NotUsed, toNotUsed } from '../../shared/utils/fp'
 
+import { LoggerGetter } from '../models/logger/LoggerGetter'
 import { User } from '../models/user/User'
 import { UserPersistence } from '../persistence/UserPersistence'
 import { PasswordUtils } from '../utils/PasswordUtils'
 import { UuidUtils } from '../utils/UuidUtils'
-import { PartialLogger } from './Logger'
 
 export type UserService = ReturnType<typeof UserService>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function UserService(Logger: PartialLogger, userPersistence: UserPersistence) {
+export function UserService(Logger: LoggerGetter, userPersistence: UserPersistence) {
   const logger = Logger('UserService')
 
   return {
@@ -26,7 +26,7 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
         userPersistence.findByUserName(userName),
         Future.chain(
           Maybe.fold(
-            () => Future.right(Maybe.none),
+            () => Future.successful(Maybe.none),
             ({ id, password }) =>
               pipe(
                 PasswordUtils.check(password, clearPassword),
@@ -42,7 +42,7 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
                           ),
                         ),
                       )
-                    : Future.right(Maybe.none),
+                    : Future.successful(Maybe.none),
                 ),
               ),
           ),
@@ -51,32 +51,36 @@ export function UserService(Logger: PartialLogger, userPersistence: UserPersiste
 
     findByToken: (token: Token): Future<Maybe<User>> => userPersistence.findByToken(token),
 
-    createUser: (): Future<void> =>
-      pipe(
-        logger.info('Creating user'),
-        Future.fromIOEither,
-        Future.chain(() =>
-          apply.sequenceT(Future.taskEitherSeq)(
-            prompt('name: '),
-            prompt('password: '),
-            prompt('confirm password: '),
-          ),
-        ),
-        Future.chain(([user, password, confirm]) =>
-          password !== confirm
-            ? Future.left(Error('Passwords must be the same'))
-            : pipe(
-                decodeFuture(LoginPayload.codec.decode)({ user, password }),
-                Future.chain(({ user: user_, password: password_ }) =>
-                  pipe(
-                    PasswordUtils.hash(password_),
-                    Future.chain(hashed => Future.fromIOEither(User.create(user_, hashed))),
-                    Future.chain(userPersistence.create),
-                  ),
-                ),
-              ),
+    createUser: createUser(),
+  }
+
+  function createUser(): Future<NotUsed> {
+    return pipe(
+      logger.info('Creating user'),
+      Future.fromIOEither,
+      Future.chain(() =>
+        apply.sequenceT(Future.ApplicativeSeq)(
+          prompt('name: '),
+          prompt('password: '),
+          prompt('confirm password: '),
         ),
       ),
+      Future.chain(([user, password, confirm]) =>
+        password !== confirm
+          ? Future.failed(Error('Passwords must be the same'))
+          : pipe(
+              decodeFuture(LoginPayload.codec.decode)({ user, password }),
+              Future.chain(({ user: user_, password: password_ }) =>
+                pipe(
+                  PasswordUtils.hash(password_),
+                  Future.chain(hashed => Future.fromIOEither(User.create(user_, hashed))),
+                  Future.chain(userPersistence.create),
+                ),
+              ),
+            ),
+      ),
+      Future.map(toNotUsed),
+    )
   }
 }
 

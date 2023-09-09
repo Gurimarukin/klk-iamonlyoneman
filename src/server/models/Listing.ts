@@ -1,36 +1,37 @@
 import * as D from 'io-ts/Decoder'
 
-import { Unknown } from '../../shared/models/Unknown'
 import { List, Maybe } from '../../shared/utils/fp'
 
-export namespace Listing {
-  export function decoder<A>(codec: D.Decoder<unknown, A>): D.Decoder<unknown, Listing<A>> {
-    return D.type({
-      kind: D.literal('Listing'),
-      data: D.type({
-        before: Maybe.decoder(D.string),
-        after: Maybe.decoder(D.string),
-        dist: D.number,
-        modhash: D.string,
-        children: D.array(codec),
-      }),
-    })
+type Listing<A> = {
+  kind: 'Listing'
+  data: {
+    before: Maybe<string>
+    after: Maybe<string>
+    dist: number
+    modhash: string
+    children: List<A>
   }
 }
 
-export type Listing<A> = {
-  readonly kind: 'Listing'
-  readonly data: {
-    readonly before: Maybe<string>
-    readonly after: Maybe<string>
-    readonly dist: number
-    readonly modhash: string
-    readonly children: List<A>
-  }
+function decoder<A>(codec: D.Decoder<unknown, A>): D.Decoder<unknown, Listing<A>> {
+  return D.struct({
+    kind: D.literal('Listing'),
+    data: D.struct({
+      before: Maybe.decoder(D.string),
+      after: Maybe.decoder(D.string),
+      dist: D.number,
+      modhash: D.string,
+      children: D.array(codec),
+    }),
+  })
 }
 
-export namespace UnknownListing {
-  export const decoder = Listing.decoder(Unknown.decoder)
-}
+const Listing = { decoder }
 
-export type UnknownListing = D.TypeOf<typeof UnknownListing.decoder>
+type UnknownListing = D.TypeOf<typeof unknownListingDecoder>
+
+const unknownListingDecoder = Listing.decoder(D.id<unknown>())
+
+const UnknownListing = { decoder: unknownListingDecoder }
+
+export { Listing, UnknownListing }

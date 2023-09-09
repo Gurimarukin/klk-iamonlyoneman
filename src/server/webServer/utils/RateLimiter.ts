@@ -5,14 +5,14 @@ import { isDeepStrictEqual } from 'util'
 import { MsDuration } from '../../../shared/MsDuration'
 import { List, Maybe, Tuple } from '../../../shared/utils/fp'
 
-import { PartialLogger } from '../../services/Logger'
+import { LoggerGetter } from '../../models/logger/LoggerGetter'
 import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'
 import { WithIp } from './WithIp'
 
 export type RateLimiter = ReturnType<typeof RateLimiter>
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function RateLimiter(Logger: PartialLogger, withIp: WithIp, lifeTime: MsDuration) {
+export function RateLimiter(Logger: LoggerGetter, withIp: WithIp, lifeTime: MsDuration) {
   const logger = Logger('RateLimiter')
 
   // eslint-disable-next-line functional/no-let
@@ -60,8 +60,8 @@ export function RateLimiter(Logger: PartialLogger, withIp: WithIp, lifeTime: MsD
 }
 
 type RequestsHistory = {
-  readonly key: Key
-  readonly history: List<number>
+  key: Key
+  history: List<number>
 }
 
 function RequestsHistory(key: Key, history: List<number>): RequestsHistory {
@@ -69,8 +69,8 @@ function RequestsHistory(key: Key, history: List<number>): RequestsHistory {
 }
 
 type Key = {
-  readonly path: string
-  readonly ip: string
+  path: string
+  ip: string
 }
 
 function Key(path: string, ip: string): Key {

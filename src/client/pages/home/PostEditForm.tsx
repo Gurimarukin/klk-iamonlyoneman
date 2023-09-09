@@ -15,9 +15,9 @@ import { theme } from '../../utils/theme'
 import { postKlkPostEditForm } from './klkPostsApi'
 
 type Props = {
-  readonly token: Token
-  readonly post: KlkPostDAO
-  readonly className?: string
+  token: Token
+  post: KlkPostDAO
+  className?: string
 }
 
 type State = E.OutputOf<typeof KlkPostEditPayload.codec>
@@ -27,11 +27,11 @@ type StateKeyString = Diff<keyof State, 'active'>
 
 const activeLens = Lens.fromProp<State>()('active')
 
-namespace Status {
-  export const empty = ''
-  export const loading = 'loading'
-  export const error = 'error'
-  export const done = 'done'
+const Status = {
+  empty: '' as const,
+  loading: 'loading' as const,
+  error: 'error' as const,
+  done: 'done' as const,
 }
 
 type Status = typeof Status.empty | typeof Status.loading | typeof Status.error | typeof Status.done
@@ -69,7 +69,7 @@ export const PostEditForm = ({ post, token, className }: Props): JSX.Element => 
               updateById(post.id, newPost)
               setStatus(Status.done)
             }),
-            Future.recover<unknown>(() => Future.right(setStatus(Status.error))),
+            Future.orElse(() => Future.successful<unknown>(setStatus(Status.error))),
             Future.runUnsafe,
           )
         }),

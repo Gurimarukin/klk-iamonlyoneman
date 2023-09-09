@@ -2,7 +2,7 @@
 import { pipe } from 'fp-ts/function'
 import { ReactElement, useEffect } from 'react'
 
-import { Dict, Maybe, Tuple } from '../../shared/utils/fp'
+import { Dict, List, Maybe, Tuple } from '../../shared/utils/fp'
 
 import { About } from '../pages/About'
 import { Login } from '../pages/Login'
@@ -25,12 +25,12 @@ function route(path: string): RouteElem {
 /* eslint-enable react/jsx-key */
 
 type Props = {
-  readonly path: string
+  path: string
 }
 
 export const Router = ({ path }: Props): JSX.Element => {
   const [subTitle, node] = route(path)
-  const title = ['r/KillLaKill - u/iamonlyoneman', ...Maybe.toArray(subTitle)].join(' | ')
+  const title = ['r/KillLaKill - u/iamonlyoneman', ...List.fromOption(subTitle)].join(' | ')
 
   useEffect(() => {
     // eslint-disable-next-line functional/immutable-data

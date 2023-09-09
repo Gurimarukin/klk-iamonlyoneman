@@ -7,57 +7,74 @@ import * as E from 'io-ts/Encoder'
 import { Dict, List } from '../utils/fp'
 import { NumberFromString } from './NumberFromString'
 
-export namespace EpisodeNumber {
-  export type Numb = number
-  export namespace Numb {
-    export const codec = NumberFromString.Bounded.codec(1, 25)
-  }
+type EpisodeNumber = EpisodeNumberNumb | EpisodeNumberUnknown
 
-  export type Unknown = 'unknown'
-  export const unknown: Unknown = 'unknown'
+type EpisodeNumberNumb = number
 
-  export const isNumb = (episode: EpisodeNumber): episode is Numb => typeof episode === 'number'
+const episodeNumberNumbCodec = NumberFromString.Bounded.codec(1, 25)
 
-  export const decoder: D.Decoder<unknown, EpisodeNumber> = D.union(
-    Numb.codec,
-    D.literal('unknown'),
-  )
+type EpisodeNumberUnknown = 'unknown'
 
-  export const toNullable = (e: EpisodeNumber): number | null => (e === 'unknown' ? null : e)
+const episodeNumberUnknown: EpisodeNumberUnknown = 'unknown'
 
-  export const eq: Eq<EpisodeNumber> = eq_.eqStrict
+const episodeNumberDecoder: D.Decoder<unknown, EpisodeNumber> = D.union(
+  episodeNumberNumbCodec,
+  D.literal('unknown'),
+)
+
+const isNumb = (episode: EpisodeNumber): episode is EpisodeNumberNumb => typeof episode === 'number'
+
+const toNullable = (e: EpisodeNumber): number | null => (e === 'unknown' ? null : e)
+
+const episodeNumberEq: Eq<EpisodeNumber> = eq_.eqStrict
+
+const EpisodeNumber = {
+  unknown: episodeNumberUnknown,
+  decoder: episodeNumberDecoder,
+  isNumb,
+  toNullable,
+  Eq: episodeNumberEq,
+  Numb: {
+    codec: episodeNumberNumbCodec,
+  },
 }
 
-export type EpisodeNumber = EpisodeNumber.Numb | EpisodeNumber.Unknown
+type PostsSort = D.TypeOf<typeof postsSortDecoder>
 
-export namespace PostsSort {
-  export const decoder = D.union(D.literal('new'), D.literal('old'))
+const postsSortDecoder = D.union(D.literal('new'), D.literal('old'))
+
+const PostsSort = { decoder: postsSortDecoder }
+
+type PostActive = D.TypeOf<typeof postActiveDecoder>
+
+const postActiveDecoder = D.union(D.literal('true'), D.literal('false'))
+
+const PostActive = { decoder: postActiveDecoder }
+
+type PartialKlkPostsQuery = D.TypeOf<typeof partialKlkPostsQueryDecoder>
+type PartialKlkPostsQueryOut = Partial<Record<keyof PartialKlkPostsQuery, string>>
+
+const partialKlkPostsQueryDecoder = D.partial({
+  episode: EpisodeNumber.decoder,
+  search: D.string,
+  sort: PostsSort.decoder,
+  active: PostActive.decoder,
+})
+
+const partialKlkPostsQueryEncoder: E.Encoder<PartialKlkPostsQueryOut, PartialKlkPostsQuery> = {
+  encode: query =>
+    pipe(
+      Dict.toReadonlyArray(query as Required<PartialKlkPostsQuery>),
+      List.reduce({} as PartialKlkPostsQueryOut, (acc, [key, value]) => ({
+        ...acc,
+        [key]: String(value),
+      })),
+    ),
 }
 
-export type PostsSort = D.TypeOf<typeof PostsSort.decoder>
-
-export namespace PostActive {
-  export const decoder = D.union(D.literal('true'), D.literal('false'))
+const PartialKlkPostsQuery = {
+  decoder: partialKlkPostsQueryDecoder,
+  encoder: partialKlkPostsQueryEncoder,
 }
 
-export type PostActive = D.TypeOf<typeof PostActive.decoder>
-
-export namespace PartialKlkPostsQuery {
-  export const decoder = D.partial({
-    episode: EpisodeNumber.decoder,
-    search: D.string,
-    sort: PostsSort.decoder,
-    active: PostActive.decoder,
-  })
-
-  type Out = Partial<Record<keyof PartialKlkPostsQuery, string>>
-  export const encoder: E.Encoder<Out, PartialKlkPostsQuery> = {
-    encode: query =>
-      pipe(
-        Dict.toReadonlyArray(query as Required<PartialKlkPostsQuery>),
-        List.reduce({} as Out, (acc, [key, value]) => ({ ...acc, [key]: String(value) })),
-      ),
-  }
-}
-
-export type PartialKlkPostsQuery = D.TypeOf<typeof PartialKlkPostsQuery.decoder>
+export { EpisodeNumber, PartialKlkPostsQuery, PostActive, PostsSort }

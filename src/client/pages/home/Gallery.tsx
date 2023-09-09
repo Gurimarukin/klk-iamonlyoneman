@@ -13,8 +13,8 @@ import { theme } from '../../utils/theme'
 import { ImageWithDetail } from './ImageWithDetail'
 
 type Props = {
-  readonly klkPosts: List<KlkPostDAO>
-  readonly scrollPosition: ScrollPosition
+  klkPosts: List<KlkPostDAO>
+  scrollPosition: ScrollPosition
 }
 
 export const Gallery: React.FC<Props> = ({ klkPosts, scrollPosition, children }) => {

@@ -3,5 +3,6 @@
 /.eslintcache
 /.parcel-cache
 /dist
+/images
 /node_modules
 /tsbuild

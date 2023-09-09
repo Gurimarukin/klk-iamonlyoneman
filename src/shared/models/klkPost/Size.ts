@@ -1,10 +1,12 @@
 import * as C from 'io-ts/Codec'
 
-export namespace Size {
-  export const codec = C.type({
-    width: C.number,
-    height: C.number,
-  })
-}
+type Size = C.TypeOf<typeof codec>
 
-export type Size = C.TypeOf<typeof Size.codec>
+const codec = C.struct({
+  width: C.number,
+  height: C.number,
+})
+
+const Size = { codec }
+
+export { Size }

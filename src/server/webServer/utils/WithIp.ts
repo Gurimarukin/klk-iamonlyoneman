@@ -9,7 +9,7 @@ import { Undefined } from '../../../shared/models/Undefined'
 import { Maybe } from '../../../shared/utils/fp'
 
 import { Config } from '../../Config'
-import { PartialLogger } from '../../services/Logger'
+import { LoggerGetter } from '../../models/logger/LoggerGetter'
 import { EndedMiddleware, MyMiddleware as M } from '../models/MyMiddleware'
 
 export type WithIp = (
@@ -18,7 +18,7 @@ export type WithIp = (
 
 const maybeStr = D.union(NonEmptyString.decoder, Undefined.decoder)
 
-export const WithIp = (Logger: PartialLogger, config: Config): WithIp => {
+export const WithIp = (Logger: LoggerGetter, config: Config): WithIp => {
   const logger = Logger('WithIp')
 
   return cause => f =>

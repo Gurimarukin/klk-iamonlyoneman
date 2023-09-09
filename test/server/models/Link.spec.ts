@@ -6,6 +6,8 @@ import { Either, Maybe } from '../../../src/shared/utils/fp'
 import { KlkPost } from '../../../src/server/models/KlkPost'
 import { Link } from '../../../src/server/models/Link'
 
+import { expectT } from '../../expectT'
+
 const image = `{
   "kind": "t3",
   "data": {
@@ -335,7 +337,7 @@ const link = `{
 describe('Link.decoder', () => {
   it('should decode image', () => {
     const parsed = Link.decoder.decode(JSON.parse(image))
-    expect(parsed).toEqual(
+    expectT(parsed).toStrictEqual(
       Either.right({
         kind: 't3',
         data: {
@@ -350,7 +352,7 @@ describe('Link.decoder', () => {
         },
       }),
     )
-    expect(KlkPost.fromLink((parsed as Right<Link>).right)).toEqual({
+    expectT(KlkPost.fromLink((parsed as Right<Link>).right)).toStrictEqual({
       id: KlkPostId.wrap('je3de8'),
       url: 'https://i.imgur.com/Pb5mmsq.jpg',
       title: 'Senketsu (from Episode 21) [1920x2125]',
@@ -359,12 +361,13 @@ describe('Link.decoder', () => {
       createdAt: new Date(1603120134000),
       permalink: '/r/KillLaKill/comments/je3de8/senketsu_from_episode_21_1920x2125/',
       active: true,
+      noLongerAvailable: Maybe.none,
     })
   })
 
   it('should decode link', () => {
     const parsed = Link.decoder.decode(JSON.parse(link))
-    expect(parsed).toEqual(
+    expectT(parsed).toStrictEqual(
       Either.right({
         kind: 't3',
         data: {
@@ -379,7 +382,7 @@ describe('Link.decoder', () => {
         },
       }),
     )
-    expect(KlkPost.fromLink((parsed as Right<Link>).right)).toEqual({
+    expectT(KlkPost.fromLink((parsed as Right<Link>).right)).toStrictEqual({
       id: KlkPostId.wrap('je3d3k'),
       url: 'https://i.imgur.com/cHZ6iZW.jpg',
       title: 'Mako (from Episode 21) minor [spoiler] [1920x2096]',
@@ -388,6 +391,7 @@ describe('Link.decoder', () => {
       createdAt: new Date(1603120109000),
       permalink: '/r/KillLaKill/comments/je3d3k/mako_from_episode_21_minor_spoiler_1920x2096/',
       active: true,
+      noLongerAvailable: Maybe.none,
     })
   })
 })

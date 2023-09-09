@@ -36,7 +36,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-base-to-string': 'warn',
+    '@typescript-eslint/no-base-to-string': ['warn', { ignoredTypeNames: ['KlkPostId'] }],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-non-null-assertion': 'error',
@@ -51,7 +51,6 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/strict-boolean-expressions': [
       'warn',
       {
@@ -90,7 +89,7 @@ module.exports = {
           '^beforeEach\\(',
           '^console\\.',
           '^describe\\(',
-          '^expect\\(',
+          '^expectT\\(',
           '^it\\(',
           '^useEffect\\(',
         ],

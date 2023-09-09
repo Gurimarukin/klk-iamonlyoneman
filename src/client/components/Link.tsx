@@ -4,9 +4,9 @@ import React, { useCallback } from 'react'
 import { useHistory } from '../contexts/HistoryContext'
 
 type Props = {
-  readonly to: string
-  readonly target?: string
-  readonly className?: string
+  to: string
+  target?: string
+  className?: string
 }
 
 export const Link: React.FC<Props> = ({ to, target, className, children }) => {

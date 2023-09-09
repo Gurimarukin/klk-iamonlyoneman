@@ -6,7 +6,7 @@ import { theme } from '../../utils/theme'
 import { HomeLink } from './HomeLink'
 
 type Props = {
-  readonly className?: string
+  className?: string
 }
 
 const labelSort = 'sort:'
