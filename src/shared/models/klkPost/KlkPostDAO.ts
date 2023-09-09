@@ -1,4 +1,4 @@
-import { eq } from 'fp-ts'
+import { boolean, eq } from 'fp-ts'
 import { Eq } from 'fp-ts/Eq'
 import { pipe } from 'fp-ts/function'
 import * as C from 'io-ts/Codec'
@@ -37,7 +37,7 @@ export namespace KlkPostDAO {
         Maybe.isNone(query.search) ||
         post.title.toLowerCase().match(query.search.value.toLowerCase()) !== null
 
-      const matchesActive = eq.eqBoolean.equals(post.active, query.active)
+      const matchesActive = boolean.Eq.equals(post.active, query.active)
 
       return matchesEpisode && matchesSearch && matchesActive
     }
