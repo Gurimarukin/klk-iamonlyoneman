@@ -90,7 +90,7 @@ module.exports = {
           '^beforeEach\\(',
           '^console\\.',
           '^describe\\(',
-          '^expect\\(',
+          '^expectT\\(',
           '^it\\(',
           '^useEffect\\(',
         ],
