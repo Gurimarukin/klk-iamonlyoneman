@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/function'
 
 import { EpisodeNumber } from '../../../shared/models/PartialKlkPostsQuery'
 import { StringUtils } from '../../../shared/utils/StringUtils'
-import { List, Maybe } from '../../../shared/utils/fp'
+import { Maybe, NonEmptyArray } from '../../../shared/utils/fp'
 
 import { Picker } from '../../components/Picker'
 import { useKlkPostsQuery } from '../../contexts/KlkPostsQueryContext'
@@ -31,34 +31,33 @@ export const EpisodePicker = ({ className }: Props): JSX.Element => {
         </LabelValue>
       }
       valueIsSelected={Maybe.isSome(query.episode)}
-      content={
-        <Container>
-          <EpisodesHalf>
-            {List.range(1, 12).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
-                {StringUtils.pad10(n)}
-              </HomeLink>
-            ))}
-          </EpisodesHalf>
-          <EpisodesHalf>
-            {List.range(13, 24).map(n => (
-              <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
-                {StringUtils.pad10(n)}
-              </HomeLink>
-            ))}
-          </EpisodesHalf>
-          <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(25), sortNew: false }}>25</HomeLink>
-          </EpisodeCenter>
-          <EpisodeCenter>
-            <HomeLink to={{ episode: Maybe.some(EpisodeNumber.unknown), sortNew: false }}>
-              {unknownLabel}
-            </HomeLink>
-          </EpisodeCenter>
-        </Container>
-      }
       className={className}
-    />
+    >
+      <Container>
+        <EpisodesHalf>
+          {NonEmptyArray.range(1, 12).map(n => (
+            <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
+              {StringUtils.pad10(n)}
+            </HomeLink>
+          ))}
+        </EpisodesHalf>
+        <EpisodesHalf>
+          {NonEmptyArray.range(13, 24).map(n => (
+            <HomeLink key={n} to={{ episode: Maybe.some(n), sortNew: false }}>
+              {StringUtils.pad10(n)}
+            </HomeLink>
+          ))}
+        </EpisodesHalf>
+        <EpisodeCenter>
+          <HomeLink to={{ episode: Maybe.some(25), sortNew: false }}>25</HomeLink>
+        </EpisodeCenter>
+        <EpisodeCenter>
+          <HomeLink to={{ episode: Maybe.some(EpisodeNumber.unknown), sortNew: false }}>
+            {unknownLabel}
+          </HomeLink>
+        </EpisodeCenter>
+      </Container>
+    </Picker>
   )
 }
 

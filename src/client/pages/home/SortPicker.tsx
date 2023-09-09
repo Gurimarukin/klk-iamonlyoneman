@@ -20,18 +20,17 @@ export const SortPicker = ({ className }: Props): JSX.Element => {
       labelPrefix={labelSort}
       labelValue={query.sortNew ? labelNew : labelOld}
       valueIsSelected={false}
-      content={
-        <Container>
-          <HomeLink to={{ sortNew: true }} compareOnlySort={true}>
-            {labelNew}
-          </HomeLink>
-          <HomeLink to={{ sortNew: false }} compareOnlySort={true}>
-            {labelOld}
-          </HomeLink>
-        </Container>
-      }
       className={className}
-    />
+    >
+      <Container>
+        <HomeLink to={{ sortNew: true }} compareOnlySort={true}>
+          {labelNew}
+        </HomeLink>
+        <HomeLink to={{ sortNew: false }} compareOnlySort={true}>
+          {labelOld}
+        </HomeLink>
+      </Container>
+    </Picker>
   )
 }
 

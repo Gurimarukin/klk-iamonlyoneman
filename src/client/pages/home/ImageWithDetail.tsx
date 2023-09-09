@@ -16,7 +16,7 @@ import { ExternalLink, InfoCircle, Pencil } from '../../components/svgs'
 import { useUser } from '../../contexts/UserContext'
 import { cssClasses } from '../../utils/cssClasses'
 import { theme } from '../../utils/theme'
-import { thumbnailUrl } from '../../utils/thumbnailUrl'
+import { cachedImgUrl, imgurImgUrl } from '../../utils/thumbnailUrl'
 import { PostEditForm } from './PostEditForm'
 
 type ImageWithDetailProps = {
@@ -101,6 +101,18 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
     },
     ref,
   ) => {
+    const imageWasCached = pipe(
+      post.noLongerAvailable,
+      Maybe.exists(a => !a), // === false
+    )
+    const src = useMemo(
+      () =>
+        imageWasCached
+          ? cachedImgUrl(post.url)
+          : imgurImgUrl(post.url, theme.Gallery.thumbnail.suffix),
+      [imageWasCached, post.url],
+    )
+
     const size: Partial<Size> = useMemo(
       () =>
         pipe(
@@ -115,7 +127,7 @@ const StatelessImageWithDetail = forwardRef<HTMLDivElement, StatelessImageWithDe
         <ImageABlank href={post.url} title="View image">
           <LazyLoadImage
             alt={post.title}
-            src={thumbnailUrl(post.url, theme.Gallery.thumbnail.suffix)}
+            src={src}
             scrollPosition={scrollPosition}
             effect="blur"
             wrapperClassName={PLACEHOLDER}

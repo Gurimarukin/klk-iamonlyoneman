@@ -3,6 +3,8 @@ import { pipe } from 'fp-ts/function'
 import { StringUtils } from '../../shared/utils/StringUtils'
 import { Maybe } from '../../shared/utils/fp'
 
+import { Config } from './Config'
+
 // | Thumbnail Suffix | Thumbnail Name   | Thumbnail Size | Keeps Image Proportions |
 // | ---------------- | ---------------- | -------------- | ----------------------- |
 // | s                | Small Square     | 90x90          | No                      |
@@ -29,10 +31,19 @@ const maxSizes: Record<ThumbnailSuffix, number> = {
 
 export const ThumbnailSuffix = { maxSizes }
 
-export const thumbnailUrl = (url: string, suffix: ThumbnailSuffix): string =>
+export const imgurImgUrl = (url: string, suffix: ThumbnailSuffix): string =>
   pipe(
     url,
     StringUtils.matcher2(urlRegex),
     Maybe.map(([before, extension]) => `${before}${suffix}${extension}`),
     Maybe.getOrElse(() => url),
   )
+
+const basenameRegex = /^.*\/([^\/]*)$/
+
+export const cachedImgUrl = (url: string): string =>
+  `${Config.imagesUrl}/${pipe(
+    url,
+    StringUtils.matcher1(basenameRegex),
+    Maybe.getOrElse(() => url),
+  )}`

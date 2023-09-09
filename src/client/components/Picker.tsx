@@ -15,11 +15,11 @@ type PickerProps = {
   labelPrefix?: React.ReactNode
   labelValue: React.ReactNode
   valueIsSelected: boolean
-  content: React.ReactNode
   className?: string
+  contentStyle?: React.CSSProperties
 }
 
-const MobilePicker = (props: PickerProps): JSX.Element => {
+const MobilePicker: React.FC<PickerProps> = props => {
   const query = useKlkPostsQuery()
 
   const [isOpened, setIsOpened] = useState(true)
@@ -49,7 +49,16 @@ const CONTENT = 'content'
 
 const StatelessPicker = forwardRef<HTMLButtonElement, StatelessPickerProps>(
   (
-    { labelPrefix, labelValue, valueIsSelected, content, className, isOpened = false, toggleOpen },
+    {
+      labelPrefix,
+      labelValue,
+      valueIsSelected,
+      className,
+      contentStyle,
+      isOpened = false,
+      toggleOpen,
+      children,
+    },
     ref,
   ) => (
     <Container
@@ -63,7 +72,9 @@ const StatelessPicker = forwardRef<HTMLButtonElement, StatelessPickerProps>(
         {isDefined(labelValue) ? <span className={LABEL_VALUE}>{labelValue}</span> : null}
         <ChevronDown />
       </Visible>
-      <div className={cssClasses(CONTENT, [IS_OPENED, isOpened])}>{content}</div>
+      <div className={cssClasses(CONTENT, [IS_OPENED, isOpened])} style={contentStyle}>
+        {children}
+      </div>
     </Container>
   ),
 )

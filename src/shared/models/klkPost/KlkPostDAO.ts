@@ -23,6 +23,7 @@ const codec = C.struct({
   createdAt: DateFromISOString.codec,
   permalink: C.string,
   active: C.boolean,
+  noLongerAvailable: Maybe.codec(C.boolean),
 })
 
 const matchesQuery =
